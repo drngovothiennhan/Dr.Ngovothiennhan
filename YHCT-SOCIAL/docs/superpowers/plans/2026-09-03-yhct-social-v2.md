@@ -1,20 +1,9 @@
 # YHCT SOCIAL v2 Implementation Plan
 
-**Goal:** Build canonical YHCT SOCIAL v2 modular PWA and admin recovery plane, then deploy preview using Vercel project `yhct-social`.
+**Goal:** Build canonical YHCT SOCIAL modular PWA, role-aware operations planes, versioned API and provider-independent production data/auth boundary; keep existing production available until live cutover gates pass.
 
-**Architecture:** Modular frontend with provider-independent adapters. Social domain logic is isolated from rendering so future REST/Google backend migration does not require rewriting UI.
+**Current milestone:** v2.5 Auth & Governance Hardening.
 
-**Tech Stack:** HTML5, CSS, ES modules, Node.js test runner, Vercel static hosting/PWA.
+Tasks include social core, 159 normalized club members, ADMIN-exclusive Control Center, SUPER_MOD/MOD operator consoles, 2D YHCT UI, official-only seed content, first-login password change, signed sessions, server-side role policies, portable PostgreSQL schema, versioned REST API, production browser bundle without member-directory leakage, and Google-owned cutover verification.
 
-**Tasks:**
-- Core adapter and social domain.
-- Feed, community, discovery, profile, notification modules.
-- Independent admin recovery plane.
-- PWA/service worker and deployment configuration.
-- GitHub/Vercel synchronization and smoke testing.
-
-**Rules:**
-- Preserve beta1.2 interaction contracts.
-- No secrets in source.
-- Test before production.
-- Production cutover requires live verification.
+Rules: preserve beta1.2 interaction contracts; no secrets/plaintext production passwords in source; preview → verification → production; production cutover requires live data/auth/media reconciliation, role smoke tests and rollback evidence.

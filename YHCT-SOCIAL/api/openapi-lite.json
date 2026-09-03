@@ -1,0 +1,21 @@
+{
+  "name":"YHCT SOCIAL API",
+  "version":1,
+  "release":"2.5.0",
+  "paths":{
+    "/api/v1/health":{"GET":{"auth":"none"}},
+    "/api/v1/auth/login":{"POST":{"auth":"none","credential":"mssv_password"}},
+    "/api/v1/auth/change-password":{"POST":{"auth":"member","requiresCurrentPassword":true}},
+    "/api/v1/session":{"GET":{"auth":"member"}},
+    "/api/v1/members":{"GET":{"auth":"member","fieldPolicy":"role_scoped"}},
+    "/api/v1/feed":{"GET":{"auth":"member"},"POST":{"auth":"member"}},
+    "/api/v1/groups":{"GET":{"auth":"member"},"POST":{"auth":"member"}},
+    "/api/v1/messages":{"GET":{"auth":"member"},"POST":{"auth":"member"}},
+    "/api/v1/sync":{"POST":{"auth":"member","idempotent":true}},
+    "/api/v1/operator/queue":{"GET":{"auth":"mod_super_mod_or_admin"}},
+    "/api/v1/operator/escalate":{"POST":{"auth":"super_mod_or_admin"}},
+    "/api/v1/admin/health":{"GET":{"auth":"admin"}},
+    "/api/v1/admin/theme":{"PUT":{"auth":"admin"}},
+    "/api/v1/admin/audit":{"GET":{"auth":"admin"}}
+  }
+}
