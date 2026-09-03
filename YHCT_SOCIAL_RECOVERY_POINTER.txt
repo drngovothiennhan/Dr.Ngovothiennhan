@@ -1,0 +1,3 @@
+YHCT SOCIAL recovery workspace initialized from verified AI APP FACTORY release HIU-YHCT-SOCIAL-BETA1.2.
+Application source is stored under yhct-social/.
+Original production remains external and is not overwritten by this recovery import.
