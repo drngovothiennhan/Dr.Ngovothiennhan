@@ -1,11 +1,11 @@
 # YHCT SOCIAL
 
-Canonical project name: YHCT SOCIAL
+Canonical social-network rebuild for the Traditional Medicine academic community.
 
-GitHub canonical branch: YHCT-SOCIAL
+- Product: **YHCT SOCIAL**
+- Canonical GitHub branch/folder: `YHCT-SOCIAL`
+- Canonical Vercel project: `yhct-social`
+- Architecture: provider-independent modular PWA
+- Current version: 2.1.0
 
-Status: Architecture v2 recovery and rebuild.
-
-This source keeps beta1.2 interaction contracts while rebuilding fragile modules with provider-independent adapters.
-
-Deployment target: Vercel project `yhct-social`.
+Run `npm test` and `npm run check` before any deployment.

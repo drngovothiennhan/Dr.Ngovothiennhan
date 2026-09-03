@@ -1,1 +1,12 @@
-{"name":"yhct-social","version":"2.0.0-alpha.1","private":true,"type":"module","scripts":{"test":"node --test tests/*.test.mjs","check":"node --check assets/app.js && node --check assets/admin.js && node --check assets/core/store.js && node --check assets/core/social.js && node --check assets/core/ranking.js && node --check sw.js"}}
+{
+  "name": "yhct-social",
+  "version": "2.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=20"},
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node scripts/check.mjs",
+    "serve": "node scripts/serve.mjs"
+  }
+}
