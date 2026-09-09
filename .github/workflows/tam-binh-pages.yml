@@ -1,0 +1,35 @@
+name: Tam Bình Sức Khỏe 150 - Pages
+on:
+  push:
+    branches: [tam-binh-live-staging]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: tam-binh-pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout staging
+        uses: actions/checkout@v6
+      - name: Prepare site
+        run: |
+          mkdir -p _site
+          cp tam-binh-live/index.html _site/index.html
+          touch _site/.nojekyll
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
