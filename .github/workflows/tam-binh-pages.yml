@@ -1,15 +1,10 @@
-name: Tam Bình Sức Khỏe 150 - Pages
+name: Tam Bình Sức Khỏe 150 - Pages (manual)
 on:
-  push:
-    branches: [tam-binh-live-staging]
   workflow_dispatch:
 permissions:
   contents: read
   pages: write
   id-token: write
-concurrency:
-  group: tam-binh-pages
-  cancel-in-progress: true
 jobs:
   deploy:
     environment:
@@ -19,6 +14,8 @@ jobs:
     steps:
       - name: Checkout staging
         uses: actions/checkout@v6
+        with:
+          ref: tam-binh-live-staging
       - name: Prepare site
         run: |
           mkdir -p _site
@@ -26,8 +23,6 @@ jobs:
           touch _site/.nojekyll
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
