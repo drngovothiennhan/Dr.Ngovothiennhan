@@ -1,5 +1,5 @@
-const CACHE='ai-thiet-chan-v2.5.1';
-const SHELL=['/','/styles.css','/history.css','/dual-view.css','/settings.css','/app.js','/settings.js','/manifest.webmanifest','/icon.svg','/open-source.html'];
+const CACHE='ai-thiet-chan-v2.5.2';
+const SHELL=['/','/styles.css','/history.css','/dual-view.css','/settings.css','/quality-dashboard.css','/app.js','/settings.js','/quality-dashboard.js','/manifest.webmanifest','/icon.svg','/open-source.html'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',event=>{
