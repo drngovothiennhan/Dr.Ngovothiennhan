@@ -6,12 +6,18 @@ Scope is intentionally locked to: fullscreen/immersive Android shell, overlay bl
 
 ## Build
 
-Open this repository in Android Studio or run the included GitHub Actions workflow. The workflow builds `app-debug.apk` and publishes it as the `ai-thiet-chan-debug-apk` artifact.
+The isolated GitHub Actions workflow builds `app-debug.apk`, runs Android lint, generates SHA-256, and uploads artifact `ai-thiet-chan-debug-apk`.
 
 ## Runtime
 
-The native shell loads the current production backend at:
+Trusted production origin:
 
 `https://a-i-thiet-chan-v1-o2gk7z.v2.appdeploy.ai/`
 
-External links are opened outside the app; camera permission is only granted to the trusted production origin.
+Security/runtime rules:
+- Android 12+: `HIDE_OVERLAY_WINDOWS` + `setHideOverlayWindows(true)`.
+- Fullscreen immersive mode is restored when window focus returns.
+- Camera permission is granted only to the trusted production origin and only for video capture.
+- External URLs leave the WebView and open in a system handler.
+- Cleartext HTTP is disabled.
+- Camera/file chooser and network failure paths return safely without crashing.
