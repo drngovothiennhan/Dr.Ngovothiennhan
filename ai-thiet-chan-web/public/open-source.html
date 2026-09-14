@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b6b64" />
+  <title>Nguồn mở · A.I Thiệt Chẩn</title>
+  <style>
+    :root{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#17302d;background:#eef6f4;line-height:1.5}body{margin:0;background:#eef6f4}.wrap{max-width:860px;margin:auto;padding:22px 16px 40px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px}.top a{color:#0b6b64;font-weight:800;text-decoration:none}.card{background:#fff;border:1px solid #dbe9e6;border-radius:18px;padding:16px;margin-top:12px}.card h2{font-size:16px;margin:0 0 6px}.card p{margin:6px 0;color:#4f625e}.card a{color:#0b6b64;word-break:break-all}.tag{display:inline-block;border-radius:999px;padding:4px 8px;background:#e8f4f2;font-size:11px;font-weight:800}.note{font-size:13px;color:#5c716d}.warn{background:#fff8e8;border-left:4px solid #ba7a14;padding:12px;border-radius:12px}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top"><div><h1>Nguồn mở & giấy phép</h1><p class="note">A.I Thiệt Chẩn dùng các dự án dưới đây làm tham chiếu kỹ thuật cho kiến trúc xử lý ảnh và máy học.</p></div><a href="/">← Ứng dụng</a></div>
+    <div class="warn note">Không sao chép mã nguồn hoặc trọng số AGPL từ TongueDiagnosis vào ứng dụng. Phần đó chỉ được dùng làm tham chiếu kiến trúc. Những thành phần có thể tích hợp trực tiếp phải tuân thủ đúng giấy phép tương ứng.</div>
+    <section class="card"><span class="tag">AGPL-3.0 · tham chiếu kiến trúc</span><h2>TongueDiagnosis.AI</h2><p>Tham chiếu pipeline chuyên biệt cho thiệt chẩn: định vị lưỡi → phân đoạn → phân loại đặc trưng → LLM. Không nhập mã nguồn/trọng số của dự án này.</p><a href="https://github.com/TonguePicture-SKaRD/TongueDiagnosis" target="_blank" rel="noreferrer">https://github.com/TonguePicture-SKaRD/TongueDiagnosis</a></section>
+    <section class="card"><span class="tag">Apache-2.0</span><h2>OpenCV</h2><p>Tham chiếu các kỹ thuật kiểm tra chất lượng ảnh: độ nét, phơi sáng, tương phản và tiền xử lý ảnh.</p><a href="https://github.com/opencv/opencv" target="_blank" rel="noreferrer">https://github.com/opencv/opencv</a></section>
+    <section class="card"><span class="tag">Apache-2.0</span><h2>Segment Anything</h2><p>Tham chiếu cơ chế tạo mask phân đoạn đối tượng để chuẩn bị cho bước tách vùng lưỡi trước phân loại.</p><a href="https://github.com/facebookresearch/segment-anything" target="_blank" rel="noreferrer">https://github.com/facebookresearch/segment-anything</a></section>
+    <section class="card"><span class="tag">MIT</span><h2>ONNX Runtime</h2><p>Tham chiếu runtime suy luận đa nền tảng cho mô hình ONNX, phù hợp triển khai mô hình phân đoạn/phân loại nhẹ sau này trên web.</p><a href="https://github.com/microsoft/onnxruntime" target="_blank" rel="noreferrer">https://github.com/microsoft/onnxruntime</a></section>
+    <section class="card"><span class="tag">Apache-2.0</span><h2>TensorFlow.js</h2><p>Tham chiếu khả năng huấn luyện, chuyển đổi và chạy mô hình máy học ngay trong trình duyệt; hiện dùng làm định hướng cho định dạng mẫu ML xuất cục bộ.</p><a href="https://github.com/tensorflow/tfjs" target="_blank" rel="noreferrer">https://github.com/tensorflow/tfjs</a></section>
+  </main>
+</body>
+</html>
