@@ -5,8 +5,8 @@ import { fileURLToPath } from 'node:url';
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 3000);
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-const VERSION = '2.1.0';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
+const VERSION = '2.1.1';
 const BUILD = process.env.RENDER_GIT_COMMIT || 'local';
 
 app.disable('x-powered-by');
