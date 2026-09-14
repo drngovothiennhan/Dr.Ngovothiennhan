@@ -8,7 +8,8 @@ const state = {
   qc: null,
   analysis: null,
   serverKey: false,
-  knowledgeVersion: ''
+  knowledgeVersion: '',
+  model: ''
 };
 const els = {
   health: $('healthBadge'),
@@ -28,21 +29,16 @@ const els = {
   theoryBox: $('theoryBox'),
   summary: $('summaryText'),
   confidence: $('confidenceBadge'),
-  model: $('modelLabel'),
+  modelLabel: $('modelLabel'),
   report: $('reportBtn'),
+  exportMl: $('exportMlBtn'),
   reportBox: $('reportBox'),
   chatForm: $('chatForm'),
   chatInput: $('chatInput'),
   chatLog: $('chatLog'),
-  settings: $('settingsBtn'),
-  dialog: $('settingsDialog'),
-  key: $('geminiKeyInput'),
-  saveKey: $('saveKeyBtn'),
-  clearKey: $('clearKeyBtn'),
   canvas: $('workCanvas')
 };
 
-function getLocalKey(){ return localStorage.getItem('aiThietChanGeminiKey') || ''; }
 function setHealth(text, cls=''){ els.health.textContent = text; els.health.className = `status-pill ${cls}`.trim(); }
 function escapeHtml(v){ return String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 function appendBubble(text, who='bot'){ const div=document.createElement('div'); div.className=`bubble ${who}`; div.textContent=text; els.chatLog.appendChild(div); els.chatLog.scrollTop=els.chatLog.scrollHeight; }
@@ -71,7 +67,8 @@ async function checkHealth(){
     if(!r.ok||!d.ok) throw new Error('health');
     state.serverKey=Boolean(d.providerConfigured);
     state.knowledgeVersion=d.knowledgeVersion||'';
-    setHealth(state.serverKey||getLocalKey()?'Hệ thống sẵn sàng':'Web sẵn sàng · A.I cần khóa',state.serverKey||getLocalKey()?'good':'warn');
+    state.model=d.model||'';
+    setHealth(state.serverKey?'A.I dùng chung sẵn sàng':'A.I máy chủ chưa cấu hình',state.serverKey?'good':'warn');
   }catch{ setHealth('Mất kết nối','bad'); }
 }
 
@@ -96,11 +93,8 @@ async function startCamera(facingMode=state.facingMode){
 
 async function openCamera(){
   if(state.stream){ stopCamera(); return; }
-  try{
-    await startCamera(state.facingMode);
-  }catch(err){
-    appendBubble(err?.name==='NotAllowedError'?'Thiết bị đang chặn quyền camera. Bạn vẫn có thể chọn ảnh từ máy.':'Không mở được camera. Hãy thử chọn ảnh từ thiết bị.');
-  }
+  try{ await startCamera(state.facingMode); }
+  catch(err){ appendBubble(err?.name==='NotAllowedError'?'Thiết bị đang chặn quyền camera. Bạn vẫn có thể chọn ảnh từ máy.':'Không mở được camera. Hãy thử chọn ảnh từ thiết bị.'); }
 }
 
 async function switchCamera(){
@@ -114,9 +108,7 @@ async function switchCamera(){
   }catch{
     try{ await startCamera(previous); }catch{ stopCamera(); }
     appendBubble('Không chuyển được camera trên thiết bị này.');
-  }finally{
-    els.switchCamera.disabled=false;
-  }
+  }finally{ els.switchCamera.disabled=false; }
 }
 
 async function captureFrame(){
@@ -156,34 +148,84 @@ async function acceptImage(dataUrl,mimeType){
 }
 
 function computeQc(ctx,w,h){
-  const sw=Math.min(240,w), sh=Math.max(1,Math.round(h*(sw/w)));
+  const sw=Math.min(280,w), sh=Math.max(1,Math.round(h*(sw/w)));
   const temp=document.createElement('canvas'); temp.width=sw; temp.height=sh;
   const t=temp.getContext('2d',{willReadFrequently:true}); t.drawImage(els.canvas,0,0,sw,sh);
   const d=t.getImageData(0,0,sw,sh).data;
-  const gray=new Float32Array(sw*sh); let sum=0,sumSq=0,bright=0,dark=0;
+  const gray=new Float32Array(sw*sh);
+  let sum=0,sumSq=0,bright=0,dark=0;
   for(let i=0,p=0;i<d.length;i+=4,p++){
-    const g=.299*d[i]+.587*d[i+1]+.114*d[i+2]; gray[p]=g; sum+=g; sumSq+=g*g; if(g>245) bright++; if(g<35) dark++;
+    const g=.299*d[i]+.587*d[i+1]+.114*d[i+2];
+    gray[p]=g; sum+=g; sumSq+=g*g;
+    if(g>245) bright++;
+    if(g<35) dark++;
   }
-  const n=gray.length, brightness=sum/n, variance=Math.max(0,sumSq/n-brightness*brightness), contrast=Math.sqrt(variance); let edge=0,count=0;
-  for(let y=1;y<sh;y++){ for(let x=1;x<sw;x++){ const p=y*sw+x; edge+=Math.abs(gray[p]-gray[p-1])+Math.abs(gray[p]-gray[p-sw]); count+=2; } }
-  const edgeScore=count?edge/count:0, glare=bright/n, darkness=dark/n;
-  const checks={light:brightness>=65&&brightness<=220&&glare<.18,dynamic:contrast>=28,focus:edgeScore>=9,shadow:darkness<.22};
+  const n=gray.length;
+  const brightness=sum/n;
+  const variance=Math.max(0,sumSq/n-brightness*brightness);
+  const contrast=Math.sqrt(variance);
+  let edge=0,count=0,lapSum=0,lapSq=0,lapCount=0;
+  for(let y=1;y<sh;y++){
+    for(let x=1;x<sw;x++){
+      const p=y*sw+x;
+      edge+=Math.abs(gray[p]-gray[p-1])+Math.abs(gray[p]-gray[p-sw]);
+      count+=2;
+    }
+  }
+  for(let y=1;y<sh-1;y++){
+    for(let x=1;x<sw-1;x++){
+      const p=y*sw+x;
+      const lap=4*gray[p]-gray[p-1]-gray[p+1]-gray[p-sw]-gray[p+sw];
+      lapSum+=lap; lapSq+=lap*lap; lapCount++;
+    }
+  }
+  const edgeScore=count?edge/count:0;
+  const lapMean=lapCount?lapSum/lapCount:0;
+  const laplacianVariance=lapCount?Math.max(0,lapSq/lapCount-lapMean*lapMean):0;
+  const glare=bright/n, darkness=dark/n;
+  const minSide=Math.min(w,h);
+  const checks={
+    resolution:minSide>=480,
+    light:brightness>=60&&brightness<=225&&glare<.15,
+    dynamic:contrast>=25,
+    focus:laplacianVariance>=55&&edgeScore>=7,
+    clipping:glare<.15&&darkness<.20
+  };
   const passed=Object.values(checks).filter(Boolean).length;
-  const grade=passed===4?'good':passed>=2?'fair':'poor';
-  return {grade,brightness:Number(brightness.toFixed(1)),contrast:Number(contrast.toFixed(1)),edge:Number(edgeScore.toFixed(1)),glare:Number((glare*100).toFixed(1)),darkness:Number((darkness*100).toFixed(1)),checks};
+  const grade=passed===5?'good':passed>=3?'fair':'poor';
+  return {
+    grade,
+    width:w,
+    height:h,
+    brightness:Number(brightness.toFixed(1)),
+    contrast:Number(contrast.toFixed(1)),
+    edge:Number(edgeScore.toFixed(1)),
+    laplacianVariance:Number(laplacianVariance.toFixed(1)),
+    glare:Number((glare*100).toFixed(1)),
+    darkness:Number((darkness*100).toFixed(1)),
+    checks
+  };
 }
 
 function renderQc(){
   const q=state.qc; if(!q) return;
-  const labels=[['Ánh sáng',q.checks.light],['Tương phản',q.checks.dynamic],['Độ nét',q.checks.focus],['Bóng tối',q.checks.shadow]];
+  const labels=[
+    ['Độ phân giải',q.checks.resolution],
+    ['Ánh sáng',q.checks.light],
+    ['Tương phản',q.checks.dynamic],
+    ['Độ nét',q.checks.focus],
+    ['Cháy/tối',q.checks.clipping]
+  ];
   els.qcChips.innerHTML=labels.map(([label,ok])=>`<span class="chip ${ok?'good':'warn'}">${ok?'✓':'!'} ${label}</span>`).join('')+`<span class="chip ${q.grade==='good'?'good':q.grade==='poor'?'bad':'warn'}">QC: ${q.grade.toUpperCase()}</span>`;
 }
 
 async function apiFetch(url,body){
-  const headers={'content-type':'application/json'}; const k=getLocalKey(); if(k) headers['x-gemini-key']=k;
-  const r=await fetch(url,{method:'POST',headers,body:JSON.stringify(body)}); const d=await r.json().catch(()=>({}));
-  if(r.status===428){ setHealth('A.I cần cấu hình','warn'); els.dialog.showModal(); throw new Error('Hãy nhập Gemini API key một lần trong Cài đặt A.I.'); }
-  if(!r.ok) throw new Error(d?.message||d?.error||`HTTP ${r.status}`); return d;
+  const r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+  const d=await r.json().catch(()=>({}));
+  if(r.status===428){ setHealth('A.I máy chủ chưa cấu hình','warn'); throw new Error('Khóa Gemini dùng chung chưa được cấu hình trên máy chủ.'); }
+  if(r.status===429){ throw new Error(`Đang vượt giới hạn bảo vệ khóa dùng chung. Thử lại sau ${d.retryAfter||'ít phút'} giây.`); }
+  if(!r.ok) throw new Error(d?.message||d?.error||`HTTP ${r.status}`);
+  return d;
 }
 
 async function analyze(){
@@ -193,8 +235,9 @@ async function analyze(){
     const d=await apiFetch('/api/analyze',{image:state.image,mimeType:state.mimeType,qc:state.qc});
     state.analysis=d.analysis;
     state.knowledgeVersion=d.knowledgeVersion||state.knowledgeVersion;
-    renderResult(d.model);
-    setHealth('A.I hoạt động','good');
+    state.model=d.model||state.model;
+    renderResult();
+    setHealth('A.I dùng chung hoạt động','good');
   }catch(err){ appendBubble(`Không thể phân tích: ${err.message}`); }
   finally{ els.analyze.disabled=false; els.analyze.textContent=old; }
 }
@@ -205,7 +248,6 @@ function renderTheoryAssessment(a){
   const stomach=Array.isArray(ta.stomachPatternSignals)?ta.stomachPatternSignals:[];
   const cannot=Array.isArray(ta.cannotConclude)?ta.cannotConclude:[];
   if(!general.length&&!stomach.length&&!cannot.length){ els.theoryBox.hidden=true; els.theoryBox.innerHTML=''; return; }
-
   const generalHtml=general.map(item=>`<li><strong>${escapeHtml(item.label||'Tín hiệu')}</strong><span>${escapeHtml(item.evidence||'')}</span></li>`).join('');
   const stomachHtml=stomach.map(item=>{
     const pct=Math.round(Math.max(0,Math.min(1,Number(item.confidence)||0))*100);
@@ -216,9 +258,13 @@ function renderTheoryAssessment(a){
   els.theoryBox.hidden=false;
 }
 
-function renderResult(model){
+function renderResult(){
   const a=state.analysis||{};
+  const vv=a.visualValidity||{};
   const fields=[
+    ['Vùng lưỡi',vv.tongueVisible===false?'Không xác nhận':vv.tongueVisible===true?'Đã xác nhận':'Không xác định'],
+    ['Bố cục ảnh',vv.framing],
+    ['Độ tin cậy màu',vv.colorReliability],
     ['Màu lưỡi',a.tongueColor],
     ['Hình thể',a.shape],
     ['Màu rêu',a.coatingColor],
@@ -237,17 +283,39 @@ function renderResult(model){
   els.summary.textContent=a.summary||'Không có tóm tắt.';
   const conf=Math.max(0,Math.min(1,Number(a.confidence)||0));
   els.confidence.textContent=`Tin cậy ${Math.round(conf*100)}%`;
-  const meta=[model?`Mô hình: ${model}`:'',state.knowledgeVersion?`KB: ${state.knowledgeVersion}`:''].filter(Boolean).join(' · ');
-  els.model.textContent=meta;
+  const meta=[state.model?`Mô hình: ${state.model}`:'',state.knowledgeVersion?`KB: ${state.knowledgeVersion}`:''].filter(Boolean).join(' · ');
+  els.modelLabel.textContent=meta;
   els.resultCard.hidden=false;
   els.resultCard.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 async function makeReport(){
-  if(!state.analysis) return; els.report.disabled=true; const old=els.report.textContent; els.report.textContent='Đang tạo báo cáo…';
+  if(!state.analysis) return;
+  els.report.disabled=true; const old=els.report.textContent; els.report.textContent='Đang tạo báo cáo…';
   try{ const d=await apiFetch('/api/report',{analysis:state.analysis,qc:state.qc}); els.reportBox.textContent=d.report; els.reportBox.hidden=false; }
   catch(err){ appendBubble(`Không tạo được báo cáo: ${err.message}`); }
   finally{ els.report.disabled=false; els.report.textContent=old; }
+}
+
+function exportMlSample(){
+  if(!state.analysis||!state.image) return;
+  const payload={
+    schemaVersion:'ai-thiet-chan-training-sample-v1',
+    createdAt:new Date().toISOString(),
+    mimeType:state.mimeType,
+    imageDataUrl:state.image,
+    qc:state.qc,
+    analysis:state.analysis,
+    model:state.model,
+    knowledgeVersion:state.knowledgeVersion,
+    note:'Mẫu xuất cục bộ để kiểm định/gán nhãn trước khi dùng huấn luyện; ứng dụng không tự tải mẫu này lên máy chủ.'
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`ai-thiet-chan-ml-${new Date().toISOString().replace(/[:.]/g,'-')}.json`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
 
 async function sendChat(ev){
@@ -269,6 +337,7 @@ els.capture.addEventListener('click',captureFrame);
 els.reset.addEventListener('click',resetAll);
 els.analyze.addEventListener('click',analyze);
 els.report.addEventListener('click',makeReport);
+els.exportMl.addEventListener('click',exportMlSample);
 els.chatForm.addEventListener('submit',sendChat);
 els.file.addEventListener('change',async e=>{
   const file=e.target.files?.[0]; if(!file) return;
@@ -276,9 +345,6 @@ els.file.addEventListener('change',async e=>{
   try{ await acceptImage(await fileToDataUrl(file),file.type); }catch{ appendBubble('Không đọc được ảnh đã chọn.'); }
   e.target.value='';
 });
-els.settings.addEventListener('click',()=>{ els.key.value=getLocalKey(); els.dialog.showModal(); });
-els.saveKey.addEventListener('click',()=>{ const k=els.key.value.trim(); if(k) localStorage.setItem('aiThietChanGeminiKey',k); else localStorage.removeItem('aiThietChanGeminiKey'); els.dialog.close(); checkHealth(); });
-els.clearKey.addEventListener('click',()=>{ localStorage.removeItem('aiThietChanGeminiKey'); els.key.value=''; els.dialog.close(); checkHealth(); });
 window.addEventListener('beforeunload',stopCamera);
 document.addEventListener('visibilitychange',()=>{ if(document.hidden&&state.stream) stopCamera(); });
 checkHealth();
