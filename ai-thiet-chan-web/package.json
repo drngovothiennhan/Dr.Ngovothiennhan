@@ -4,6 +4,6 @@
   "private": true,
   "type": "module",
   "engines": {"node": ">=20"},
-  "scripts": {"start": "node server.mjs", "test": "node tests/smoke.mjs", "check": "node --check server.mjs && node --check knowledge.mjs && node --check public/app.js && node --check public/settings.js && node --check public/quality-dashboard.js && node --check public/sw.js && node tests/smoke.mjs"},
+  "scripts": {"start": "node --import ./runtime-guard.mjs server.mjs", "test": "node tests/smoke.mjs", "check": "node --check server.mjs && node --check runtime-guard.mjs && node --check knowledge.mjs && node --check public/app.js && node --check public/capture-metadata.js && node --check public/settings.js && node --check public/quality-dashboard.js && node --check public/sw.js && node tests/smoke.mjs"},
   "dependencies": {"express": "^5.1.0"}
 }
