@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="/history.css" />
   <link rel="stylesheet" href="/dual-view.css" />
   <link rel="stylesheet" href="/settings.css" />
+  <link rel="stylesheet" href="/quality-dashboard.css" />
   <title>A.I Thiệt Chẩn</title>
 </head>
 <body>
@@ -86,7 +87,10 @@
 
         <div id="cameraPanel" class="camera-panel" hidden>
           <div class="camera-panel-head"><strong id="cameraTargetLabel">Đang chụp</strong><button id="closeCameraBtn" class="btn ghost compact" type="button">Đóng</button></div>
-          <div class="camera-stage"><video id="video" playsinline autoplay muted></video></div>
+          <div class="camera-stage">
+            <video id="video" playsinline autoplay muted></video>
+            <div class="capture-frame-guide" aria-hidden="true"><span>Đưa toàn bộ lưỡi vào khung · giữ máy ổn định · tránh ám màu</span></div>
+          </div>
           <div class="action-grid camera-actions">
             <button id="switchCameraBtn" class="btn" type="button">↻ Đổi camera</button>
             <button id="captureBtn" class="btn primary" type="button">Chụp ảnh</button>
@@ -120,10 +124,30 @@
           <div class="result-section-title" id="combinedTitle">2. Tổng hợp nhận định</div>
           <div id="theoryBox" class="theory-box" hidden></div>
           <div class="summary-box"><strong>Tóm tắt</strong><p id="summaryText"></p></div>
+          <div class="clinical-boundary"><strong>Giới hạn sử dụng y tế</strong>Điểm tin cậy hiển thị là độ tự tin nội bộ của A.I sau QC ảnh, không phải sensitivity/specificity hay xác nhận chẩn đoán. Production hiện chưa có nhãn đồng thuận chuyên gia để khẳng định độ chính xác lâm sàng.</div>
         </section>
 
         <button id="reportBtn" class="btn primary full">Tạo báo cáo tổng kết ca</button>
         <div id="reportBox" class="report-box" hidden></div>
+      </section>
+
+      <section class="card quality-card" aria-labelledby="qualityTitle">
+        <div class="section-head">
+          <div><h2 id="qualityTitle">Chất lượng hệ thống & dữ liệu</h2><p>Chỉ số vận hành minh bạch; không thay thế đánh giá lâm sàng.</p></div>
+          <button id="qualityRefreshBtn" class="btn ghost compact" type="button">Làm mới</button>
+        </div>
+        <div class="quality-grid">
+          <div class="quality-metric"><span>Ca đang có trong lịch sử</span><strong id="qualityTotal">…</strong></div>
+          <div class="quality-metric"><span>Ca tổng quát / tổng số</span><strong id="qualityGeneral">…</strong></div>
+          <div class="quality-metric"><span>Tỷ lệ QC tốt mặt trên</span><strong id="qualityQc">…</strong></div>
+          <div class="quality-metric"><span>Confidence A.I trung bình</span><strong id="qualityConfidence">…</strong></div>
+        </div>
+        <div id="qualityDataState" class="quality-note warn">Đang tải tình trạng dữ liệu…</div>
+        <div class="device-readiness" aria-label="Khả năng đa thiết bị">
+          <span class="chip">Thiết bị: <strong id="qualityDevice">…</strong></span>
+          <span class="chip">Camera: <strong id="qualityCamera">…</strong></span>
+          <span class="chip">PWA: <strong id="qualityPwa">…</strong></span>
+        </div>
       </section>
 
       <section class="card history-card">
@@ -172,6 +196,7 @@
   <canvas id="workCanvas" hidden></canvas>
   <script src="/app.js" defer></script>
   <script src="/settings.js" defer></script>
+  <script src="/quality-dashboard.js" defer></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load',async()=>{
