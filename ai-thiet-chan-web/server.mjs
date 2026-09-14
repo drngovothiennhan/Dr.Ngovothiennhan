@@ -106,6 +106,6 @@ app.post('/api/report', async (req, res) => {
 });
 
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: '5m', etag: true }));
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.use((req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 app.listen(PORT, '0.0.0.0', () => console.log(`A.I Thiệt Chẩn web listening on ${PORT}`));
