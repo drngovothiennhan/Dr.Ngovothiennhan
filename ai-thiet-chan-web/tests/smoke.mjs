@@ -44,7 +44,7 @@ try{
   if(!settingsJs.includes('aiThietChanDefaultMode')||!settingsJs.includes("applyMode('general')")||!settingsJs.includes("applyMode('normal')")) throw new Error('settings behavior gate failed');
 
   const qualityJs=await fetch(`http://127.0.0.1:${port}/quality-dashboard.js`).then(r=>r.text());
-  for(const marker of ["'/api/cases?limit=100'",'navigator.mediaDevices?.getUserMedia','confidence A.I','chưa có nhãn đồng thuận chuyên gia']) if(!qualityJs.includes(marker)) throw new Error(`quality dashboard behavior missing: ${marker}`);
+  for(const marker of ["'/api/cases?limit=100'",'navigator.mediaDevices?.getUserMedia','qualityConfidence','chưa có nhãn đồng thuận chuyên gia']) if(!qualityJs.includes(marker)) throw new Error(`quality dashboard behavior missing: ${marker}`);
 
   const serverText=await readFile(path.join(root,'server.mjs'),'utf8');
   for(const marker of ['ai_thiet_chan_store_case_v2','ai_thiet_chan_list_cases_v2','tongue-dual-view-feature-vector-v1','bottomImage','sublingual-vessel-description','sha256-composite']) if(!serverText.includes(marker)) throw new Error(`server dual-view marker missing: ${marker}`);
