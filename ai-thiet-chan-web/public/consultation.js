@@ -60,6 +60,10 @@
   });
 
   form.addEventListener('submit',ev=>{
+    if(!inquiry.active&&!inquiry.completed){
+      ev.preventDefault();ev.stopImmediatePropagation();
+      input.value='';bubble('Chatbot này cần hoàn thành Vấn chẩn Thập vấn trước khi đưa ra nhận định. Hãy nhấn “Bắt đầu Thập vấn”.');return;
+    }
     if(!inquiry.active)return;
     const answer=input.value.trim();
     if(!answer){ev.preventDefault();ev.stopImmediatePropagation();return;}
