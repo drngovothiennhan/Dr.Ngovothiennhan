@@ -30,13 +30,14 @@
       const total=cases.length;
       const general=cases.filter(x=>x.assessment_mode==='general').length;
       const goodTop=cases.filter(x=>x.top_qc_grade==='good').length;
-      const confidence=cases.length?cases.reduce((s,x)=>s+(Number(x.confidence)||0),0)/cases.length:0;
+      const qcCandidate=cases.filter(x=>x.top_qc_grade!=='poor'&&(x.assessment_mode!=='general'||x.bottom_qc_grade!=='poor')).length;
       els.total.textContent=String(total);
       els.general.textContent=total?`${general}/${total}`:'0';
       els.qc.textContent=total?pct(goodTop/total):'—';
-      els.confidence.textContent=total?pct(confidence):'—';
+      els.confidence.textContent=total?pct(qcCandidate/total):'—';
+      const metricLabel=els.confidence.closest('.quality-metric')?.querySelector('span');if(metricLabel)metricLabel.textContent='Ca đạt QC tối thiểu';
       els.dataState.textContent=total
-        ?`Kho hiện có ${total} ca. Dữ liệu đang được tích lũy tự động nhưng production hiện chưa có nhãn đồng thuận chuyên gia; chưa dùng các chỉ số này để khẳng định độ chính xác lâm sàng.`
+        ?`Kho hiện có ${total} ca. ${qcCandidate}/${total} ca đạt bộ lọc QC tối thiểu để xem xét cho dữ liệu huấn luyện. Production hiện chưa có nhãn đồng thuận chuyên gia nên chưa dùng các chỉ số này để khẳng định độ chính xác lâm sàng.`
         :'Kho chưa có ca. Chưa có dữ liệu để đánh giá khả năng máy học.';
       els.dataState.classList.toggle('warn',true);
     }catch{
