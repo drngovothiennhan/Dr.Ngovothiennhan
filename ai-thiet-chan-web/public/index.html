@@ -7,11 +7,12 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="description" content="A.I Thiệt Chẩn - phân tích hình ảnh lưỡi phục vụ học tập và tham khảo." />
+  <meta name="description" content="A.I Thiệt Chẩn - phân tích mặt trên và mặt dưới lưỡi phục vụ học tập và tham khảo." />
   <link rel="icon" href="/icon.svg" type="image/svg+xml" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="stylesheet" href="/styles.css" />
   <link rel="stylesheet" href="/history.css" />
+  <link rel="stylesheet" href="/dual-view.css" />
   <title>A.I Thiệt Chẩn</title>
 </head>
 <body>
@@ -28,37 +29,69 @@
       <section class="card capture-card">
         <div class="section-head">
           <div>
-            <h1>Ghi nhận hình lưỡi</h1>
-            <p>Ảnh chính diện, đủ sáng, không filter màu.</p>
+            <h1>Chọn chế độ thiệt chẩn</h1>
+            <p>Bình thường dùng 1 ảnh mặt trên. Tổng quát dùng 2 ảnh mặt trên + mặt dưới.</p>
           </div>
           <span id="healthBadge" class="status-pill">Đang kiểm tra…</span>
         </div>
 
-        <div id="cameraStage" class="camera-stage">
-          <video id="video" playsinline autoplay muted hidden></video>
-          <img id="preview" alt="Ảnh lưỡi đã chọn" hidden />
-          <div id="emptyState" class="empty-state">
-            <div class="tongue-mark">舌</div>
-            <strong>Chưa có ảnh</strong>
-            <span>Chụp trực tiếp hoặc chọn ảnh từ thiết bị</span>
+        <div class="mode-picker" role="group" aria-label="Chế độ thiệt chẩn">
+          <button id="normalModeBtn" class="mode-btn active" type="button" data-mode="normal">
+            <strong>Bình thường</strong><span>1 ảnh mặt trên lưỡi</span>
+          </button>
+          <button id="generalModeBtn" class="mode-btn" type="button" data-mode="general">
+            <strong>Tổng quát</strong><span>2 ảnh trên + dưới lưỡi</span>
+          </button>
+        </div>
+
+        <div id="generalGuide" class="capture-guide" hidden>
+          <strong>Chế độ tổng quát</strong>
+          <span>Mặt trên: chụp toàn bộ lưỡi, cố gắng thấy rõ phần sau/gốc lưỡi. Khuyến khích camera sau, đủ sáng; có thể dùng đèn flash của thiết bị khi cần để thấy rõ vùng trong và toàn bộ lưỡi.</span>
+          <span>Mặt dưới: nâng đầu lưỡi để thấy rõ mặt dưới và các mạch máu/tĩnh mạch dưới lưỡi.</span>
+        </div>
+
+        <div class="view-capture-grid">
+          <article class="view-capture-card" data-view="top">
+            <div class="view-title"><strong>Ảnh mặt trên lưỡi</strong><span>Bắt buộc</span></div>
+            <div class="image-slot">
+              <img id="topPreview" alt="Ảnh mặt trên lưỡi" hidden />
+              <div id="topEmpty" class="slot-empty"><div class="tongue-mark small">舌</div><span>Chưa có ảnh mặt trên</span></div>
+            </div>
+            <div class="slot-actions">
+              <button id="topCameraBtn" class="btn primary" type="button">Chụp mặt trên</button>
+              <label class="btn file-btn">Chọn ảnh<input id="topFileInput" type="file" accept="image/*" capture="environment" hidden /></label>
+              <button id="topResetBtn" class="btn ghost" type="button">Xóa ảnh</button>
+            </div>
+            <div id="topQcPanel" class="qc-panel" hidden><div class="qc-title">QC mặt trên</div><div id="topQcChips" class="chips"></div></div>
+          </article>
+
+          <article id="bottomCaptureCard" class="view-capture-card" data-view="bottom" hidden>
+            <div class="view-title"><strong>Ảnh mặt dưới lưỡi</strong><span>Bắt buộc ở chế độ tổng quát</span></div>
+            <div class="image-slot">
+              <img id="bottomPreview" alt="Ảnh mặt dưới lưỡi" hidden />
+              <div id="bottomEmpty" class="slot-empty"><div class="tongue-mark small">舌</div><span>Chưa có ảnh mặt dưới</span></div>
+            </div>
+            <div class="slot-actions">
+              <button id="bottomCameraBtn" class="btn primary" type="button">Chụp mặt dưới</button>
+              <label class="btn file-btn">Chọn ảnh<input id="bottomFileInput" type="file" accept="image/*" capture="environment" hidden /></label>
+              <button id="bottomResetBtn" class="btn ghost" type="button">Xóa ảnh</button>
+            </div>
+            <div id="bottomQcPanel" class="qc-panel" hidden><div class="qc-title">QC mặt dưới</div><div id="bottomQcChips" class="chips"></div></div>
+          </article>
+        </div>
+
+        <div id="cameraPanel" class="camera-panel" hidden>
+          <div class="camera-panel-head"><strong id="cameraTargetLabel">Đang chụp</strong><button id="closeCameraBtn" class="btn ghost compact" type="button">Đóng</button></div>
+          <div class="camera-stage"><video id="video" playsinline autoplay muted></video></div>
+          <div class="action-grid camera-actions">
+            <button id="switchCameraBtn" class="btn" type="button">↻ Đổi camera</button>
+            <button id="captureBtn" class="btn primary" type="button">Chụp ảnh</button>
           </div>
-        </div>
-
-        <div class="action-grid">
-          <button id="cameraBtn" class="btn primary">Mở camera</button>
-          <button id="switchCameraBtn" class="btn" hidden>↻ Đổi camera</button>
-          <button id="captureBtn" class="btn" hidden>Chụp ảnh</button>
-          <label class="btn file-btn">Chọn ảnh<input id="fileInput" type="file" accept="image/*" capture="environment" hidden /></label>
-          <button id="resetBtn" class="btn ghost">Làm lại</button>
-        </div>
-
-        <div id="qcPanel" class="qc-panel" hidden>
-          <div class="qc-title">Kiểm tra chất lượng ảnh</div>
-          <div id="qcChips" class="chips"></div>
+          <p class="camera-note">Camera sau được ưu tiên để hình rõ hơn. Nếu thiết bị có đèn flash, có thể bật khi vùng lưỡi phía trong thiếu sáng.</p>
         </div>
 
         <button id="analyzeBtn" class="analyze-btn" disabled>Phân tích bằng A.I</button>
-        <p class="disclaimer">Mỗi ca sau phân tích được lưu tự động vào kho dữ liệu học máy và khử trùng lặp theo ảnh. Không thu tên hoặc thông tin định danh. Kết quả chỉ hỗ trợ học tập/tham khảo, không thay thế tứ chẩn trực tiếp.</p>
+        <p class="disclaimer">Mỗi ca sau phân tích được lưu tự động vào kho dữ liệu học máy và khử trùng lặp theo tổ hợp ảnh. Không thu tên hoặc thông tin định danh. Kết quả chỉ hỗ trợ học tập/tham khảo, không thay thế tứ chẩn trực tiếp.</p>
       </section>
 
       <section id="resultCard" class="card" hidden>
@@ -66,9 +99,25 @@
           <div><h2>Kết quả quan sát</h2><p id="modelLabel"></p></div>
           <span id="confidenceBadge" class="status-pill good"></span>
         </div>
-        <div id="resultGrid" class="result-grid"></div>
-        <div id="theoryBox" class="theory-box" hidden></div>
-        <div class="summary-box"><strong>Tóm tắt</strong><p id="summaryText"></p></div>
+
+        <section class="result-section">
+          <div class="result-section-title">1. Mặt trên lưỡi</div>
+          <div id="topResultGrid" class="result-grid"></div>
+          <div id="topLimitations" class="limitations" hidden></div>
+        </section>
+
+        <section id="bottomResultSection" class="result-section" hidden>
+          <div class="result-section-title">2. Mặt dưới lưỡi & mạch máu</div>
+          <div id="bottomResultGrid" class="result-grid"></div>
+          <div id="bottomLimitations" class="limitations" hidden></div>
+        </section>
+
+        <section class="result-section combined-section">
+          <div class="result-section-title" id="combinedTitle">2. Tổng hợp nhận định</div>
+          <div id="theoryBox" class="theory-box" hidden></div>
+          <div class="summary-box"><strong>Tóm tắt</strong><p id="summaryText"></p></div>
+        </section>
+
         <button id="reportBtn" class="btn primary full">Tạo báo cáo tổng kết ca</button>
         <div id="reportBox" class="report-box" hidden></div>
       </section>
@@ -85,7 +134,7 @@
         <div class="section-head">
           <div><h2>Chatbot tư vấn nhanh</h2><p>Trao đổi theo đúng kết quả quan sát hiện tại.</p></div>
         </div>
-        <div id="chatLog" class="chat-log"><div class="bubble bot">Tôi sẽ trả lời dựa trên ảnh, kết quả quan sát và hệ tri thức thiệt chẩn đã nạp; không tự thêm dữ liệu.</div></div>
+        <div id="chatLog" class="chat-log"><div class="bubble bot">Tôi sẽ trả lời dựa trên ảnh mặt trên/mặt dưới đã cung cấp, kết quả quan sát và hệ tri thức thiệt chẩn đã nạp; không tự thêm dữ liệu.</div></div>
         <form id="chatForm" class="chat-form">
           <input id="chatInput" autocomplete="off" placeholder="Nhập câu hỏi…" />
           <button class="btn primary" type="submit">Gửi</button>
