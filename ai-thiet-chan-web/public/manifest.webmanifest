@@ -1,0 +1,12 @@
+{
+  "name": "A.I Thiệt Chẩn",
+  "short_name": "Thiệt Chẩn",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#eef6f4",
+  "theme_color": "#0b6b64",
+  "lang": "vi",
+  "description": "Ứng dụng web quan sát và phân tích hình ảnh lưỡi phục vụ học tập, tham khảo Y học cổ truyền."
+}
