@@ -6,6 +6,8 @@ const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 3000);
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const VERSION = '2.1.0';
+const BUILD = process.env.RENDER_GIT_COMMIT || 'local';
 
 app.disable('x-powered-by');
 app.use(express.json({ limit: '15mb' }));
@@ -14,6 +16,7 @@ app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'no-referrer');
   res.setHeader('Permissions-Policy', 'camera=(self), microphone=(self), geolocation=()');
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  if (req.path.startsWith('/api/')) res.setHeader('Cache-Control', 'no-store');
   next();
 });
 
@@ -53,7 +56,17 @@ function parseJsonText(text) {
 }
 
 app.get('/api/health', (req, res) => {
-  res.json({ ok: true, app: 'A.I Thiệt Chẩn', architecture: 'independent-web', providerConfigured: Boolean(process.env.GEMINI_API_KEY), model: MODEL, time: new Date().toISOString() });
+  res.json({
+    ok: true,
+    app: 'A.I Thiệt Chẩn',
+    architecture: 'independent-web',
+    legacyAppDeploy: false,
+    version: VERSION,
+    build: BUILD.slice(0, 12),
+    providerConfigured: Boolean(process.env.GEMINI_API_KEY),
+    model: MODEL,
+    time: new Date().toISOString()
+  });
 });
 
 app.post('/api/analyze', async (req, res) => {
@@ -101,11 +114,20 @@ app.post('/api/report', async (req, res) => {
     return res.json({ ok: true, report, model: MODEL });
   } catch (err) {
     console.error('report_error', err?.message || err);
-    return res.status(502).json({ error: 'REPORT_FAILED', message: err?.message || 'Unknown error' });
+    return res.status(err?.status === 429 ? 429 : 502).json({ error: 'REPORT_FAILED', message: err?.message || 'Unknown error' });
   }
 });
 
-app.use(express.static(path.join(__dirname, 'public'), { maxAge: '5m', etag: true }));
-app.use((req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: 0,
+  etag: true,
+  setHeaders: (res, filePath) => {
+    if (/\.(html|js|css|webmanifest|svg)$/i.test(filePath)) res.setHeader('Cache-Control', 'no-cache');
+  }
+}));
+app.use((req, res) => {
+  res.setHeader('Cache-Control', 'no-cache');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
-app.listen(PORT, '0.0.0.0', () => console.log(`A.I Thiệt Chẩn web listening on ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`A.I Thiệt Chẩn web v${VERSION} listening on ${PORT}`));
