@@ -45,6 +45,7 @@
 
         <div class="action-grid">
           <button id="cameraBtn" class="btn primary">Mở camera</button>
+          <button id="switchCameraBtn" class="btn" hidden>↻ Đổi camera</button>
           <button id="captureBtn" class="btn" hidden>Chụp ảnh</button>
           <label class="btn file-btn">Chọn ảnh<input id="fileInput" type="file" accept="image/*" capture="environment" hidden /></label>
           <button id="resetBtn" class="btn ghost">Làm lại</button>
@@ -56,7 +57,7 @@
         </div>
 
         <button id="analyzeBtn" class="analyze-btn" disabled>Phân tích bằng A.I</button>
-        <p class="disclaimer">Kết quả chỉ hỗ trợ quan sát/học tập, không thay thế chẩn đoán trực tiếp.</p>
+        <p class="disclaimer">Đối chiếu thiệt tượng theo tài liệu YHCT đã nạp; kết quả chỉ hỗ trợ học tập/tham khảo và không thay thế tứ chẩn trực tiếp.</p>
       </section>
 
       <section id="resultCard" class="card" hidden>
@@ -65,6 +66,7 @@
           <span id="confidenceBadge" class="status-pill good"></span>
         </div>
         <div id="resultGrid" class="result-grid"></div>
+        <div id="theoryBox" class="theory-box" hidden></div>
         <div class="summary-box"><strong>Tóm tắt</strong><p id="summaryText"></p></div>
         <button id="reportBtn" class="btn primary full">Tạo báo cáo tổng kết ca</button>
         <div id="reportBox" class="report-box" hidden></div>
@@ -74,7 +76,7 @@
         <div class="section-head">
           <div><h2>Chatbot tư vấn nhanh</h2><p>Trao đổi theo đúng kết quả quan sát hiện tại.</p></div>
         </div>
-        <div id="chatLog" class="chat-log"><div class="bubble bot">Tôi sẽ trả lời dựa trên ảnh/kết quả đang có và không tự thêm dữ liệu.</div></div>
+        <div id="chatLog" class="chat-log"><div class="bubble bot">Tôi sẽ trả lời dựa trên ảnh, kết quả quan sát và hệ tri thức thiệt chẩn đã nạp; không tự thêm dữ liệu.</div></div>
         <form id="chatForm" class="chat-form">
           <input id="chatInput" autocomplete="off" placeholder="Nhập câu hỏi…" />
           <button class="btn primary" type="submit">Gửi</button>
