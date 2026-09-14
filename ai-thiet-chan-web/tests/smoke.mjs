@@ -13,39 +13,43 @@ try{
   const health=await waitForHealth();
   if(!health.ok) throw new Error('health not ok');
   if(health.architecture!=='independent-web'||health.legacyPlatform!==false) throw new Error('architecture gate failed');
-  if(health.version!=='2.4.0') throw new Error(`wrong version: ${health.version}`);
+  if(health.version!=='2.5.0') throw new Error(`wrong version: ${health.version}`);
   if(health.sharedProvider!==true||health.clientSuppliedKeyAccepted!==false) throw new Error('shared provider gate failed');
-  if(health.caseCollection?.mode!=='automatic'||health.caseCollection?.history!==true||health.caseCollection?.deduplicate!=='sha256') throw new Error('automatic case collection gate failed');
+  if(!Array.isArray(health.assessmentModes)||!health.assessmentModes.includes('normal')||!health.assessmentModes.includes('general')) throw new Error('assessment modes gate failed');
+  if(!Array.isArray(health.generalAssessmentViews)||!health.generalAssessmentViews.includes('top')||!health.generalAssessmentViews.includes('bottom')) throw new Error('dual view gate failed');
+  if(health.caseCollection?.mode!=='automatic'||health.caseCollection?.history!==true||health.caseCollection?.deduplicate!=='sha256-composite') throw new Error('automatic dual-view case collection gate failed');
   if(!String(health.knowledgeVersion||'').startsWith('thiet-chan-kb-')) throw new Error('knowledge version missing');
   if(Number(health.knowledgeSources)!==2||Number(health.openSourceReferences)!==5) throw new Error('knowledge/source gate failed');
 
   const home=await fetch(`http://127.0.0.1:${port}/`);const html=await home.text();
   if(!home.ok||!html.includes('A.I THIỆT CHẨN')) throw new Error('home gate failed');
-  if(!html.includes('switchCameraBtn')||!html.includes('theoryBox')) throw new Error('camera/theory gate failed');
-  if(html.includes('exportMlBtn')||html.includes('Xuất mẫu máy học')) throw new Error('manual ML export must be removed');
-  if(!html.includes('historyList')||!html.includes('Lịch sử ca')) throw new Error('case history UI missing');
+  for(const marker of ['normalModeBtn','generalModeBtn','topCameraBtn','bottomCameraBtn','topFileInput','bottomFileInput','switchCameraBtn','bottomResultSection','Lịch sử ca']) if(!html.includes(marker)) throw new Error(`dual-view UI missing: ${marker}`);
+  if(!html.includes('camera sau')||!html.includes('mạch máu/tĩnh mạch dưới lưỡi')) throw new Error('capture guidance missing');
+  if(html.includes('exportMlBtn')||html.includes('Xuất mẫu máy học')) throw new Error('manual ML export must stay removed');
   if(!html.includes('lưu tự động vào kho dữ liệu học máy')) throw new Error('automatic collection disclosure missing');
-  if(!html.includes('/open-source.html')) throw new Error('open source notice missing');
 
   const appJs=await fetch(`http://127.0.0.1:${port}/app.js`).then(r=>r.text());
-  if(!appJs.includes("facingMode:'environment'")||!appJs.includes("previous==='environment'?'user':'environment'")) throw new Error('camera switch missing');
+  for(const marker of ["mode:'normal'","images:{top:emptyImage(),bottom:emptyImage()}","openCamera('top')","openCamera('bottom')",'bottomImage','bottomQc']) if(!appJs.includes(marker)) throw new Error(`dual-view client marker missing: ${marker}`);
+  if(!appJs.includes("previous==='environment'?'user':'environment'")) throw new Error('camera switch missing');
   if(!appJs.includes('laplacianVariance')) throw new Error('enhanced QC missing');
   if(!appJs.includes('loadHistory')||!appJs.includes("'/api/cases?limit=30'")) throw new Error('history client missing');
   if(appJs.includes('exportMlSample')||appJs.includes('ai-thiet-chan-training-sample-v1')) throw new Error('manual export code must be absent');
   if(appJs.includes('aiThietChanGeminiKey')||appJs.includes('x-gemini-key')) throw new Error('client Gemini key path must be absent');
 
   const serverText=await readFile(path.join(root,'server.mjs'),'utf8');
-  for(const marker of ['ai_thiet_chan_store_case','ai_thiet_chan_list_cases','automatic-server-training-store','createHash']) if(!serverText.includes(marker)) throw new Error(`server training store marker missing: ${marker}`);
+  for(const marker of ['ai_thiet_chan_store_case_v2','ai_thiet_chan_list_cases_v2','tongue-dual-view-feature-vector-v1','bottomImage','sublingual-vessel-description','sha256-composite']) if(!serverText.includes(marker)) throw new Error(`server dual-view marker missing: ${marker}`);
   if(/appdeploy/i.test(serverText)||serverText.includes("req.get('x-gemini-key')")) throw new Error('legacy/client-key server path detected');
 
+  const noKey=await fetch(`http://127.0.0.1:${port}/api/analyze`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({mode:'general',topImage:'data:image/jpeg;base64,'+'a'.repeat(200),bottomImage:'data:image/jpeg;base64,'+'b'.repeat(200)})});
+  if(noKey.status!==428) throw new Error(`expected analyze 428 without shared key, got ${noKey.status}`);
   const casesWithoutKey=await fetch(`http://127.0.0.1:${port}/api/cases`);
   if(casesWithoutKey.status!==428) throw new Error(`expected case history 428 without shared key, got ${casesWithoutKey.status}`);
 
   const manifest=await fetch(`http://127.0.0.1:${port}/manifest.webmanifest`).then(r=>r.json());
   if(manifest.display!=='standalone'||!Array.isArray(manifest.icons)||manifest.icons.length===0) throw new Error('PWA manifest gate failed');
   const sw=await fetch(`http://127.0.0.1:${port}/sw.js`).then(r=>r.text());
-  if(!sw.includes("url.pathname.startsWith('/api/')")||!sw.includes('ai-thiet-chan-v2.4.0')||!sw.includes('/history.css')) throw new Error('service worker gate failed');
+  if(!sw.includes("url.pathname.startsWith('/api/')")||!sw.includes('ai-thiet-chan-v2.5.0')||!sw.includes('/dual-view.css')) throw new Error('service worker gate failed');
 
   await scanPublic(path.join(root,'public'));
-  console.log('SMOKE PASS: v2.4.0 automatic training collection, deduplicated case store and case history');
+  console.log('SMOKE PASS: v2.5.0 normal/general dual-view tongue assessment with top/bottom capture, history and automatic training store');
 } finally { child.kill('SIGTERM'); }
