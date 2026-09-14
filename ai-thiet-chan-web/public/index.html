@@ -18,9 +18,9 @@
     <header class="topbar">
       <div>
         <div class="brand">A.I THIỆT CHẨN</div>
-        <div class="subtitle">Quan sát lưỡi · QC ảnh · A.I phân tích</div>
+        <div class="subtitle">QC ảnh · A.I phân tích · KB YHCT</div>
       </div>
-      <button id="settingsBtn" class="icon-btn" aria-label="Cài đặt A.I">⚙</button>
+      <a class="icon-btn" href="/open-source.html" aria-label="Nguồn mở và giấy phép">ⓘ</a>
     </header>
 
     <main class="content">
@@ -57,7 +57,7 @@
         </div>
 
         <button id="analyzeBtn" class="analyze-btn" disabled>Phân tích bằng A.I</button>
-        <p class="disclaimer">Đối chiếu thiệt tượng theo tài liệu YHCT đã nạp; kết quả chỉ hỗ trợ học tập/tham khảo và không thay thế tứ chẩn trực tiếp.</p>
+        <p class="disclaimer">A.I dùng khóa Gemini chung từ máy chủ. Đối chiếu thiệt tượng chỉ hỗ trợ học tập/tham khảo và không thay thế tứ chẩn trực tiếp.</p>
       </section>
 
       <section id="resultCard" class="card" hidden>
@@ -69,6 +69,7 @@
         <div id="theoryBox" class="theory-box" hidden></div>
         <div class="summary-box"><strong>Tóm tắt</strong><p id="summaryText"></p></div>
         <button id="reportBtn" class="btn primary full">Tạo báo cáo tổng kết ca</button>
+        <button id="exportMlBtn" class="btn full">Xuất mẫu máy học (.json)</button>
         <div id="reportBox" class="report-box" hidden></div>
       </section>
 
@@ -84,15 +85,6 @@
       </section>
     </main>
   </div>
-
-  <dialog id="settingsDialog">
-    <form method="dialog" class="settings-card">
-      <h3>Cấu hình A.I</h3>
-      <p>Khóa Gemini chỉ lưu trên thiết bị này và chỉ được gửi đến backend của A.I Thiệt Chẩn khi gọi A.I. Nếu server đã cấu hình khóa, có thể để trống.</p>
-      <label>Gemini API key<input id="geminiKeyInput" type="password" autocomplete="off" placeholder="AIza…" /></label>
-      <div class="dialog-actions"><button id="clearKeyBtn" value="none" class="btn ghost" type="button">Xóa khóa</button><button id="saveKeyBtn" value="default" class="btn primary" type="button">Lưu</button></div>
-    </form>
-  </dialog>
 
   <canvas id="workCanvas" hidden></canvas>
   <script src="/app.js" defer></script>
