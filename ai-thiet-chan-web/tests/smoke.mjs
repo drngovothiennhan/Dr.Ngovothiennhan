@@ -49,7 +49,7 @@ try{
   if(!settingsJs.includes('aiThietChanDefaultMode')||!settingsJs.includes("applyMode('general')")||!settingsJs.includes("applyMode('normal')")) throw new Error('settings behavior gate failed');
 
   const qualityJs=await fetch(`http://127.0.0.1:${port}/quality-dashboard.js`).then(r=>r.text());
-  for(const marker of ["'/api/cases?limit=100'",'navigator.mediaDevices?.getUserMedia','qualityConfidence','chưa có nhãn đồng thuận chuyên gia']) if(!qualityJs.includes(marker)) throw new Error(`quality dashboard behavior missing: ${marker}`);
+  for(const marker of ["'/api/cases?limit=100'",'navigator.mediaDevices?.getUserMedia','qualityConfidence','Ca đạt QC tối thiểu','chưa có nhãn đồng thuận chuyên gia']) if(!qualityJs.includes(marker)) throw new Error(`quality dashboard behavior missing: ${marker}`);
 
   const runtimeGuard=await readFile(path.join(root,'runtime-guard.mjs'),'utf8');
   if(!runtimeGuard.includes("generativelanguage.googleapis.com")||!runtimeGuard.includes('45_000')||!runtimeGuard.includes(".supabase.co")||!runtimeGuard.includes('15_000')) throw new Error('runtime upstream guard missing');
