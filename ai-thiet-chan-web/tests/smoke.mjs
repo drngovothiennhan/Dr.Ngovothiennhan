@@ -25,10 +25,12 @@ try{
   if(!home.ok||!html.includes('A.I THIỆT CHẨN')) throw new Error('home gate failed');
   for(const marker of ['normalModeBtn','generalModeBtn','topCameraBtn','bottomCameraBtn','topFileInput','bottomFileInput','switchCameraBtn','bottomResultSection','Lịch sử ca']) if(!html.includes(marker)) throw new Error(`dual-view UI missing: ${marker}`);
   for(const marker of ['settingsBtn','settingsDialog','settingsNormalMode','settingsGeneralMode','Cài đặt']) if(!html.includes(marker)) throw new Error(`settings UI missing: ${marker}`);
-  if(!html.includes('/settings.css')||!html.includes('/settings.js')) throw new Error('settings assets missing');
+  for(const marker of ['capture-frame-guide','qualityTitle','qualityTotal','qualityGeneral','qualityQc','qualityConfidence','qualityDevice','Giới hạn sử dụng y tế']) if(!html.includes(marker)) throw new Error(`quality UI missing: ${marker}`);
+  if(!html.includes('/settings.css')||!html.includes('/settings.js')||!html.includes('/quality-dashboard.css')||!html.includes('/quality-dashboard.js')) throw new Error('quality/settings assets missing');
   if(!html.includes('camera sau')||!html.includes('mạch máu/tĩnh mạch dưới lưỡi')) throw new Error('capture guidance missing');
   if(html.includes('exportMlBtn')||html.includes('Xuất mẫu máy học')) throw new Error('manual ML export must stay removed');
   if(!html.includes('lưu tự động vào kho dữ liệu học máy')) throw new Error('automatic collection disclosure missing');
+  if(!html.includes('không phải sensitivity/specificity')) throw new Error('clinical confidence boundary missing');
 
   const appJs=await fetch(`http://127.0.0.1:${port}/app.js`).then(r=>r.text());
   for(const marker of ["mode:'normal'","images:{top:emptyImage(),bottom:emptyImage()}","openCamera('top')","openCamera('bottom')",'bottomImage','bottomQc']) if(!appJs.includes(marker)) throw new Error(`dual-view client marker missing: ${marker}`);
@@ -40,6 +42,9 @@ try{
 
   const settingsJs=await fetch(`http://127.0.0.1:${port}/settings.js`).then(r=>r.text());
   if(!settingsJs.includes('aiThietChanDefaultMode')||!settingsJs.includes("applyMode('general')")||!settingsJs.includes("applyMode('normal')")) throw new Error('settings behavior gate failed');
+
+  const qualityJs=await fetch(`http://127.0.0.1:${port}/quality-dashboard.js`).then(r=>r.text());
+  for(const marker of ["'/api/cases?limit=100'",'navigator.mediaDevices?.getUserMedia','confidence A.I','chưa có nhãn đồng thuận chuyên gia']) if(!qualityJs.includes(marker)) throw new Error(`quality dashboard behavior missing: ${marker}`);
 
   const serverText=await readFile(path.join(root,'server.mjs'),'utf8');
   for(const marker of ['ai_thiet_chan_store_case_v2','ai_thiet_chan_list_cases_v2','tongue-dual-view-feature-vector-v1','bottomImage','sublingual-vessel-description','sha256-composite']) if(!serverText.includes(marker)) throw new Error(`server dual-view marker missing: ${marker}`);
@@ -53,8 +58,8 @@ try{
   const manifest=await fetch(`http://127.0.0.1:${port}/manifest.webmanifest`).then(r=>r.json());
   if(manifest.display!=='standalone'||!Array.isArray(manifest.icons)||manifest.icons.length===0) throw new Error('PWA manifest gate failed');
   const sw=await fetch(`http://127.0.0.1:${port}/sw.js`).then(r=>r.text());
-  if(!sw.includes("url.pathname.startsWith('/api/')")||!sw.includes('ai-thiet-chan-v2.5.1')||!sw.includes('/dual-view.css')||!sw.includes('/settings.css')||!sw.includes('/settings.js')) throw new Error('service worker gate failed');
+  if(!sw.includes("url.pathname.startsWith('/api/')")||!sw.includes('ai-thiet-chan-v2.5.2')||!sw.includes('/dual-view.css')||!sw.includes('/settings.css')||!sw.includes('/settings.js')||!sw.includes('/quality-dashboard.css')||!sw.includes('/quality-dashboard.js')) throw new Error('service worker gate failed');
 
   await scanPublic(path.join(root,'public'));
-  console.log('SMOKE PASS: v2.5.0 dual-view assessment with visible settings control, history and automatic training store');
+  console.log('SMOKE PASS: v2.5.0 dual-view assessment with capture standard, visible settings, transparent data quality, history and automatic training store');
 } finally { child.kill('SIGTERM'); }
