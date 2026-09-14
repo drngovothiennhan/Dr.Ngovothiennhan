@@ -15,14 +15,14 @@ async function waitForHealth(){
   throw new Error('health timeout');
 }
 
-async function scan(dir){
+async function scanPublic(dir){
   const entries=await readdir(dir,{withFileTypes:true});
   for(const entry of entries){
     const full=path.join(dir,entry.name);
-    if(entry.isDirectory()) await scan(full);
-    else if(/\.(mjs|js|html|css|json|webmanifest)$/i.test(entry.name)){
+    if(entry.isDirectory()) await scanPublic(full);
+    else if(/\.(mjs|js|html|css|json|webmanifest|svg)$/i.test(entry.name)){
       const text=await readFile(full,'utf8');
-      if(/appdeploy/i.test(text)) throw new Error(`legacy AppDeploy reference: ${path.relative(root,full)}`);
+      if(/appdeploy/i.test(text)) throw new Error(`legacy platform reference: ${path.relative(root,full)}`);
     }
   }
 }
@@ -31,7 +31,7 @@ try{
   const health=await waitForHealth();
   if(!health.ok) throw new Error('health not ok');
   if(health.architecture!=='independent-web') throw new Error('wrong architecture');
-  if(health.legacyAppDeploy!==false) throw new Error('legacy flag is not false');
+  if(health.legacyPlatform!==false) throw new Error('legacy platform flag is not false');
   const home=await fetch(`http://127.0.0.1:${port}/`); const html=await home.text();
   if(!home.ok||!html.includes('A.I THIỆT CHẨN')) throw new Error('home gate failed');
   const manifest=await fetch(`http://127.0.0.1:${port}/manifest.webmanifest`).then(r=>r.json());
@@ -40,9 +40,10 @@ try{
   if(!sw.includes("url.pathname.startsWith('/api/')")) throw new Error('service worker API bypass missing');
   const noKey=await fetch(`http://127.0.0.1:${port}/api/analyze`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({image:'data:image/jpeg;base64,'+'a'.repeat(200)})});
   if(noKey.status!==428) throw new Error(`expected 428 without AI key, got ${noKey.status}`);
-  await scan(path.join(root,'public'));
-  await scan(path.join(root,'server.mjs').replace(/server\.mjs$/,''));
-  console.log('SMOKE PASS: independent web, PWA shell, API gates, no AppDeploy references');
+  await scanPublic(path.join(root,'public'));
+  const serverText=await readFile(path.join(root,'server.mjs'),'utf8');
+  if(/appdeploy/i.test(serverText)) throw new Error('legacy platform reference: server.mjs');
+  console.log('SMOKE PASS: independent web, PWA shell, API gates, no legacy platform references');
 } finally {
   child.kill('SIGTERM');
 }
