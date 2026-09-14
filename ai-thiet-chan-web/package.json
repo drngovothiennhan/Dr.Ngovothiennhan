@@ -1,9 +1,9 @@
 {
   "name": "ai-thiet-chan-web",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "private": true,
   "type": "module",
   "engines": {"node": ">=20"},
-  "scripts": {"start": "node server.mjs", "test": "node tests/smoke.mjs", "check": "node --check server.mjs && node --check public/app.js && node --check public/sw.js && node tests/smoke.mjs"},
+  "scripts": {"start": "node server.mjs", "test": "node tests/smoke.mjs", "check": "node --check server.mjs && node --check knowledge.mjs && node --check public/app.js && node --check public/sw.js && node tests/smoke.mjs"},
   "dependencies": {"express": "^5.1.0"}
 }
