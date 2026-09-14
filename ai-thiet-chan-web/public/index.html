@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="/styles.css" />
   <link rel="stylesheet" href="/history.css" />
   <link rel="stylesheet" href="/dual-view.css" />
+  <link rel="stylesheet" href="/settings.css" />
   <title>A.I Thiệt Chẩn</title>
 </head>
 <body>
@@ -22,7 +23,10 @@
         <div class="brand">A.I THIỆT CHẨN</div>
         <div class="subtitle">QC ảnh · A.I phân tích · KB YHCT</div>
       </div>
-      <a class="icon-btn" href="/open-source.html" aria-label="Nguồn mở và giấy phép">ⓘ</a>
+      <div class="topbar-actions">
+        <button id="settingsBtn" class="icon-btn settings-btn" type="button" aria-label="Mở cài đặt"><span aria-hidden="true">⚙</span><span class="settings-label">Cài đặt</span></button>
+        <a class="icon-btn" href="/open-source.html" aria-label="Nguồn mở và giấy phép">ⓘ</a>
+      </div>
     </header>
 
     <main class="content">
@@ -143,8 +147,31 @@
     </main>
   </div>
 
+  <dialog id="settingsDialog" class="settings-dialog" aria-labelledby="settingsTitle">
+    <div class="settings-panel">
+      <div class="settings-head">
+        <div><h2 id="settingsTitle">Cài đặt</h2><p>Các lựa chọn hiện có của A.I Thiệt Chẩn.</p></div>
+        <button id="settingsCloseBtn" class="settings-close" type="button" aria-label="Đóng cài đặt">×</button>
+      </div>
+      <div class="settings-group">
+        <strong>Chế độ thiệt chẩn mặc định trên thiết bị này</strong>
+        <div class="settings-options">
+          <button id="settingsNormalMode" class="settings-option" type="button" aria-pressed="true">Bình thường</button>
+          <button id="settingsGeneralMode" class="settings-option" type="button" aria-pressed="false">Tổng quát</button>
+        </div>
+      </div>
+      <div class="settings-meta">
+        <div class="settings-meta-row"><span>A.I</span><strong id="settingsAiState">Đang kiểm tra…</strong></div>
+        <div class="settings-meta-row"><span>Kho dữ liệu học máy</span><strong id="settingsStoreState">Đang kiểm tra…</strong></div>
+        <div class="settings-meta-row"><span>Phiên bản</span><strong id="settingsVersion">—</strong></div>
+      </div>
+      <p class="settings-note">Camera sau vẫn được ứng dụng ưu tiên khi mở camera. Cài đặt này chỉ ghi nhớ chế độ thiệt chẩn mặc định trên chính thiết bị đang dùng.</p>
+    </div>
+  </dialog>
+
   <canvas id="workCanvas" hidden></canvas>
   <script src="/app.js" defer></script>
+  <script src="/settings.js" defer></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load',async()=>{
