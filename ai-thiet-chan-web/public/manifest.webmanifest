@@ -1,12 +1,17 @@
 {
   "name": "A.I Thiệt Chẩn",
   "short_name": "Thiệt Chẩn",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["fullscreen", "standalone"],
   "orientation": "portrait-primary",
   "background_color": "#eef6f4",
   "theme_color": "#0b6b64",
   "lang": "vi",
-  "description": "Ứng dụng web quan sát và phân tích hình ảnh lưỡi phục vụ học tập, tham khảo Y học cổ truyền."
+  "description": "Ứng dụng web quan sát và phân tích hình ảnh lưỡi phục vụ học tập, tham khảo Y học cổ truyền.",
+  "icons": [
+    {"src":"/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
 }
