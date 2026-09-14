@@ -24,6 +24,8 @@ try{
   const home=await fetch(`http://127.0.0.1:${port}/`);const html=await home.text();
   if(!home.ok||!html.includes('A.I THIỆT CHẨN')) throw new Error('home gate failed');
   for(const marker of ['normalModeBtn','generalModeBtn','topCameraBtn','bottomCameraBtn','topFileInput','bottomFileInput','switchCameraBtn','bottomResultSection','Lịch sử ca']) if(!html.includes(marker)) throw new Error(`dual-view UI missing: ${marker}`);
+  for(const marker of ['settingsBtn','settingsDialog','settingsNormalMode','settingsGeneralMode','Cài đặt']) if(!html.includes(marker)) throw new Error(`settings UI missing: ${marker}`);
+  if(!html.includes('/settings.css')||!html.includes('/settings.js')) throw new Error('settings assets missing');
   if(!html.includes('camera sau')||!html.includes('mạch máu/tĩnh mạch dưới lưỡi')) throw new Error('capture guidance missing');
   if(html.includes('exportMlBtn')||html.includes('Xuất mẫu máy học')) throw new Error('manual ML export must stay removed');
   if(!html.includes('lưu tự động vào kho dữ liệu học máy')) throw new Error('automatic collection disclosure missing');
@@ -35,6 +37,9 @@ try{
   if(!appJs.includes('loadHistory')||!appJs.includes("'/api/cases?limit=30'")) throw new Error('history client missing');
   if(appJs.includes('exportMlSample')||appJs.includes('ai-thiet-chan-training-sample-v1')) throw new Error('manual export code must be absent');
   if(appJs.includes('aiThietChanGeminiKey')||appJs.includes('x-gemini-key')) throw new Error('client Gemini key path must be absent');
+
+  const settingsJs=await fetch(`http://127.0.0.1:${port}/settings.js`).then(r=>r.text());
+  if(!settingsJs.includes('aiThietChanDefaultMode')||!settingsJs.includes("applyMode('general')")||!settingsJs.includes("applyMode('normal')")) throw new Error('settings behavior gate failed');
 
   const serverText=await readFile(path.join(root,'server.mjs'),'utf8');
   for(const marker of ['ai_thiet_chan_store_case_v2','ai_thiet_chan_list_cases_v2','tongue-dual-view-feature-vector-v1','bottomImage','sublingual-vessel-description','sha256-composite']) if(!serverText.includes(marker)) throw new Error(`server dual-view marker missing: ${marker}`);
@@ -48,8 +53,8 @@ try{
   const manifest=await fetch(`http://127.0.0.1:${port}/manifest.webmanifest`).then(r=>r.json());
   if(manifest.display!=='standalone'||!Array.isArray(manifest.icons)||manifest.icons.length===0) throw new Error('PWA manifest gate failed');
   const sw=await fetch(`http://127.0.0.1:${port}/sw.js`).then(r=>r.text());
-  if(!sw.includes("url.pathname.startsWith('/api/')")||!sw.includes('ai-thiet-chan-v2.5.0')||!sw.includes('/dual-view.css')) throw new Error('service worker gate failed');
+  if(!sw.includes("url.pathname.startsWith('/api/')")||!sw.includes('ai-thiet-chan-v2.5.1')||!sw.includes('/dual-view.css')||!sw.includes('/settings.css')||!sw.includes('/settings.js')) throw new Error('service worker gate failed');
 
   await scanPublic(path.join(root,'public'));
-  console.log('SMOKE PASS: v2.5.0 normal/general dual-view tongue assessment with top/bottom capture, history and automatic training store');
+  console.log('SMOKE PASS: v2.5.0 dual-view assessment with visible settings control, history and automatic training store');
 } finally { child.kill('SIGTERM'); }
