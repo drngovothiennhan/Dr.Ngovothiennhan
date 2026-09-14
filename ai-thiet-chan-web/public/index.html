@@ -11,6 +11,7 @@
   <link rel="icon" href="/icon.svg" type="image/svg+xml" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/history.css" />
   <title>A.I Thiệt Chẩn</title>
 </head>
 <body>
@@ -57,7 +58,7 @@
         </div>
 
         <button id="analyzeBtn" class="analyze-btn" disabled>Phân tích bằng A.I</button>
-        <p class="disclaimer">A.I dùng khóa Gemini chung từ máy chủ. Đối chiếu thiệt tượng chỉ hỗ trợ học tập/tham khảo và không thay thế tứ chẩn trực tiếp.</p>
+        <p class="disclaimer">Mỗi ca sau phân tích được lưu tự động vào kho dữ liệu học máy và khử trùng lặp theo ảnh. Không thu tên hoặc thông tin định danh. Kết quả chỉ hỗ trợ học tập/tham khảo, không thay thế tứ chẩn trực tiếp.</p>
       </section>
 
       <section id="resultCard" class="card" hidden>
@@ -69,8 +70,15 @@
         <div id="theoryBox" class="theory-box" hidden></div>
         <div class="summary-box"><strong>Tóm tắt</strong><p id="summaryText"></p></div>
         <button id="reportBtn" class="btn primary full">Tạo báo cáo tổng kết ca</button>
-        <button id="exportMlBtn" class="btn full">Xuất mẫu máy học (.json)</button>
         <div id="reportBox" class="report-box" hidden></div>
+      </section>
+
+      <section class="card history-card">
+        <div class="section-head">
+          <div><h2>Lịch sử ca</h2><p id="historyCount">Đang tải…</p></div>
+          <button id="refreshHistoryBtn" class="btn ghost compact" type="button">Làm mới</button>
+        </div>
+        <div id="historyList" class="history-list"><div class="history-empty">Đang tải lịch sử ca…</div></div>
       </section>
 
       <section class="card chat-card">
