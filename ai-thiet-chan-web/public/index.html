@@ -99,7 +99,7 @@
         </div>
 
         <button id="analyzeBtn" class="analyze-btn" disabled>Phân tích bằng A.I</button>
-        <p class="disclaimer">Mỗi ca sau phân tích được lưu tự động vào kho dữ liệu học máy và khử trùng lặp theo tổ hợp ảnh. Không thu tên hoặc thông tin định danh. Kết quả chỉ hỗ trợ học tập/tham khảo, không thay thế tứ chẩn trực tiếp.</p>
+        <p class="disclaimer">Mỗi ca sau phân tích được lưu tự động vào kho dữ liệu học máy và khử trùng lặp theo tổ hợp ảnh. Hệ thống chỉ lưu ngữ cảnh thiết bị ở mức phân loại thô phục vụ kiểm định đa thiết bị, không lưu raw user-agent, tên hoặc thông tin định danh. Kết quả chỉ hỗ trợ học tập/tham khảo, không thay thế tứ chẩn trực tiếp.</p>
       </section>
 
       <section id="resultCard" class="card" hidden>
@@ -195,6 +195,7 @@
 
   <canvas id="workCanvas" hidden></canvas>
   <script src="/app.js" defer></script>
+  <script src="/capture-metadata.js" defer></script>
   <script src="/settings.js" defer></script>
   <script src="/quality-dashboard.js" defer></script>
   <script>
