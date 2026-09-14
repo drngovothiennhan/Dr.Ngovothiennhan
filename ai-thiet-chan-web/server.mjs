@@ -331,4 +331,4 @@ app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, '0.0.0.0', () => console.log(`A.I Thiệt Chẩn web v${VERSION} listening on ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`A.I Thiệt Chẩn web v${VERSION} listening on ${PORT} · sharedGemini=${Boolean(apiKey())}`));
