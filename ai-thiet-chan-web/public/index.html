@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b6b64" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="A.I Thiệt Chẩn - phân tích hình ảnh lưỡi phục vụ học tập và tham khảo." />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="stylesheet" href="/styles.css" />
+  <title>A.I Thiệt Chẩn</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="brand">A.I THIỆT CHẨN</div>
+        <div class="subtitle">Quan sát lưỡi · QC ảnh · A.I phân tích</div>
+      </div>
+      <button id="settingsBtn" class="icon-btn" aria-label="Cài đặt A.I">⚙</button>
+    </header>
+
+    <main class="content">
+      <section class="card capture-card">
+        <div class="section-head">
+          <div>
+            <h1>Ghi nhận hình lưỡi</h1>
+            <p>Ảnh chính diện, đủ sáng, không filter màu.</p>
+          </div>
+          <span id="healthBadge" class="status-pill">Đang kiểm tra…</span>
+        </div>
+
+        <div id="cameraStage" class="camera-stage">
+          <video id="video" playsinline autoplay muted hidden></video>
+          <img id="preview" alt="Ảnh lưỡi đã chọn" hidden />
+          <div id="emptyState" class="empty-state">
+            <div class="tongue-mark">舌</div>
+            <strong>Chưa có ảnh</strong>
+            <span>Chụp trực tiếp hoặc chọn ảnh từ thiết bị</span>
+          </div>
+        </div>
+
+        <div class="action-grid">
+          <button id="cameraBtn" class="btn primary">Mở camera</button>
+          <button id="captureBtn" class="btn" hidden>Chụp ảnh</button>
+          <label class="btn file-btn">Chọn ảnh<input id="fileInput" type="file" accept="image/*" capture="environment" hidden /></label>
+          <button id="resetBtn" class="btn ghost">Làm lại</button>
+        </div>
+
+        <div id="qcPanel" class="qc-panel" hidden>
+          <div class="qc-title">Kiểm tra chất lượng ảnh</div>
+          <div id="qcChips" class="chips"></div>
+        </div>
+
+        <button id="analyzeBtn" class="analyze-btn" disabled>Phân tích bằng A.I</button>
+        <p class="disclaimer">Kết quả chỉ hỗ trợ quan sát/học tập, không thay thế chẩn đoán trực tiếp.</p>
+      </section>
+
+      <section id="resultCard" class="card" hidden>
+        <div class="section-head">
+          <div><h2>Kết quả quan sát</h2><p id="modelLabel"></p></div>
+          <span id="confidenceBadge" class="status-pill good"></span>
+        </div>
+        <div id="resultGrid" class="result-grid"></div>
+        <div class="summary-box"><strong>Tóm tắt</strong><p id="summaryText"></p></div>
+        <button id="reportBtn" class="btn primary full">Tạo báo cáo tổng kết ca</button>
+        <div id="reportBox" class="report-box" hidden></div>
+      </section>
+
+      <section class="card chat-card">
+        <div class="section-head">
+          <div><h2>Chatbot tư vấn nhanh</h2><p>Trao đổi theo đúng kết quả quan sát hiện tại.</p></div>
+        </div>
+        <div id="chatLog" class="chat-log"><div class="bubble bot">Tôi sẽ trả lời dựa trên ảnh/kết quả đang có và không tự thêm dữ liệu.</div></div>
+        <form id="chatForm" class="chat-form">
+          <input id="chatInput" autocomplete="off" placeholder="Nhập câu hỏi…" />
+          <button class="btn primary" type="submit">Gửi</button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="settingsDialog">
+    <form method="dialog" class="settings-card">
+      <h3>Cấu hình A.I</h3>
+      <p>Khóa Gemini chỉ lưu trên thiết bị này và chỉ được gửi đến backend của A.I Thiệt Chẩn khi gọi A.I. Nếu server đã cấu hình khóa, có thể để trống.</p>
+      <label>Gemini API key<input id="geminiKeyInput" type="password" autocomplete="off" placeholder="AIza…" /></label>
+      <div class="dialog-actions"><button id="clearKeyBtn" value="none" class="btn ghost" type="button">Xóa khóa</button><button id="saveKeyBtn" value="default" class="btn primary" type="button">Lưu</button></div>
+    </form>
+  </dialog>
+
+  <canvas id="workCanvas" hidden></canvas>
+  <script src="/app.js" defer></script>
+</body>
+</html>
