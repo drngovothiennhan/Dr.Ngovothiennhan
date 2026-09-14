@@ -1,0 +1,12 @@
+<resources>
+    <style name="Theme.AIThietChan" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/brand_teal_dark</item>
+        <item name="android:navigationBarColor">@color/brand_teal_dark</item>
+        <item name="android:windowBackground">@color/white</item>
+        <item name="android:windowDisablePreview">false</item>
+    </style>
+</resources>
