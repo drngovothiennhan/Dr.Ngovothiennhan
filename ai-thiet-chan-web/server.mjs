@@ -60,7 +60,7 @@ app.get('/api/health', (req, res) => {
     ok: true,
     app: 'A.I Thiệt Chẩn',
     architecture: 'independent-web',
-    legacyAppDeploy: false,
+    legacyPlatform: false,
     version: VERSION,
     build: BUILD.slice(0, 12),
     providerConfigured: Boolean(process.env.GEMINI_API_KEY),
