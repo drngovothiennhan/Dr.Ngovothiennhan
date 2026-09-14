@@ -8,6 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="description" content="A.I Thiệt Chẩn - phân tích hình ảnh lưỡi phục vụ học tập và tham khảo." />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="stylesheet" href="/styles.css" />
   <title>A.I Thiệt Chẩn</title>
@@ -93,5 +94,17 @@
 
   <canvas id="workCanvas" hidden></canvas>
   <script src="/app.js" defer></script>
+  <script>
+    if('serviceWorker' in navigator){
+      window.addEventListener('load',async()=>{
+        try{
+          const reg=await navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'});
+          await reg.update();
+          let refreshing=false;
+          navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!refreshing){refreshing=true;location.reload();}});
+        }catch{}
+      });
+    }
+  </script>
 </body>
 </html>
