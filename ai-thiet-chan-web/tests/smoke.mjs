@@ -26,7 +26,8 @@ try{
   for(const marker of ['normalModeBtn','generalModeBtn','topCameraBtn','bottomCameraBtn','topFileInput','bottomFileInput','switchCameraBtn','bottomResultSection','Lịch sử ca']) if(!html.includes(marker)) throw new Error(`dual-view UI missing: ${marker}`);
   for(const marker of ['settingsBtn','settingsDialog','settingsNormalMode','settingsGeneralMode','Cài đặt']) if(!html.includes(marker)) throw new Error(`settings UI missing: ${marker}`);
   for(const marker of ['capture-frame-guide','qualityTitle','qualityTotal','qualityGeneral','qualityQc','qualityConfidence','qualityDevice','Giới hạn sử dụng y tế']) if(!html.includes(marker)) throw new Error(`quality UI missing: ${marker}`);
-  if(!html.includes('/settings.css')||!html.includes('/settings.js')||!html.includes('/quality-dashboard.css')||!html.includes('/quality-dashboard.js')||!html.includes('/capture-metadata.js')) throw new Error('quality/settings/capture assets missing');
+  for(const marker of ['toggleHistoryBtn','historyPanel','startInquiryBtn','inquiryProgress','Vấn chẩn · Thập vấn','không phải chẩn đoán xác định']) if(!html.includes(marker)) throw new Error(`consultation/history UI missing: ${marker}`);
+  if(!html.includes('/settings.css')||!html.includes('/settings.js')||!html.includes('/quality-dashboard.css')||!html.includes('/quality-dashboard.js')||!html.includes('/capture-metadata.js')||!html.includes('/consultation.js')) throw new Error('quality/settings/capture/consultation assets missing');
   if(!html.includes('camera sau')||!html.includes('mạch máu/tĩnh mạch dưới lưỡi')) throw new Error('capture guidance missing');
   if(html.includes('exportMlBtn')||html.includes('Xuất mẫu máy học')) throw new Error('manual ML export must stay removed');
   if(!html.includes('lưu tự động vào kho dữ liệu học máy')) throw new Error('automatic collection disclosure missing');
@@ -42,8 +43,12 @@ try{
   if(appJs.includes('aiThietChanGeminiKey')||appJs.includes('x-gemini-key')) throw new Error('client Gemini key path must be absent');
 
   const captureMeta=await fetch(`http://127.0.0.1:${port}/capture-metadata.js`).then(r=>r.text());
-  for(const marker of ['capture-context-v1','deviceClass','viewportClass','raw user']) if(captureMeta.includes('raw user')) throw new Error('raw user agent must not be stored');
+  if(captureMeta.includes('raw user')) throw new Error('raw user agent must not be stored');
   if(!captureMeta.includes('capture-context-v1')||!captureMeta.includes('deviceClass')||!captureMeta.includes('viewportClass')||!captureMeta.includes("url.includes('/api/analyze')")) throw new Error('capture metadata behavior gate failed');
+
+  const consultationJs=await fetch(`http://127.0.0.1:${port}/consultation.js`).then(r=>r.text());
+  for(const marker of ['questions=[','Hàn – nhiệt','Mồ hôi','Đại – tiểu tiện','Bệnh cũ – thuốc','Khởi phát – diễn tiến','[THAP_VAN_CONTEXT]','Nhận định biện chứng tham khảo','toggleHistoryBtn']) if(!consultationJs.includes(marker)) throw new Error(`Thap van workflow missing: ${marker}`);
+  if(!consultationJs.includes('questions.map')||!consultationJs.includes("url.includes('/api/chat')")) throw new Error('Thap van synthesis path missing');
 
   const settingsJs=await fetch(`http://127.0.0.1:${port}/settings.js`).then(r=>r.text());
   if(!settingsJs.includes('aiThietChanDefaultMode')||!settingsJs.includes("applyMode('general')")||!settingsJs.includes("applyMode('normal')")) throw new Error('settings behavior gate failed');
@@ -66,8 +71,8 @@ try{
   const manifest=await fetch(`http://127.0.0.1:${port}/manifest.webmanifest`).then(r=>r.json());
   if(manifest.display!=='standalone'||!Array.isArray(manifest.icons)||manifest.icons.length===0) throw new Error('PWA manifest gate failed');
   const sw=await fetch(`http://127.0.0.1:${port}/sw.js`).then(r=>r.text());
-  if(!sw.includes("url.pathname.startsWith('/api/')")||!sw.includes('ai-thiet-chan-v2.5.3')||!sw.includes('/dual-view.css')||!sw.includes('/settings.css')||!sw.includes('/settings.js')||!sw.includes('/quality-dashboard.css')||!sw.includes('/quality-dashboard.js')||!sw.includes('/capture-metadata.js')) throw new Error('service worker gate failed');
+  if(!sw.includes("url.pathname.startsWith('/api/')")||!sw.includes('ai-thiet-chan-v2.5.4')||!sw.includes('/dual-view.css')||!sw.includes('/settings.css')||!sw.includes('/settings.js')||!sw.includes('/quality-dashboard.css')||!sw.includes('/quality-dashboard.js')||!sw.includes('/capture-metadata.js')||!sw.includes('/consultation.js')) throw new Error('service worker gate failed');
 
   await scanPublic(path.join(root,'public'));
-  console.log('SMOKE PASS: v2.5.0 hardened dual-view assessment with capture standard, multi-device metadata, bounded upstream waits and transparent data quality');
+  console.log('SMOKE PASS: v2.5.0 dual-view assessment with collapsed history and deterministic Thap van consultation before reference synthesis');
 } finally { child.kill('SIGTERM'); }
