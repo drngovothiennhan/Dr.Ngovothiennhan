@@ -7,8 +7,48 @@ const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 3000);
 const MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
-const VERSION = '2.2.0';
+const VERSION = '2.3.0';
 const BUILD = process.env.RENDER_GIT_COMMIT || 'local';
+const AI_RATE_LIMIT_WINDOW_MS = Math.max(60_000, Number(process.env.AI_RATE_LIMIT_WINDOW_MS || 600_000));
+const AI_RATE_LIMIT_MAX = Math.max(1, Number(process.env.AI_RATE_LIMIT_MAX || 30));
+
+const OPEN_SOURCE_REFERENCES = [
+  {
+    name: 'TongueDiagnosis.AI',
+    repo: 'https://github.com/TonguePicture-SKaRD/TongueDiagnosis',
+    license: 'AGPL-3.0',
+    use: 'architecture-reference-only',
+    note: 'Tham chiếu pipeline định vị lưỡi → phân đoạn → phân loại đặc trưng → LLM; không sao chép mã nguồn hoặc trọng số AGPL.'
+  },
+  {
+    name: 'OpenCV',
+    repo: 'https://github.com/opencv/opencv',
+    license: 'Apache-2.0',
+    use: 'image-quality-reference',
+    note: 'Tham chiếu kỹ thuật QC ảnh: độ nét, phơi sáng, tương phản và tiền xử lý.'
+  },
+  {
+    name: 'Segment Anything',
+    repo: 'https://github.com/facebookresearch/segment-anything',
+    license: 'Apache-2.0',
+    use: 'segmentation-reference',
+    note: 'Tham chiếu kiến trúc tạo mask để chuẩn bị bước tách vùng lưỡi trước phân loại.'
+  },
+  {
+    name: 'ONNX Runtime',
+    repo: 'https://github.com/microsoft/onnxruntime',
+    license: 'MIT',
+    use: 'inference-runtime-reference',
+    note: 'Tham chiếu runtime suy luận đa nền tảng cho mô hình ONNX.'
+  },
+  {
+    name: 'TensorFlow.js',
+    repo: 'https://github.com/tensorflow/tfjs',
+    license: 'Apache-2.0',
+    use: 'browser-ml-reference',
+    note: 'Tham chiếu huấn luyện/chuyển đổi/chạy mô hình trong trình duyệt và định dạng mẫu ML.'
+  }
+];
 
 app.disable('x-powered-by');
 app.use(express.json({ limit: '15mb' }));
@@ -21,9 +61,35 @@ app.use((req, res, next) => {
   next();
 });
 
-function apiKey(req) {
-  const headerKey = req.get('x-gemini-key');
-  return process.env.GEMINI_API_KEY || (headerKey && headerKey.trim()) || '';
+const rateBuckets = new Map();
+function requestIdentity(req) {
+  const forwarded = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  return (forwarded || req.socket?.remoteAddress || 'unknown').slice(0, 96);
+}
+function aiRateLimit(req, res, next) {
+  const now = Date.now();
+  const key = requestIdentity(req);
+  let bucket = rateBuckets.get(key);
+  if (!bucket || now - bucket.startedAt >= AI_RATE_LIMIT_WINDOW_MS) {
+    bucket = { startedAt: now, count: 0 };
+    rateBuckets.set(key, bucket);
+  }
+  bucket.count += 1;
+  if (bucket.count > AI_RATE_LIMIT_MAX) {
+    const retryAfter = Math.max(1, Math.ceil((bucket.startedAt + AI_RATE_LIMIT_WINDOW_MS - now) / 1000));
+    res.setHeader('Retry-After', String(retryAfter));
+    return res.status(429).json({ error: 'AI_RATE_LIMITED', retryAfter });
+  }
+  next();
+}
+const cleanupTimer = setInterval(() => {
+  const cutoff = Date.now() - AI_RATE_LIMIT_WINDOW_MS * 2;
+  for (const [key, bucket] of rateBuckets) if (bucket.startedAt < cutoff) rateBuckets.delete(key);
+}, AI_RATE_LIMIT_WINDOW_MS);
+cleanupTimer.unref?.();
+
+function apiKey() {
+  return String(process.env.GEMINI_API_KEY || '').trim();
 }
 
 function textFromGemini(data) {
@@ -61,25 +127,67 @@ function clampConfidence(value) {
   return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0;
 }
 
+function mlFeatureVector(out, qc) {
+  return {
+    schemaVersion: 'tongue-feature-vector-v1',
+    knowledgeVersion: KNOWLEDGE_VERSION,
+    visual: {
+      tongueColor: out.tongueColor || '',
+      shape: out.shape || '',
+      coatingColor: out.coatingColor || '',
+      coatingThickness: out.coatingThickness || '',
+      coatingTexture: out.coatingTexture || '',
+      moisture: out.moisture || '',
+      fissures: out.fissures || '',
+      toothmarks: out.toothmarks || '',
+      pricklesSpots: out.pricklesSpots || '',
+      stasisMarks: out.stasisMarks || ''
+    },
+    validity: out.visualValidity || {},
+    qc: qc || {},
+    confidence: out.confidence
+  };
+}
+
 function normalizeAnalysis(analysis, qc) {
   const out = analysis && typeof analysis === 'object' ? analysis : {};
   out.confidence = clampConfidence(out.confidence);
   out.knowledgeVersion = KNOWLEDGE_VERSION;
   out.knowledgeSources = KNOWLEDGE_SOURCES;
+  if (!out.visualValidity || typeof out.visualValidity !== 'object') {
+    out.visualValidity = { tongueVisible: null, framing: 'unknown', occlusion: 'unknown', colorReliability: 'unknown' };
+  }
   if (!out.theoryAssessment || typeof out.theoryAssessment !== 'object') {
     out.theoryAssessment = { generalSignals: [], stomachPatternSignals: [], cannotConclude: [] };
   }
   for (const key of ['generalSignals', 'stomachPatternSignals', 'cannotConclude']) {
     if (!Array.isArray(out.theoryAssessment[key])) out.theoryAssessment[key] = [];
   }
+
+  const qcFactor = qc?.grade === 'good' ? 1 : qc?.grade === 'fair' ? 0.72 : 0.35;
+  out.confidence = Number((out.confidence * qcFactor).toFixed(3));
+
+  if (out.visualValidity.tongueVisible === false) {
+    out.theoryAssessment.stomachPatternSignals = [];
+    out.theoryAssessment.generalSignals = [];
+    out.confidence = Math.min(out.confidence, 0.2);
+    const note = 'Không xác nhận được vùng lưỡi rõ ràng trong ảnh.';
+    if (!out.theoryAssessment.cannotConclude.includes(note)) out.theoryAssessment.cannotConclude.push(note);
+  }
   if (qc?.grade === 'poor') {
     out.theoryAssessment.stomachPatternSignals = [];
-    out.confidence = Math.min(out.confidence, 0.35);
+    out.confidence = Math.min(out.confidence, 0.25);
     const note = 'Ảnh QC kém: không xếp thể Vị quản từ ảnh này.';
     if (!out.theoryAssessment.cannotConclude.includes(note)) out.theoryAssessment.cannotConclude.push(note);
   } else if (qc?.grade === 'fair') {
-    out.confidence = Math.min(out.confidence, 0.7);
+    out.confidence = Math.min(out.confidence, 0.62);
   }
+
+  out.ml = {
+    pipeline: ['capture-qc', 'visual-validity', 'tongue-feature-extraction', 'knowledge-mapping'],
+    featureVector: mlFeatureVector(out, qc),
+    storage: 'none-server-side'
+  };
   return out;
 }
 
@@ -91,30 +199,39 @@ app.get('/api/health', (req, res) => {
     legacyPlatform: false,
     version: VERSION,
     build: BUILD.slice(0, 12),
-    providerConfigured: Boolean(process.env.GEMINI_API_KEY),
+    providerConfigured: Boolean(apiKey()),
+    sharedProvider: true,
+    clientSuppliedKeyAccepted: false,
     model: MODEL,
     knowledgeVersion: KNOWLEDGE_VERSION,
     knowledgeSources: KNOWLEDGE_SOURCES.length,
+    openSourceReferences: OPEN_SOURCE_REFERENCES.length,
+    aiRateLimit: { windowMs: AI_RATE_LIMIT_WINDOW_MS, max: AI_RATE_LIMIT_MAX },
     time: new Date().toISOString()
   });
 });
 
-app.post('/api/analyze', async (req, res) => {
+app.get('/api/sources', (req, res) => {
+  res.json({ ok: true, version: VERSION, references: OPEN_SOURCE_REFERENCES });
+});
+
+app.post('/api/analyze', aiRateLimit, async (req, res) => {
   try {
-    const key = apiKey(req);
+    const key = apiKey();
     if (!key) return res.status(428).json({ error: 'AI_PROVIDER_NOT_CONFIGURED' });
     const { image, mimeType = 'image/jpeg', qc = {} } = req.body || {};
     if (typeof image !== 'string' || image.length < 100) return res.status(400).json({ error: 'IMAGE_REQUIRED' });
     const base64 = image.includes(',') ? image.split(',').pop() : image;
     if (base64.length > 14_000_000) return res.status(413).json({ error: 'IMAGE_TOO_LARGE' });
 
-    const prompt = `Bạn là bộ phân tích thiệt tượng YHCT của A.I Thiệt Chẩn. Hãy tách rõ (A) mô tả thị giác thực sự nhìn thấy và (B) đối chiếu lý thuyết. Chỉ dùng hệ tri thức bên dưới; tuyệt đối không tự bịa triệu chứng, mạch, bệnh danh, nguyên nhân hay điều trị. Đây là công cụ học tập/tham khảo, không phải chẩn đoán xác định.
+    const prompt = `Bạn là bộ phân tích thiệt tượng YHCT của A.I Thiệt Chẩn. Hãy làm theo pipeline nhiều tầng: (1) xác nhận ảnh có vùng lưỡi dùng được; (2) mô tả đặc điểm thị giác; (3) đối chiếu hệ tri thức. Chỉ dùng hệ tri thức bên dưới; tuyệt đối không tự bịa triệu chứng, mạch, bệnh danh, nguyên nhân hay điều trị. Đây là công cụ học tập/tham khảo, không phải chẩn đoán xác định.
 
 QC ẢNH: ${JSON.stringify(qc)}
 HỆ TRI THỨC ${KNOWLEDGE_VERSION}:
 ${TONGUE_KNOWLEDGE}
 
 YÊU CẦU NHẬN DIỆN:
+- Trước tiên đánh giá visualValidity: có thực sự thấy lưỡi hay không, mức che khuất, bố cục và độ tin cậy màu.
 - Quan sát màu chất lưỡi, hình thể, màu rêu, dày/mỏng, nhuận/khô, nhầy/vữa/tróc, nứt, hằn răng, điểm/gai, ban/điểm ứ nếu thấy.
 - Chỉ đánh giá tĩnh mạch dưới lưỡi khi ảnh thật sự cho thấy mặt dưới lưỡi; nếu không, ghi "không thấy/không đánh giá".
 - Không suy trạng thái vận động của lưỡi từ ảnh tĩnh.
@@ -124,6 +241,7 @@ YÊU CẦU NHẬN DIỆN:
 Trả về DUY NHẤT JSON hợp lệ theo schema:
 {
   "quality":"good|fair|poor",
+  "visualValidity":{"tongueVisible":true,"framing":"good|fair|poor","occlusion":"none|partial|major","colorReliability":"good|fair|poor"},
   "tongueColor":"...",
   "shape":"...",
   "coatingColor":"...",
@@ -160,9 +278,9 @@ confidence từ 0 đến 1.`;
   }
 });
 
-app.post('/api/chat', async (req, res) => {
+app.post('/api/chat', aiRateLimit, async (req, res) => {
   try {
-    const key = apiKey(req);
+    const key = apiKey();
     if (!key) return res.status(428).json({ error: 'AI_PROVIDER_NOT_CONFIGURED' });
     const { analysis, message } = req.body || {};
     if (!message || typeof message !== 'string') return res.status(400).json({ error: 'MESSAGE_REQUIRED' });
@@ -183,9 +301,9 @@ Trả lời ngắn gọn bằng tiếng Việt theo hướng học tập/tham kh
   }
 });
 
-app.post('/api/report', async (req, res) => {
+app.post('/api/report', aiRateLimit, async (req, res) => {
   try {
-    const key = apiKey(req);
+    const key = apiKey();
     if (!key) return res.status(428).json({ error: 'AI_PROVIDER_NOT_CONFIGURED' });
     const { analysis, qc } = req.body || {};
     if (!analysis) return res.status(400).json({ error: 'ANALYSIS_REQUIRED' });
