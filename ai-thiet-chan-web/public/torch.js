@@ -7,6 +7,7 @@
   let currentFacing='';
   let torchSupported=false;
   let torchEnabled=false;
+  let initialized=false;
 
   const $=id=>document.getElementById(id);
   const requestedFacing=constraints=>{
@@ -15,7 +16,18 @@
     if(facing&&typeof facing==='object') return facing.exact||facing.ideal||'';
     return '';
   };
-  const button=()=>$('toggleTorchBtn');
+  function ensureButton(){
+    let btn=$('toggleTorchBtn');
+    if(btn) return btn;
+    const actions=document.querySelector('.camera-actions');
+    if(!actions) return null;
+    btn=document.createElement('button');
+    btn.id='toggleTorchBtn';btn.className='btn ghost';btn.type='button';btn.hidden=true;
+    btn.textContent='Bật đèn';btn.setAttribute('aria-pressed','false');btn.setAttribute('aria-label','Bật hoặc tắt đèn flash camera sau');
+    actions.insertBefore(btn,actions.lastElementChild||null);
+    return btn;
+  }
+  const button=()=>ensureButton();
   const updateButton=()=>{
     const btn=button();
     if(!btn) return;
@@ -24,9 +36,7 @@
     btn.textContent=torchEnabled?'Tắt đèn':'Bật đèn';
     btn.setAttribute('aria-pressed',String(torchEnabled));
   };
-  const resetState=()=>{
-    currentTrack=null;currentFacing='';torchSupported=false;torchEnabled=false;updateButton();
-  };
+  const resetState=()=>{currentTrack=null;currentFacing='';torchSupported=false;torchEnabled=false;updateButton();};
   const detectTrack=(stream,constraints)=>{
     const track=stream?.getVideoTracks?.()[0]||null;
     currentTrack=track;
@@ -47,10 +57,7 @@
       torchEnabled=false;updateButton();return false;
     }
   }
-  async function turnOff(){
-    if(torchEnabled) await setTorch(false);
-    torchEnabled=false;updateButton();
-  }
+  async function turnOff(){if(torchEnabled) await setTorch(false);torchEnabled=false;updateButton();}
 
   mediaDevices.getUserMedia=async constraints=>{
     await turnOff();
@@ -59,10 +66,12 @@
     return stream;
   };
 
-  window.addEventListener('DOMContentLoaded',()=>{
+  function init(){
+    if(initialized) return;initialized=true;
     button()?.addEventListener('click',async()=>{await setTorch(!torchEnabled);});
     for(const id of ['closeCameraBtn','captureBtn','switchCameraBtn']) $(id)?.addEventListener('click',()=>{void turnOff();},true);
     document.addEventListener('visibilitychange',()=>{if(document.hidden)void turnOff();});
     updateButton();
-  });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();
