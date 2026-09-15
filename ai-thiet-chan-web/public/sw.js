@@ -1,4 +1,4 @@
-const CACHE='ai-thiet-chan-v2.5.5';
+const CACHE='ai-thiet-chan-v2.5.4';
 const SHELL=['/','/styles.css','/history.css','/dual-view.css','/settings.css','/quality-dashboard.css','/app.js','/capture-metadata.js','/consultation.js','/torch.js','/settings.js','/quality-dashboard.js','/manifest.webmanifest','/icon.svg','/open-source.html'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
