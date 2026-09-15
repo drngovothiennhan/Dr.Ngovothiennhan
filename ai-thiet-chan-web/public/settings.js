@@ -52,3 +52,10 @@
   const initial=readMode();paint(initial);
   queueMicrotask(()=>applyMode(initial));
 })();
+
+(()=>{
+  if(document.querySelector('script[data-rear-torch]')) return;
+  const script=document.createElement('script');
+  script.src='/torch.js';script.async=false;script.dataset.rearTorch='true';
+  document.head.appendChild(script);
+})();
