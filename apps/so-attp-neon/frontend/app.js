@@ -343,7 +343,22 @@ setInterval(health, 60000);
         });
       }
     }
-    return {jobId:null, fields:[], lineItems, rawText, imageKey:null, passes:1, model:'Tesseract local fallback', localFallback:true};
+    const image = await fileB64(file);
+    const persisted = await api('/api/ocr-local', {
+      method:'POST',
+      body:JSON.stringify({kind,image,rawText,lineItems})
+    });
+    return {
+      jobId:persisted.jobId,
+      fields:[],
+      lineItems:persisted.lineItems || lineItems,
+      rawText,
+      imageKey:persisted.imageKey,
+      imageSha256:persisted.imageSha256,
+      passes:1,
+      model:'Tesseract local fallback',
+      localFallback:true
+    };
   } finally {
     await worker.terminate();
   }
