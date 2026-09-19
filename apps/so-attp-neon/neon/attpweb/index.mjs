@@ -1,15 +1,17 @@
-const BASE='https://raw.githubusercontent.com/drngovothiennhan/Dr.Ngovothiennhan/so-attp-neon-rebuild/apps/so-attp-neon/frontend';
+import { readFile } from 'node:fs/promises';
 const API='https://br-old-shape-avehrcx0-attpapi.compute.c-11.us-east-1.aws.neon.tech';
 const AUTH='https://ep-hidden-silence-avd49n4o.neonauth.c-11.us-east-1.aws.neon.tech/neondb/auth';
 const TYPES={'/':'text/html; charset=utf-8','/index.html':'text/html; charset=utf-8','/app.js':'text/javascript; charset=utf-8','/styles.css':'text/css; charset=utf-8'};
-const cache=new Map();
+const ASSETS={
+  '/':new URL('./public/index.html',import.meta.url),
+  '/index.html':new URL('./public/index.html',import.meta.url),
+  '/app.js':new URL('./public/app.js',import.meta.url),
+  '/styles.css':new URL('./public/styles.css',import.meta.url)
+};
 async function asset(path){
-  const name=path==='/'?'index.html':path.slice(1);
-  const hit=cache.get(name);
-  if(hit && Date.now()-hit.at<10000) return hit.body;
-  const r=await fetch(`${BASE}/${name}`,{headers:{'user-agent':'attp-neon-web'}});
-  if(!r.ok) throw new Error(`SOURCE_${r.status}`);
-  const body=await r.text(); cache.set(name,{body,at:Date.now()}); return body;
+  const url=ASSETS[path];
+  if(!url) throw new Error('ASSET_NOT_FOUND');
+  return readFile(url,'utf8');
 }
 async function forward(req,target){
   const headers=new Headers(req.headers);
