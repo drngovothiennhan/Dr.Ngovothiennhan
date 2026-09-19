@@ -1,5 +1,11 @@
-name: Deploy Sổ ATTP to GitHub Pages (optional)
+name: Deploy Sổ ATTP to GitHub Pages
+
 on:
+  push:
+    branches: [so-attp-github-pages-v2]
+    paths:
+      - 'apps/so-attp-github/**'
+      - '.github/workflows/so-attp-pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -12,16 +18,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Syntax check frontend
+        run: |
+          node --check apps/so-attp-github/app.js
+          node --check apps/so-attp-github/sw.js
+          node --check apps/so-attp-github/backend/attpapi.mjs
+
   deploy:
+    needs: validate
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/configure-pages@v6
-      - uses: actions/upload-pages-artifact@v4
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
         with:
-          path: apps/so-attp-neon/frontend
-      - id: deployment
+          path: apps/so-attp-github
+
+      - name: Deploy
+        id: deployment
         uses: actions/deploy-pages@v4
