@@ -1,16 +1,30 @@
-# Sổ ATTP Trường học — Neon rebuild
+# Sổ ATTP Trường học — GitHub + Neon rebuild
 
-Kiến trúc độc lập AppDeploy:
+Runtime chính thức của branch này **không dùng AppDeploy, Render hay Vercel**.
 
-- **Frontend:** static HTML/CSS/JS trên Render Static Site.
-- **API/OCR:** Node.js trên Render Web Service.
-- **Database:** Neon Postgres, database `attp`, branch `so-attp-truong-hoc-prod`.
-- **Ảnh chứng từ:** Neon Object Storage, private bucket `attp-documents`.
-- **OCR/AI:** Google Gemini hai lượt; lượt 1 chép bảng, lượt 2 trích cấu trúc. Confidence >=95 chỉ khi code đối chiếu được số lượng đúng cột trong transcript chuẩn hóa.
-- **Google Sheets:** chỉ là lớp đồng bộ/xuất báo cáo về sau; không phải database chính.
+## Kiến trúc
 
-## Runtime env (server)
+- **Source:** GitHub branch `so-attp-neon-rebuild`
+- **Web:** Neon Function `attpweb` — phục vụ frontend tĩnh từ GitHub source và proxy same-origin `/api/*`
+- **API/OCR:** Neon Function `attpapi`
+- **Database:** Neon Postgres, database `attp`, branch `so-attp-truong-hoc-prod`
+- **Ảnh chứng từ:** Neon Object Storage, private bucket `attp-documents`
+- **Đăng nhập:** Neon Auth (Better Auth), JWT EdDSA
+- **AI/OCR:** Neon AI Gateway khi model khả dụng; OCR 2 lượt và fail-closed
+- **Google Sheets:** chỉ là lớp đồng bộ/xuất báo cáo về sau, không phải database chính
 
-`DATABASE_URL`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_ENDPOINT_URL_S3`, `AWS_REGION`, `ATTP_BUCKET`, `GEMINI_API_KEY`, `GEMINI_OCR_MODEL`, `GEMINI_VERIFY_MODEL`, `CORS_ORIGINS`.
+## OCR policy
 
-Không commit khóa bí mật vào GitHub.
+1. Ảnh frontend được giảm tối đa khoảng 1600 px / 2 MP.
+2. Lượt 1 chép bảng theo cấu trúc: `STT | Mã | Tên hàng | ĐVT | Số lượng | Đơn giá | Thành tiền`.
+3. Lượt 2 trích dữ liệu có cấu trúc.
+4. Confidence >=95 chỉ khi code tự đối chiếu được tên hàng và **Số lượng nằm đúng cột Số lượng**.
+5. Nếu bằng chứng không đủ, bản ghi giữ `CẦN DÒ LẠI`; không tự nâng confidence.
+
+## GitHub Pages
+
+Workflow Pages được giữ ở chế độ **manual-only**. Repository hiện chưa bật Pages trong Settings, nên runtime chính là `attpweb`. Khi Pages được bật sau này có thể chạy workflow thủ công mà không đổi backend.
+
+## Không commit secret
+
+Không đưa connection string, storage credential hay AI key vào GitHub. Neon Functions dùng biến môi trường/injected credentials của branch.
