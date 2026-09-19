@@ -8,6 +8,7 @@ const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 let state = { records: [], inventory: [], menus: [], ocr: null, user: null };
 let signUpMode = localStorage.getItem('attp_default_activated') !== '1';
+let selectedImageFile = null;
 
 function toast(message) {
   const el = $('#toast');
@@ -146,10 +147,21 @@ $$('#nav button').forEach(button => {
     $$('.tab').forEach(tab => tab.classList.toggle('active', tab.id === 'tab-' + button.dataset.tab));
   };
 });
-$('#image').onchange = event => {
-  const file = event.target.files[0];
-  if (file) $('#preview').src = URL.createObjectURL(file);
-};
+function setSelectedImage(file) {
+  if (!file) return;
+  if (!file.type?.startsWith('image/')) {
+    toast('Vui lòng chọn file ảnh.');
+    return;
+  }
+  selectedImageFile = file;
+  $('#preview').src = URL.createObjectURL(file);
+  $('#selectedFile').textContent = file.name || 'Ảnh vừa chụp';
+  $('#ocrMsg').textContent = 'Ảnh đã sẵn sàng. Bấm Nhận diện OCR/AI.';
+}
+$('#takePhoto').onclick = () => $('#cameraInput').click();
+$('#choosePhoto').onclick = () => $('#fileInput').click();
+$('#cameraInput').onchange = event => setSelectedImage(event.target.files?.[0]);
+$('#fileInput').onchange = event => setSelectedImage(event.target.files?.[0]);
 
 async function fileB64(file, max = 1600) {
   const bitmap = await createImageBitmap(file);
@@ -173,8 +185,8 @@ async function fileB64(file, max = 1600) {
 }
 
 $('#runOcr').onclick = async () => {
-  const file = $('#image').files[0];
-  if (!file) return toast('Hãy chụp/chọn ảnh trước');
+  const file = selectedImageFile;
+  if (!file) return toast('Hãy chụp ảnh hoặc tải ảnh từ máy trước');
   $('#runOcr').disabled = true;
   $('#ocrMsg').textContent = 'Đang đọc 2 lượt và kiểm tra cột…';
   try {
