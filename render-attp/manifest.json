@@ -1,0 +1,9 @@
+{
+  "name": "Sổ ATTP trường học",
+  "short_name": "Sổ ATTP",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#087f5b",
+  "icons": []
+}
