@@ -7,7 +7,7 @@ const authClient = createAuthClient(AUTH_URL, { fetchOptions: { credentials: 'in
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 let state = { records: [], inventory: [], menus: [], ocr: null, user: null };
-let signUpMode = localStorage.getItem('attp_default_activated') !== '1';
+let signUpMode = false;
 let selectedImageFile = null;
 
 function toast(message) {
@@ -42,7 +42,7 @@ async function health() {
       d.dbConfigured ? 'DB' : '',
       d.storageConfigured ? 'Storage' : '',
       d.authConfigured ? 'Auth' : '',
-      d.aiConfigured ? 'AI' : ''
+      d.aiOperational ? 'AI' : (d.localFallback ? 'OCR local' : '')
     ].filter(Boolean);
     $('#health').textContent = bits.length ? bits.join(' + ') + ' sẵn sàng' : 'API đang cấu hình';
   } catch {
@@ -72,16 +72,12 @@ async function restoreSession() {
   return showLoggedOut();
 }
 function renderAuthMode() {
-  $('#authTitle').textContent = signUpMode ? 'Tạo tài khoản' : 'Đăng nhập';
-  $('#authSubmit').textContent = signUpMode ? 'Tạo tài khoản' : 'Đăng nhập';
-  $('#authToggle').textContent = signUpMode ? 'Đã có tài khoản? Đăng nhập' : 'Chưa có tài khoản? Tạo tài khoản';
-  $('#authPassword').autocomplete = signUpMode ? 'new-password' : 'current-password';
+  signUpMode = false;
+  $('#authTitle').textContent = 'Đăng nhập';
+  $('#authSubmit').textContent = 'Đăng nhập';
+  $('#authPassword').autocomplete = 'current-password';
+  if ($('#authToggle')) $('#authToggle').classList.add('hidden');
 }
-$('#authToggle').onclick = () => {
-  signUpMode = !signUpMode;
-  renderAuthMode();
-  $('#authMsg').textContent = '';
-};
 $('#authForm').onsubmit = async event => {
   event.preventDefault();
   const email = $('#authEmail').value.trim();
@@ -89,14 +85,10 @@ $('#authForm').onsubmit = async event => {
   $('#authSubmit').disabled = true;
   $('#authMsg').textContent = 'Đang xử lý…';
   try {
-    const creating = signUpMode;
-    const result = creating
-      ? await authClient.signUp.email({ name: email.split('@')[0] || 'User', email, password })
-      : await authClient.signIn.email({ email, password });
+    const result = await authClient.signIn.email({ email, password });
     if (result.error) throw result.error;
     const session = await authClient.getSession();
     if (!session.data?.user) throw new Error('Chưa tạo được phiên đăng nhập');
-    if (creating) { localStorage.setItem('attp_default_activated','1'); signUpMode = false; }
     $('#authMsg').textContent = '';
     await showLoggedIn(session.data.user);
   } catch (error) {
@@ -180,6 +172,181 @@ async function fileB64(file, max = 1600) {
     reader.readAsDataURL(blob);
   });
   return { data, mimeType: 'image/jpeg' };
+}
+
+async function localOcrFallback(file, kind) {
+  $('#ocrMsg').textContent = 'AI Gateway không khả dụng. Đang OCR local trên thiết bị…';
+  const mod = await import('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.esm.min.js');
+  const worker = await mod.createWorker('vie+eng', 1);
+  try {
+    const result = await worker.recognize(file);
+    const rawText = result?.data?.text || '';
+    const lineItems = [];
+    if (kind === '1a' || kind === '1b') {
+      const unitRe = '(?:Kg|kg|KG|g|G|L|l|ml|ML|cái|Cái|gói|Gói|hộp|Hộp|thùng|Thùng)';
+      const re = new RegExp('^\\s*(\\d{1,3})\\s+([A-Z0-9._/-]+)\\s+(.+?)\\s+(' + unitRe + ')\\s+([0-9.,]+)\\s+([0-9.,]+)\\s+([0-9.,]+)\\s*
+  const file = selectedImageFile;
+  if (!file) return toast('Hãy chụp ảnh hoặc tải ảnh từ máy trước');
+  $('#runOcr').disabled = true;
+  $('#ocrMsg').textContent = 'Đang đọc 2 lượt và kiểm tra cột…';
+  try {
+    const image = await fileB64(file);
+    state.ocr = await api('/api/ocr', {
+      method: 'POST',
+      body: JSON.stringify({ kind: $('#kind').value, image })
+    });
+    renderOcr();
+  } catch (error) {
+    if (/AI_GATEWAY|AI_MODEL|AI_403|gateway/i.test(error.message || '')) {
+      try {
+        state.ocr = await localOcrFallback(file, $('#kind').value);
+        renderOcr();
+        $('#ocrMsg').textContent = 'Đang dùng OCR local dự phòng. Tất cả kết quả phải dò lại trước khi lưu.';
+        toast('AI Gateway chưa hoạt động; đã chuyển sang OCR local.');
+      } catch (fallbackError) {
+        $('#ocrMsg').textContent = fallbackError.message;
+        toast('OCR dự phòng cũng lỗi: ' + fallbackError.message);
+      }
+    } else {
+      $('#ocrMsg').textContent = error.message;
+      toast(error.message);
+    }
+  } finally {
+    $('#runOcr').disabled = false;
+  }
+};
+
+function esc(value) {
+  return String(value ?? '').replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+}
+function renderOcr() {
+  const o = state.ocr;
+  if (!o) return;
+  $('#ocrMsg').textContent = 'Đã đọc ' + (o.passes || 2) + ' lượt · model ' + (o.model || 'AI') + '. Dòng vàng cần dò lại.';
+  const fields = (o.fields || []).map((x, i) =>
+    '<div class="fieldrow"><b>' + esc(x.key) + '</b><input data-fi="' + i + '" value="' +
+    esc(x.value) + '"><span class="badge ' + (x.confidence >= 95 ? 'ok' : 'warn') + '">' +
+    Math.round(x.confidence) + '%</span></div>'
+  ).join('');
+  const lines = (o.lineItems || []).map((x, i) =>
+    '<div class="ocr-line"><input data-ln="' + i + '" data-k="name" value="' + esc(x.name) +
+    '"><input data-ln="' + i + '" data-k="quantity" value="' + esc(x.quantity) +
+    '"><input data-ln="' + i + '" data-k="unit" value="' + esc(x.unit) +
+    '"><select data-ln="' + i + '" data-k="kind"><option ' + (x.kindSuggestion === '1a' ? 'selected' : '') +
+    '>1a</option><option ' + (x.kindSuggestion === '1b' ? 'selected' : '') +
+    '>1b</option><option ' + (x.kindSuggestion === 'review' ? 'selected' : '') +
+    '>review</option></select><span class="badge ' + (x.confidence >= 95 ? 'ok' : 'warn') + '">' +
+    Math.round(x.confidence) + '% ' + (x.columnVerified ? '✓ cột' : 'dò lại') + '</span></div>'
+  ).join('');
+  $('#ocrResult').innerHTML = '<div class="card"><h3>Trường chung</h3>' + fields +
+    '<h3>Dòng hàng</h3>' + (lines || '<p class="muted">Không có bảng hàng.</p>') +
+    '<div class="actions"><button class="primary" id="saveOcr">Lưu bản ghi</button></div>' +
+    '<details><summary>OCR thô</summary><pre>' + esc(o.rawText || '') + '</pre></details></div>';
+  $('#saveOcr').onclick = saveOcr;
+}
+
+async function saveOcr() {
+  const o = state.ocr;
+  const kind = $('#kind').value;
+  const fields = {};
+  (o.fields || []).forEach((x, i) => {
+    fields[x.key] = {
+      value: document.querySelector('[data-fi="' + i + '"]').value,
+      confidence: x.confidence,
+      confirmed: !o.localFallback && x.confidence >= 95
+    };
+  });
+  const lines = (o.lineItems || []).map((x, i) => {
+    const get = key => document.querySelector('[data-ln="' + i + '"][data-k="' + key + '"]').value;
+    return { ...x, name: get('name'), quantity: get('quantity'), unit: get('unit'), kind: get('kind'), confidence: o.localFallback ? Math.min(90, x.confidence || 0) : x.confidence };
+  });
+  try {
+    if ((kind === '1a' || kind === '1b') && lines.length) {
+      const usable = lines.filter(x => ['1a', '1b'].includes(x.kind));
+      const d = await api('/api/invoice-records', {
+        method: 'POST',
+        body: JSON.stringify({ sharedFields: fields, lines: usable, rawText: o.rawText, imageKey: o.imageKey, ocrJobId: o.jobId })
+      });
+      toast('Đã lưu ' + d.saved + ' dòng; ' + d.review + ' dòng cần dò lại');
+    } else {
+      await api('/api/records', {
+        method: 'POST',
+        body: JSON.stringify({ kind, fields, rawText: o.rawText, imageKey: o.imageKey, ocrJobId: o.jobId })
+      });
+      toast('Đã lưu bản ghi');
+    }
+    await load();
+  } catch (error) {
+    toast('Không lưu được: ' + error.message);
+  }
+}
+
+$('#inventoryForm').onsubmit = async event => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(event.target));
+  try {
+    await api('/api/inventory', { method: 'POST', body: JSON.stringify(payload) });
+    toast('Đã nhập kho');
+    event.target.reset();
+    await load();
+  } catch (error) {
+    toast(error.message);
+  }
+};
+$('#menuForm').onsubmit = async event => {
+  event.preventDefault();
+  const form = Object.fromEntries(new FormData(event.target));
+  const items = form.lines.split('\n').map(s => s.trim()).filter(Boolean).map(line => {
+    const [dish = '', ingredients = '', servings = '0'] = line.split('|').map(s => s.trim());
+    return { date: form.date, meal: form.meal, dish, ingredients, servings };
+  });
+  try {
+    await api('/api/menu', { method: 'POST', body: JSON.stringify({ items }) });
+    toast('Đã lưu thực đơn');
+    event.target.reset();
+    await load();
+  } catch (error) {
+    toast(error.message);
+  }
+};
+$$('[data-period]').forEach(button => {
+  button.onclick = async () => {
+    try {
+      const d = await api('/api/report?period=' + button.dataset.period);
+      $('#reportBox').textContent =
+        'Kỳ: ' + d.period + '\n' +
+        'Bước 1: ' + d.step1 + '\n' +
+        'Bước 2: ' + d.step2 + '\n' +
+        'Bước 3: ' + d.step3 + '\n' +
+        'Mẫu lưu: ' + d.samples + '\n' +
+        'Cần dò OCR: ' + d.needs + '\n' +
+        'Sắp hết hạn: ' + d.expiring + '\n' +
+        'Quá hạn: ' + d.expired;
+    } catch (error) {
+      toast(error.message);
+    }
+  };
+});
+
+renderAuthMode();
+health();
+restoreSession();
+setInterval(health, 60000);
+);
+      for (const line of rawText.split(/\\r?\\n/)) {
+        const m = line.match(re);
+        if (!m) continue;
+        lineItems.push({
+          code:m[2], name:m[3].trim(), unit:m[4], quantity:m[5], expiry:'',
+          confidence:80, kindSuggestion:kind, reason:'OCR local dự phòng; bắt buộc dò lại',
+          columnVerified:false, evidenceLine:line
+        });
+      }
+    }
+    return {jobId:null, fields:[], lineItems, rawText, imageKey:null, passes:1, model:'Tesseract local fallback', localFallback:true};
+  } finally {
+    await worker.terminate();
+  }
 }
 
 $('#runOcr').onclick = async () => {
