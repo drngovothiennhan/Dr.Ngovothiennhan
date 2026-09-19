@@ -1,0 +1,14 @@
+{
+  "name":"Sổ ATTP Trường học",
+  "short_name":"Sổ ATTP",
+  "description":"PWA kiểm thực, kho, thực đơn và OCR chứng từ an toàn thực phẩm trường học.",
+  "start_url":"./",
+  "scope":"./",
+  "display":"standalone",
+  "background_color":"#f8fafc",
+  "theme_color":"#047857",
+  "icons":[
+    {"src":"./icon.svg","sizes":"192x192","type":"image/svg+xml","purpose":"any"},
+    {"src":"./icon.svg","sizes":"512x512","type":"image/svg+xml","purpose":"maskable"}
+  ]
+}
