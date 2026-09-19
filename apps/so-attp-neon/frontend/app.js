@@ -19,26 +19,17 @@ function toast(message) {
 function fmt(value) {
   return value ? new Date(value).toLocaleString('vi-VN') : '—';
 }
-async function getJwt() {
-  let result = await authClient.token();
-  if (result.data?.token) return result.data.token;
-
-  const session = await authClient.getSession();
-  if (session.data?.session && session.data?.user) {
-    result = await authClient.token();
-    if (result.data?.token) return result.data.token;
-  }
-
-  throw new Error('Cần đăng nhập lại một lần sau cập nhật bảo mật.');
-}
 async function api(path, options = {}, authenticated = true) {
   const headers = { 'content-type': 'application/json', ...(options.headers || {}) };
-  if (authenticated) headers.authorization = 'Bearer ' + await getJwt();
-  const response = await fetch(API + path, { ...options, headers });
+  const response = await fetch(API + path, {
+    ...options,
+    headers,
+    credentials: 'include'
+  });
   const data = await response.json().catch(() => ({}));
-  if (response.status === 401) {
+  if (response.status === 401 && authenticated) {
     await showLoggedOut();
-    throw new Error('Phiên đăng nhập hết hạn');
+    throw new Error('Phiên đăng nhập không hợp lệ. Hãy đăng nhập lại.');
   }
   if (!response.ok) throw new Error(data.message || data.error || ('HTTP ' + response.status));
   return data;
