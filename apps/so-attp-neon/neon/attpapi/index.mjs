@@ -249,6 +249,7 @@ async function handler(req){
     for(const [i,line] of (b.lines||[]).slice(0,100).entries()){
       if(!line?.name||!['1a','1b'].includes(line.kind))continue;
       const c=clamp(line.confidence), fields={...(b.sharedFields||{}),name:{value:line.name,confidence:c,confirmed:c>=95},weight:{value:line.quantity||'',confidence:c,confirmed:c>=95},unit:{value:line.unit||'',confidence:c,confirmed:c>=95}};
+      if(line.kind==='1b'&&line.expiry) fields.expiry={value:line.expiry,confidence:c,confirmed:c>=95};
       const uncertain=Object.values(fields).some(v=>v?.value&&Number(v.confidence||0)<95&&!v.confirmed); const status=uncertain?'CẦN DÒ LẠI':'ĐÃ XÁC MINH'; if(uncertain)review++;
       payload.push({legacy_id:`ocr-line:${b.ocrJobId}:${i+1}`,kind:line.kind,status,item_code:line.code||'',fields,warnings:uncertain?['Cần dò lại OCR']:[]});
     }
