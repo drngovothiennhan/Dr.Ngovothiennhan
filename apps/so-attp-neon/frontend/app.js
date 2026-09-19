@@ -1,7 +1,7 @@
 import { createAuthClient } from 'https://esm.sh/@neondatabase/neon-js@0.7.0-beta/auth?bundle';
 
 const API = window.location.origin;
-const AUTH_URL = 'https://ep-hidden-silence-avd49n4o.neonauth.c-11.us-east-1.aws.neon.tech/neondb/auth';
+const AUTH_URL = window.location.origin + '/auth';
 const authClient = createAuthClient(AUTH_URL, { fetchOptions: { credentials: 'include' } });
 
 const $ = s => document.querySelector(s);
