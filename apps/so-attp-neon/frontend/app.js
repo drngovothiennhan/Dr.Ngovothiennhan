@@ -20,9 +20,16 @@ function fmt(value) {
   return value ? new Date(value).toLocaleString('vi-VN') : '—';
 }
 async function getJwt() {
-  const { data, error } = await authClient.token();
-  if (error || !data?.token) throw new Error('Phiên đăng nhập hết hạn. Hãy đăng nhập lại.');
-  return data.token;
+  let result = await authClient.token();
+  if (result.data?.token) return result.data.token;
+
+  const session = await authClient.getSession();
+  if (session.data?.session && session.data?.user) {
+    result = await authClient.token();
+    if (result.data?.token) return result.data.token;
+  }
+
+  throw new Error('Cần đăng nhập lại một lần sau cập nhật bảo mật.');
 }
 async function api(path, options = {}, authenticated = true) {
   const headers = { 'content-type': 'application/json', ...(options.headers || {}) };
