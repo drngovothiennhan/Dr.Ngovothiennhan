@@ -233,13 +233,15 @@ async function handler(req){
   if(path==='/api/ocr-local'&&req.method==='POST') return handleLocalOcr(await req.json(),user);
   if(path==='/api/records'&&req.method==='POST'){
     const b=await req.json(); if(b.ocrJobId && !b.imageKey) return json({error:'SOURCE_IMAGE_REQUIRED'},409);
-    const fields=b.fields||{}; const uncertain=Object.entries(fields).filter(([,v])=>v?.value&&Number(v?.confidence||0)<95&&!v?.confirmed).map(([k])=>k); const status=uncertain.length?'CẦN DÒ LẠI':'ĐÃ XÁC MINH';
+    const fields=b.fields||{}; const uncertain=Object.entries(fields).filter(([,v])=>v?.value&&Number(v?.confidence||0)<95&&!v?.confirmed).map(([k])=>k);
+    const forceReview=b.localFallback===true || Object.keys(fields).length===0;
+    const status=(forceReview||uncertain.length)?'CẦN DÒ LẠI':'ĐÃ XÁC MINH';
     const legacyId=b.ocrJobId?`ocr-record:${b.ocrJobId}:${b.kind}`:null;
     const r=await sql(`insert into records(legacy_id,kind,status,source,fields,markers,raw_text,warnings,source_image_key,ocr_job_id)
       values($1,$2,$3,'neon-rebuild',$4::jsonb,$5::jsonb,$6,$7::jsonb,$8,$9)
       on conflict(legacy_id) do update set status=excluded.status,fields=excluded.fields,markers=excluded.markers,raw_text=excluded.raw_text,warnings=excluded.warnings,source_image_key=excluded.source_image_key,ocr_job_id=excluded.ocr_job_id
       returning id,status,created_at`,
-      [legacyId,b.kind,status,JSON.stringify(fields),JSON.stringify(b.markers||[]),b.rawText||'',JSON.stringify(uncertain.map(k=>`OCR dưới 95%: ${k}`)),b.imageKey||null,b.ocrJobId||null]); return json(r[0],201);
+      [legacyId,b.kind,status,JSON.stringify(fields),JSON.stringify(b.markers||[]),b.rawText||'',JSON.stringify([...(forceReview?['OCR local/dữ liệu cấu trúc chưa đủ; bắt buộc dò lại']:[]),...uncertain.map(k=>`OCR dưới 95%: ${k}`)]),b.imageKey||null,b.ocrJobId||null]); return json(r[0],201);
   }
   if(path==='/api/invoice-records'&&req.method==='POST'){
     const b=await req.json(); if(!b.ocrJobId||!b.imageKey) return json({error:'SOURCE_IMAGE_REQUIRED'},409);
