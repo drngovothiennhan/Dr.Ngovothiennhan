@@ -57,6 +57,9 @@ async function apiProxy(req,u){
 }
 async function authProxy(req,u){
   const path=u.pathname==='/auth'?'':u.pathname.slice('/auth'.length);
+  if (/\/sign-up(?:\/|$)/i.test(path) || /\/register(?:\/|$)/i.test(path)) {
+    return Response.json({error:'SIGNUP_DISABLED'},{status:403,headers:{'cache-control':'no-store'}});
+  }
   return forward(req,AUTH+path+u.search);
 }
 export default {async fetch(req){
