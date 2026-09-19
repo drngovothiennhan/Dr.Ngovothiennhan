@@ -78,13 +78,22 @@ function verifyLineAgainstTranscript(item, rawText) {
 }
 
 app.get('/health', async (_req,res) => {
+  const dbConfigured = Boolean(process.env.DATABASE_URL);
+  const base = { ok:true, service:'so-attp-api', dbConfigured, ocrConfigured:Boolean(process.env.GEMINI_API_KEY), storageConfigured:Boolean(s3) };
+  if (!dbConfigured) return res.json({ ...base, readiness:'configuration_required' });
   try {
     const { rows } = await pool.query('select current_database() as db, now() as now');
-    res.json({ ok:true, service:'so-attp-api', db:rows[0].db, now:rows[0].now, ocrConfigured:Boolean(process.env.GEMINI_API_KEY), storageConfigured:Boolean(s3) });
-  } catch (e) { res.status(500).json({ ok:false, error:String(e.message || e) }); }
+    res.json({ ...base, readiness:'ready', db:rows[0].db, now:rows[0].now });
+  } catch (e) { res.json({ ...base, readiness:'database_unreachable', dbError:String(e.message || e).slice(0,160) }); }
+});
+
+app.get('/ready', async (_req,res) => {
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok:false, error:'DATABASE_NOT_CONFIGURED' });
+  try { await pool.query('select 1'); return res.json({ok:true}); } catch { return res.status(503).json({ok:false,error:'DATABASE_UNREACHABLE'}); }
 });
 
 app.get('/api/bootstrap', async (_req,res) => {
+  if (!process.env.DATABASE_URL) return res.status(503).json({ error:'DATABASE_NOT_CONFIGURED', message:'Backend mới đã live; cần gắn DATABASE_URL của Neon trong Render Secrets.' });
   try {
     const [records, inventory, menus] = await Promise.all([
       pool.query('select id, kind, status, source, item_code, fields, warnings, source_image_key, created_at from records order by id desc limit 250'),
