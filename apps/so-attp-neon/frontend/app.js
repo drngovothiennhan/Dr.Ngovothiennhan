@@ -7,7 +7,7 @@ const authClient = createAuthClient(AUTH_URL, { fetchOptions: { credentials: 'in
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 let state = { records: [], inventory: [], menus: [], ocr: null, user: null };
-let signUpMode = false;
+let signUpMode = localStorage.getItem('attp_default_activated') !== '1';
 
 function toast(message) {
   const el = $('#toast');
@@ -90,12 +90,14 @@ $('#authForm').onsubmit = async event => {
   $('#authSubmit').disabled = true;
   $('#authMsg').textContent = 'Đang xử lý…';
   try {
-    const result = signUpMode
+    const creating = signUpMode;
+    const result = creating
       ? await authClient.signUp.email({ name: email.split('@')[0] || 'User', email, password })
       : await authClient.signIn.email({ email, password });
     if (result.error) throw result.error;
     const session = await authClient.getSession();
     if (!session.data?.user) throw new Error('Chưa tạo được phiên đăng nhập');
+    if (creating) { localStorage.setItem('attp_default_activated','1'); signUpMode = false; }
     $('#authMsg').textContent = '';
     await showLoggedIn(session.data.user);
   } catch (error) {
