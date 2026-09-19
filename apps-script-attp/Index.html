@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <style>
+    :root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#172033;background:#f6f8fb}
+    *{box-sizing:border-box}body{margin:0;background:#f6f8fb}.wrap{max-width:1180px;margin:auto}
+    header{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid #e5e7eb;padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+    .brand{display:flex;gap:10px;align-items:center}.logo{width:38px;height:38px;border-radius:11px;background:#087f5b;color:#fff;display:grid;place-items:center;font-weight:800}
+    h1{font-size:16px;margin:0}.sub{font-size:10px;color:#6b7280}.btn{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer}.primary{background:#087f5b;color:#fff}.secondary{background:#fff;border:1px solid #d1d5db;color:#344054}
+    .layout{display:grid;grid-template-columns:190px 1fr;gap:18px;padding:18px}.side{display:flex;flex-direction:column;gap:5px}.nav{border:0;background:transparent;padding:10px 12px;text-align:left;border-radius:10px;color:#475467}.nav.active{background:#e9f8f2;color:#087f5b;font-weight:800}
+    .panel{display:none}.panel.active{display:block}.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:15px;margin-bottom:13px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+    h2{font-size:22px;margin:0 0 4px}.muted{font-size:13px;color:#667085}.notice{padding:11px 13px;border:1px solid #f4d27a;background:#fff8dd;border-radius:12px;margin-bottom:12px;font-size:13px}.notice.ok{background:#ecfdf3;border-color:#abefc6}.notice.bad{background:#fff1f2;border-color:#fecdd3}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:13px}.stat strong{display:block;font-size:26px;margin-top:4px}
+    .chips{display:flex;gap:7px;overflow:auto;padding:5px 0 12px}.chip{white-space:nowrap;border:1px solid #d0d5dd;background:#fff;padding:8px 11px;border-radius:999px}.chip.active{background:#e9f8f2;border-color:#087f5b;color:#087f5b;font-weight:800}
+    .upload{border:2px dashed #8ac7b1;background:#effaf6;border-radius:16px;padding:20px;text-align:center}.actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+    .previewBox{position:relative;background:#f2f4f7;border-radius:14px;overflow:hidden}.preview{max-width:100%;max-height:520px;margin:auto;display:block}.marker{position:absolute;transform:translate(-50%,-50%);width:27px;height:27px;border-radius:50%;background:#d92d20;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800;border:2px solid #fff}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:#475467}input,textarea,select{width:100%;padding:10px 11px;border:1px solid #d0d5dd;border-radius:10px;background:#fff;font:inherit}.warn{border-color:#f59e0b;background:#fffbeb}.small{font-size:11px;color:#667085}
+    .item{border:1px solid #e5e7eb;border-radius:12px;padding:9px;margin-bottom:7px}.item.warn{border-color:#f59e0b;background:#fffbeb}.itemgrid{display:grid;grid-template-columns:24px 1.7fr .6fr .55fr .8fr;gap:7px;align-items:center}
+    .tableWrap{overflow:auto}.tbl{width:100%;min-width:720px;border-collapse:collapse;font-size:12px}.tbl th,.tbl td{padding:8px;border-bottom:1px solid #e5e7eb;text-align:left}.tbl th{background:#f8fafc}.badge{padding:3px 7px;border-radius:999px;font-size:10px;font-weight:800}.green{background:#dcfce7;color:#166534}.yellow{background:#fef3c7;color:#92400e}.red{background:#fee2e2;color:#991b1b}
+    .loader{display:none;padding:10px;font-size:12px;color:#475467}.loader.on{display:block}.bottom{display:none}
+    @media(max-width:780px){.layout{display:block;padding:12px 10px 82px}.side{display:none}.stats,.grid4{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr 1fr}.itemgrid{grid-template-columns:24px 1fr .58fr}.desktopOnly{display:none}.bottom{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:40;background:#fff;border-top:1px solid #e5e7eb}.bottom button{background:#fff;border:0;padding:8px 2px;font-size:10px;color:#667085}.bottom button.active{color:#087f5b;background:#ecfdf5}.preview{max-height:430px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><div class="logo">✓</div><div><h1>Sổ ATTP trường học</h1><div class="sub">Google Apps Script · Google Sheets · Gemini OCR</div></div></div>
+    <button class="btn secondary" onclick="openSheet()">Google Sheets</button>
+  </header>
+
+  <div class="layout">
+    <aside class="side" id="side"></aside>
+    <main>
+      <div id="notice"></div>
+      <div id="loader" class="loader"></div>
+      <section id="dashboard" class="panel active"></section>
+      <section id="capture" class="panel"></section>
+      <section id="menu" class="panel"></section>
+      <section id="stock" class="panel"></section>
+      <section id="reports" class="panel"></section>
+      <section id="settings" class="panel"></section>
+    </main>
+  </div>
+</div>
+<nav id="bottom" class="bottom"></nav>
+<input id="cameraInput" type="file" accept="image/*" capture="environment" hidden>
+<input id="galleryInput" type="file" accept="image/*" hidden>
+
+<script>
+const THRESHOLD=95;
+const tabs=[['dashboard','Tổng quan','▥'],['capture','Chụp & nhập','📷'],['menu','Thực đơn','🍲'],['stock','Kho','▣'],['reports','Báo cáo','☑'],['settings','Cài đặt','⚙']];
+const stepMeta={
+ '1a':'Bước 1a · Tươi sống/đông lạnh',
+ '1b':'Bước 1b · Khô/bao gói/phụ gia',
+ '2':'Bước 2 · Trong chế biến',
+ '3':'Bước 3 · Trước khi ăn',
+ sample:'Lưu mẫu thức ăn'
+};
+const defs={
+ '1a':[['name','Tên thực phẩm',1],['receivedAt','Thời gian nhập',1],['weight','Khối lượng',1],['unit','Đơn vị',0],['supplier','Cơ sở cung cấp',1],['supplierContact','Địa chỉ / điện thoại',0],['deliverer','Người giao hàng',0],['invoice','Chứng từ / hóa đơn',0],['vetRegistration','ĐK VS thú y',0],['quarantine','Giấy kiểm dịch',0],['sensory','Kiểm tra cảm quan',0],['rapidTest','Xét nghiệm nhanh',0],['result','Kết quả',0],['action','Biện pháp xử lý / ghi chú',0]],
+ '1b':[['name','Tên thực phẩm',1],['manufacturer','Cơ sở sản xuất',0],['manufacturerAddress','Địa chỉ sản xuất',0],['receivedAt','Thời gian nhập',1],['weight','Khối lượng',1],['unit','Đơn vị',0],['supplier','Cơ sở cung cấp',1],['supplierContact','Địa chỉ / điện thoại',0],['deliverer','Người giao hàng',0],['expiry','Hạn sử dụng',1],['storage','Điều kiện bảo quản',0],['invoice','Chứng từ / hóa đơn',0],['sensory','Kiểm tra cảm quan',0],['action','Ghi chú',0]],
+ '2':[['date','Ngày',1],['meal','Ca / bữa ăn',1],['dish','Tên món ăn',1],['ingredients','Nguyên liệu chính',1],['servings','Số suất',1],['prepDone','Sơ chế xong',1],['cookDone','Chế biến xong',1],['staffHygiene','Người tham gia chế biến',0],['equipment','Trang thiết bị / dụng cụ',0],['area','Khu vực chế biến',0],['sensory','Cảm quan',0],['action','Ghi chú',0]],
+ '3':[['date','Ngày',1],['meal','Ca / bữa ăn',1],['dish','Tên món ăn',1],['servings','Số suất',1],['splitDone','Chia xong',1],['eatStart','Bắt đầu ăn',1],['utensils','Dụng cụ chia/chứa/che đậy',0],['sensory','Cảm quan',0],['action','Ghi chú',0]],
+ sample:[['date','Ngày',1],['sampleName','Tên mẫu thức ăn',1],['meal','Bữa ăn / giờ ăn',1],['servings','Số suất',1],['amount','Khối lượng/thể tích',1],['unit','Đơn vị g/ml',1],['container','Dụng cụ chứa',0],['temperature','Nhiệt độ °C',1],['takenAt','Thời gian lấy mẫu',1],['destroyAt','Thời gian hủy mẫu',0],['condition','Tình trạng/Ghi chú',0],['keeper','Người lưu mẫu',0],['destroyer','Người hủy mẫu',0],['sealed','Niêm phong',0]]
+};
+let state={sheetUrl:'',dashboard:{},menus:[],stock:[],config:{},model:''};
+let tab='dashboard',kind='1a',file=null,preview='',fields={},items=[],markers=[],busy=false;
+
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function today(){return new Date().toISOString().slice(0,10)}
+function notify(msg,type=''){notice.innerHTML='<div class="notice '+type+'">'+esc(msg)+'</div>';setTimeout(()=>{if(notice)notice.innerHTML=''},9000)}
+function loading(on,text='Đang xử lý…'){busy=on;loader.className='loader '+(on?'on':'');loader.textContent=text}
+function server(name,...args){return new Promise((resolve,reject)=>{google.script.run.withSuccessHandler(resolve).withFailureHandler(e=>reject(new Error(e.message||e)))[name](...args)})}
+function setTab(t){tab=t;document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));document.getElementById(t).classList.add('active');renderNav();render()}
+function renderNav(){side.innerHTML=tabs.map(([id,l,i])=>'<button class="nav '+(tab===id?'active':'')+'" onclick="setTab(\''+id+'\')">'+i+' '+l+'</button>').join('');bottom.innerHTML=tabs.map(([id,l,i])=>'<button class="'+(tab===id?'active':'')+'" onclick="setTab(\''+id+'\')"><div>'+i+'</div>'+l+'</button>').join('')}
+function render(){renderDashboard();renderCapture();renderMenu();renderStock();renderReports();renderSettings()}
+function openSheet(){if(state.sheetUrl)window.open(state.sheetUrl,'_blank')}
+
+async function boot(){
+ loading(true,'Đang tải dữ liệu Google Sheets…');
+ try{state=await server('getBootstrap');renderNav();render()}catch(e){notify('Không tải được dữ liệu: '+e.message,'bad')}finally{loading(false)}
+}
+
+function renderDashboard(){
+ const d=state.dashboard||{};
+ dashboard.innerHTML='<h2>Tổng quan hôm nay</h2><p class="muted">Ứng dụng và dữ liệu nằm trong Google; không phụ thuộc Render/Vercel/AppDeploy.</p><div class="stats">'+
+ '<div class="stat">Bản ghi hôm nay<strong>'+(d.todayRecords||0)+'</strong></div>'+
+ '<div class="stat">Cần dò lại<strong>'+(d.review||0)+'</strong></div>'+
+ '<div class="stat">HSD ≤7 ngày<strong>'+(d.expiring||0)+'</strong></div>'+
+ '<div class="stat">Mặt hàng kho<strong>'+(d.stockCount||0)+'</strong></div></div>'+
+ '<div class="card"><b>OCR chính: '+esc(state.model||'Gemini')+'</b><p class="muted">Dữ liệu dưới 95% vẫn được ghi nhưng mang trạng thái CẦN DÒ LẠI. Hệ thống không tự tạo HSD, giờ nhập hoặc giấy tờ không có trên ảnh.</p></div>';
+}
+
+function selectFile(f){
+ if(!f)return;file=f;if(preview)URL.revokeObjectURL(preview);preview=URL.createObjectURL(f);fields={};items=[];markers=[];renderCapture();
+}
+cameraInput.onchange=e=>selectFile(e.target.files?.[0]);galleryInput.onchange=e=>selectFile(e.target.files?.[0]);
+
+function renderCapture(){
+ const chips=Object.entries(stepMeta).map(([k,l])=>'<button class="chip '+(kind===k?'active':'')+'" onclick="kind=\''+k+'\';fields={};items=[];markers=[];renderCapture()">'+l.split(' · ')[0]+'</button>').join('');
+ let image='';
+ if(preview){
+   image='<div class="previewBox" onclick="addMarker(event,this)"><img class="preview" src="'+preview+'">'+markers.map((m,i)=>'<button title="'+esc(m.text)+'" class="marker" style="left:'+m.x+'%;top:'+m.y+'%">'+(i+1)+'</button>').join('')+'</div>'+
+   '<div class="actions"><button class="btn primary" onclick="cameraInput.click()">📷 Chụp lại</button><button class="btn secondary" onclick="galleryInput.click()">🖼️ Chọn ảnh khác</button><button class="btn primary" onclick="runOcr()">✨ Nhận diện AI</button></div>';
+ }else{
+   image='<div class="upload"><div style="font-size:30px">🖼️</div><b>Chọn ảnh chứng từ</b><p class="muted">Hóa đơn, phiếu giao nhận, ảnh món ăn hoặc mẫu lưu</p><div class="actions"><button class="btn primary" onclick="cameraInput.click()">📷 Chụp ảnh</button><button class="btn secondary" onclick="galleryInput.click()">🖼️ Tải ảnh từ máy</button></div></div>';
+ }
+ const form=defs[kind].map(([k,l,req])=>{const x=fields[k]||{};return '<label>'+l+(req?' *':'')+'<input id="f_'+k+'" value="'+esc(x.value||'')+'" class="'+(x.confidence&&x.confidence<THRESHOLD?'warn':'')+'" oninput="manualField(\''+k+'\',this.value)">'+(x.confidence?'<span class="small">AI '+x.confidence+'%</span>':'')+'</label>'}).join('');
+ let list='';
+ if(items.length&&(kind==='1a'||kind==='1b')){
+   list='<div class="card"><b>Hóa đơn nhiều dòng · '+items.length+' mặt hàng</b><p class="muted">Rà lại tên, số lượng, đơn vị và nhóm. Dòng vàng vẫn nhập được nhưng sẽ mang CẦN DÒ LẠI.</p>'+
+   items.map((x,i)=>'<div class="item '+(x.confidence<THRESHOLD||x.kind==='review'?'warn':'')+'"><div class="itemgrid"><input type="checkbox" '+(x.selected!==false?'checked':'')+' onchange="items['+i+'].selected=this.checked"><input value="'+esc(x.name)+'" oninput="items['+i+'].name=this.value"><input value="'+esc(x.quantity)+'" oninput="items['+i+'].quantity=this.value"><input class="desktopOnly" value="'+esc(x.unit)+'" oninput="items['+i+'].unit=this.value"><select onchange="items['+i+'].kind=this.value"><option value="1a" '+(x.kind==='1a'?'selected':'')+'>1a</option><option value="1b" '+(x.kind==='1b'?'selected':'')+'>1b</option><option value="review" '+(x.kind==='review'?'selected':'')+'>Dò nhóm</option></select></div><div class="small">Mã '+esc(x.code||'—')+' · '+x.confidence+'%</div></div>').join('')+
+   '<button class="btn primary" style="width:100%" onclick="saveInvoice()">💾 Nhập các dòng đã chọn</button></div>';
+ }
+ capture.innerHTML='<h2>Chụp & nhập sổ</h2><p class="muted">Ảnh gửi trực tiếp tới Gemini OCR từ Apps Script.</p><div class="chips">'+chips+'</div><div class="card"><b>'+stepMeta[kind]+'</b></div><div class="card">'+image+(markers.length?'<div class="small" style="margin-top:8px">'+markers.map((m,i)=>'#'+(i+1)+' '+esc(m.text)).join(' · ')+'</div>':'')+'</div>'+list+'<div class="card"><b>Kiểm tra dữ liệu trước khi lưu</b><div class="grid2" style="margin-top:10px">'+form+'</div><button class="btn primary" style="width:100%;margin-top:12px" onclick="saveSingle()">💾 Lưu bản ghi</button></div>';
+}
+function manualField(k,v){fields[k]={value:v,confidence:100}}
+function addMarker(ev,box){if(ev.target.classList.contains('marker'))return;const r=box.getBoundingClientRect(),text=prompt('Ghi chú trên ảnh:');if(!text)return;markers.push({x:((ev.clientX-r.left)/r.width*100).toFixed(1),y:((ev.clientY-r.top)/r.height*100).toFixed(1),text});renderCapture()}
+
+async function toPayload(file){
+ const bmp=await createImageBitmap(file),max=2000,scale=Math.min(1,max/Math.max(bmp.width,bmp.height));
+ const c=document.createElement('canvas');c.width=Math.max(1,Math.round(bmp.width*scale));c.height=Math.max(1,Math.round(bmp.height*scale));c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+ const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.9));
+ const b64=await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(String(fr.result).split(',')[1]);fr.onerror=rej;fr.readAsDataURL(blob)});
+ return {base64:b64,mimeType:'image/jpeg'};
+}
+
+async function runOcr(){
+ if(!file)return notify('Hãy chọn ảnh trước.','bad');
+ loading(true,'Gemini đang đọc ảnh và tách bảng…');
+ try{
+   const image=await toPayload(file);
+   const res=await server('ocrImage',{kind,image});
+   if(!res.ok){
+     if(res.code==='NO_GEMINI_KEY')notify('Chưa có Gemini API key. Vào Cài đặt để xem bước thiết lập một lần.','bad');
+     else notify(res.message||'OCR lỗi','bad');
+     return;
+   }
+   fields=res.data.fields||{};
+   items=(res.data.lineItems||[]).map(x=>({...x,selected:true}));
+   notify(items.length?'Đã nhận diện '+items.length+' dòng hàng. Hãy rà các dòng dưới 95%.':'Đã nhận diện thông tin trên ảnh.','ok');
+   renderCapture();
+ }catch(e){notify('OCR lỗi: '+e.message,'bad')}finally{loading(false)}
+}
+
+function fieldValues(){const out={};defs[kind].forEach(([k])=>out[k]=document.getElementById('f_'+k)?.value?.trim()||fields[k]?.value||'');return out}
+function minConfidence(){const vals=Object.values(fields).filter(x=>x&&x.value).map(x=>Number(x.confidence||100));return vals.length?Math.min(...vals):100}
+async function saveSingle(){
+ const f=fieldValues(),missing=defs[kind].filter(([k,l,r])=>r&&!f[k]).map(x=>x[1]);if(missing.length)return notify('Thiếu: '+missing.join(', '),'bad');
+ loading(true,'Đang ghi Google Sheets…');
+ try{const r=await server('saveSingleRecord',kind,f,minConfidence());notify('Đã ghi Google Sheet · '+r.status,'ok');await refresh()}catch(e){notify('Không ghi được: '+e.message,'bad')}finally{loading(false)}
+}
+async function saveInvoice(){
+ const chosen=items.filter(x=>x.selected!==false);if(!chosen.length)return notify('Chưa chọn dòng nào.','bad');
+ if(chosen.some(x=>x.kind==='review'))return notify('Còn dòng chưa xác định 1a/1b. Hãy chọn nhóm trước.','bad');
+ const shared=fieldValues();if(!shared.receivedAt||!shared.supplier)return notify('Cần Thời gian nhập và Cơ sở cung cấp.','bad');
+ loading(true,'Đang ghi '+chosen.length+' dòng vào Google Sheets…');
+ try{const r=await server('saveInvoiceBatch',{shared,lines:chosen});notify('Đã ghi '+r.saved+' dòng; '+r.review+' dòng CẦN DÒ LẠI.','ok');items=[];await refresh()}catch(e){notify('Không ghi được: '+e.message,'bad')}finally{loading(false)}
+}
+
+function renderMenu(){
+ menu.innerHTML='<h2>Thực đơn</h2><div class="card"><div class="grid2"><label>Ngày<input id="m_date" type="date" value="'+today()+'"></label><label>Bữa<input id="m_meal" value="Trưa"></label></div><label style="margin-top:10px">Mỗi dòng: Tên món | Nguyên liệu chính | Số suất<textarea id="m_lines" rows="7"></textarea></label><button class="btn primary" style="margin-top:10px" onclick="saveMenuUI()">Lưu thực đơn</button></div><div class="card"><b>Dữ liệu gần đây</b>'+((state.menus||[]).slice(-20).reverse().map(x=>'<div class="item">'+esc(x['Ngày'])+' · '+esc(x['Ca/Bữa'])+' · <b>'+esc(x['Tên món ăn'])+'</b> · '+esc(x['Số suất dự kiến'])+' suất</div>').join('')||'<p class="muted">Chưa có dữ liệu.</p>')+'</div>';
+}
+async function saveMenuUI(){
+ const lines=m_lines.value.split(/\n/).map(x=>x.trim()).filter(Boolean),arr=lines.map(l=>{const p=l.split('|').map(x=>x.trim());return {date:m_date.value,meal:m_meal.value,dish:p[0]||'',ingredients:p[1]||'',servings:Number(p[2]||0)}}).filter(x=>x.dish);
+ if(!arr.length)return notify('Chưa có món.','bad');loading(true,'Đang lưu thực đơn…');try{await server('saveMenu',arr);notify('Đã lưu '+arr.length+' món.','ok');await refresh()}catch(e){notify(e.message,'bad')}finally{loading(false)}
+}
+
+function daysLeft(v){if(!v)return 99999;return Math.ceil((new Date(v+'T23:59:59')-Date.now())/86400000)}
+function renderStock(){
+ stock.innerHTML='<h2>Kho thực phẩm</h2><p class="muted">Tồn = tồn đầu + nhập − xuất − lưu mẫu.</p><div class="card"><div class="grid4">'+[['name','Tên thực phẩm'],['group','Nhóm'],['received','Ngày nhập'],['expiry','HSD'],['lot','Số lô'],['supplier','Nhà cung cấp'],['openingQty','Tồn đầu'],['inQty','Nhập'],['outQty','Xuất'],['sampleQty','Lưu mẫu'],['unit','Đơn vị'],['location','Vị trí'],['storage','Bảo quản']].map(([k,l])=>'<label>'+l+'<input id="st_'+k+'" '+(k==='received'||k==='expiry'?'type="date"':'')+' value="'+(k==='received'?today():'')+'"></label>').join('')+'</div><button class="btn primary" style="margin-top:10px" onclick="saveStockUI()">Nhập kho</button></div><div class="card tableWrap"><table class="tbl"><tr><th>Thực phẩm</th><th>Tồn</th><th>HSD</th><th>Trạng thái</th></tr>'+((state.stock||[]).slice(-100).reverse().map(x=>{const d=daysLeft(x['HSD']);return '<tr><td>'+esc(x['Tên thực phẩm'])+'</td><td>'+esc(x['Tồn hiện tại'])+' '+esc(x['Đơn vị'])+'</td><td>'+esc(x['HSD'])+'</td><td><span class="badge '+(d<0?'red':d<=7?'yellow':'green')+'">'+(d<0?'QUÁ HẠN':d<=7?'SẮP HẾT HẠN':'CÒN HẠN')+'</span></td></tr>'}).join('')||'<tr><td colspan="4">Chưa có dữ liệu.</td></tr>')+'</table></div>';
+}
+async function saveStockUI(){const keys=['name','group','received','expiry','lot','supplier','openingQty','inQty','outQty','sampleQty','unit','location','storage'],o={};keys.forEach(k=>o[k]=document.getElementById('st_'+k)?.value||'');if(!o.name||!o.expiry)return notify('Cần tên thực phẩm và HSD.','bad');loading(true,'Đang lưu kho…');try{await server('saveStock',o);notify('Đã lưu kho.','ok');await refresh()}catch(e){notify(e.message,'bad')}finally{loading(false)}}
+
+function renderReports(){reports.innerHTML='<h2>Báo cáo</h2><div class="card"><div class="chips"><button class="chip" onclick="reportUI(\'day\')">Ngày</button><button class="chip" onclick="reportUI(\'week\')">Tuần</button><button class="chip" onclick="reportUI(\'month\')">Tháng</button></div><textarea id="reportBox" rows="14" placeholder="Chọn kỳ báo cáo"></textarea></div>'}
+async function reportUI(p){loading(true,'Đang tổng hợp…');try{const r=await server('getReport',p);reportBox.value=r.text;notify('Đã tổng hợp báo cáo.','ok')}catch(e){notify(e.message,'bad')}finally{loading(false)}}
+
+function renderSettings(){
+ const c=state.config||{};
+ settings.innerHTML='<h2>Cài đặt</h2>'+
+ '<div class="card"><b>Trạng thái</b><p>Gemini API key: <b>'+(c.hasGeminiKey?'Đã cấu hình':'CHƯA CẤU HÌNH')+'</b></p><p>Model: <b>'+esc(state.model||'')+'</b></p><p>Zalo token: <b>'+(c.hasZaloToken?'Đã cấu hình':'Chưa cấu hình')+'</b></p></div>'+
+ '<div class="card"><b>Thiết lập Gemini một lần</b><p class="muted">Apps Script → Project Settings → Script Properties → thêm <b>GEMINI_API_KEY</b>. Không nhập key vào giao diện web.</p></div>'+
+ '<div class="card"><b>Báo cáo Zalo</b><div class="grid2"><label>Giờ gửi 0–23<input id="cfg_hour" type="number" min="0" max="23" value="'+esc(c.reportHour||'')+'"></label><label>Zalo user_id, cách nhau dấu phẩy<input id="cfg_uid" value="'+esc(c.zaloRecipients||'')+'"></label></div><label style="margin-top:10px">Zalo endpoint<input id="cfg_endpoint" value="'+esc(c.zaloEndpoint||'')+'" placeholder="Endpoint OpenAPI của OA"></label><button class="btn primary" style="margin-top:10px" onclick="saveConfigUI()">Lưu cấu hình</button><button class="btn secondary" style="margin-top:10px" onclick="installTriggerUI()">Bật báo cáo ngày</button><button class="btn secondary" style="margin-top:10px" onclick="testZaloUI()">Test Zalo</button><p class="small">ZALO_ACCESS_TOKEN được lưu trong Script Properties, không nhập trên giao diện.</p></div>';
+}
+async function saveConfigUI(){loading(true,'Đang lưu…');try{state.config=await server('saveConfig',{reportHour:cfg_hour.value,zaloRecipients:cfg_uid.value,zaloEndpoint:cfg_endpoint.value});notify('Đã lưu cấu hình.','ok');renderSettings()}catch(e){notify(e.message,'bad')}finally{loading(false)}}
+async function installTriggerUI(){loading(true,'Đang tạo lịch…');try{const r=await server('installDailyReportTrigger');notify('Đã bật báo cáo hằng ngày lúc '+r.hour+'h.','ok')}catch(e){notify(e.message,'bad')}finally{loading(false)}}
+async function testZaloUI(){loading(true,'Đang gửi thử…');try{const r=await server('testZalo');notify(r.ok?'Đã gửi thử Zalo.':r.message,r.ok?'ok':'bad')}catch(e){notify(e.message,'bad')}finally{loading(false)}}
+
+async function refresh(){state=await server('getBootstrap');render()}
+renderNav();boot();
+</script>
+</body>
+</html>
