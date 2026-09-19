@@ -345,6 +345,7 @@ function renderOcr(){
       '<input aria-label="Tên hàng" data-ln="'+i+'" data-k="name" value="'+esc(x.name)+'">'+
       '<input aria-label="Số lượng" data-ln="'+i+'" data-k="quantity" value="'+esc(x.quantity||'')+'">'+
       '<input aria-label="ĐVT" data-ln="'+i+'" data-k="unit" value="'+esc(x.unit||'')+'">'+
+      '<input aria-label="HSD" data-ln="'+i+'" data-k="expiry" placeholder="HSD" value="'+esc(x.expiry||'')+'">'+
       '<select aria-label="Loại" data-ln="'+i+'" data-k="kind">'+
         '<option '+(x.kindSuggestion==='1a'?'selected':'')+'>1a</option>'+
         '<option '+(x.kindSuggestion==='1b'?'selected':'')+'>1b</option>'+
@@ -384,6 +385,7 @@ async function saveOcr(){
       name:get('name'),
       quantity:get('quantity'),
       unit:get('unit'),
+      expiry:get('expiry'),
       kind:get('kind'),
       confidence:o.localFallback?Math.min(90,Number(x.confidence||0)):Number(x.confidence||0)
     };
