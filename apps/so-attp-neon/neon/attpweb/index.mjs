@@ -6,7 +6,7 @@ const cache=new Map();
 async function asset(path){
   const name=path==='/'?'index.html':path.slice(1);
   const hit=cache.get(name);
-  if(hit && Date.now()-hit.at<60000) return hit.body;
+  if(hit && Date.now()-hit.at<10000) return hit.body;
   const r=await fetch(`${BASE}/${name}`,{headers:{'user-agent':'attp-neon-web'}});
   if(!r.ok) throw new Error(`SOURCE_${r.status}`);
   const body=await r.text(); cache.set(name,{body,at:Date.now()}); return body;
@@ -27,7 +27,34 @@ async function forward(req,target){
   }
   return new Response(r.body,{status:r.status,statusText:r.statusText,headers:outHeaders});
 }
-async function apiProxy(req,u){ return forward(req,API+u.pathname+u.search); }
+async function apiProxy(req,u){
+  if(u.pathname==='/health') return forward(req,API+u.pathname+u.search);
+
+  const cookie=req.headers.get('cookie')||'';
+  if(!cookie) return Response.json({error:'UNAUTHORIZED'},{status:401});
+
+  const tokenResp=await fetch(AUTH+'/token',{
+    method:'GET',
+    headers:{cookie,'accept':'application/json'}
+  });
+  const tokenBody=await tokenResp.json().catch(()=>({}));
+  const token=tokenBody?.token;
+  if(!tokenResp.ok || !token) return Response.json({error:'UNAUTHORIZED'},{status:401});
+
+  const headers=new Headers(req.headers);
+  headers.delete('host');
+  headers.delete('origin');
+  headers.delete('cookie');
+  headers.set('authorization','Bearer '+token);
+  const init={method:req.method,headers,redirect:'manual'};
+  if(!['GET','HEAD'].includes(req.method)) init.body=await req.arrayBuffer();
+
+  const r=await fetch(API+u.pathname+u.search,init);
+  const outHeaders=new Headers(r.headers);
+  outHeaders.delete('content-encoding');
+  outHeaders.delete('content-length');
+  return new Response(r.body,{status:r.status,statusText:r.statusText,headers:outHeaders});
+}
 async function authProxy(req,u){
   const path=u.pathname==='/auth'?'':u.pathname.slice('/auth'.length);
   return forward(req,AUTH+path+u.search);
@@ -37,6 +64,6 @@ export default {async fetch(req){
   if(u.pathname==='/health'||u.pathname.startsWith('/api/')) return apiProxy(req,u);
   if(u.pathname==='/auth'||u.pathname.startsWith('/auth/')) return authProxy(req,u);
   if(!TYPES[u.pathname]) return new Response('Not found',{status:404});
-  try{return new Response(await asset(u.pathname),{headers:{'content-type':TYPES[u.pathname],'cache-control':'public, max-age=60','x-content-type-options':'nosniff'}})}
+  try{return new Response(await asset(u.pathname),{headers:{'content-type':TYPES[u.pathname],'cache-control':'no-store, max-age=0','x-content-type-options':'nosniff'}})}
   catch(e){return Response.json({ok:false,error:String(e.message||e)},{status:502})}
 }};
