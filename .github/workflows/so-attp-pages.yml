@@ -1,10 +1,5 @@
-name: Deploy Sổ ATTP to GitHub Pages
+name: Deploy Sổ ATTP to GitHub Pages (optional)
 on:
-  push:
-    branches: [so-attp-neon-rebuild]
-    paths:
-      - 'apps/so-attp-neon/frontend/**'
-      - '.github/workflows/so-attp-pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -23,14 +18,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-      - name: Configure Pages
-        uses: actions/configure-pages@v6
-      - name: Upload static site
-        uses: actions/upload-pages-artifact@v4
+      - uses: actions/checkout@v6
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: apps/so-attp-neon/frontend
-      - name: Deploy
-        id: deployment
+      - id: deployment
         uses: actions/deploy-pages@v4
