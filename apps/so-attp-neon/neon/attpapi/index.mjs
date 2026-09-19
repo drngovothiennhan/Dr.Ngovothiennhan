@@ -7,12 +7,85 @@ let jwksCache = null;
 let jwksAt = 0;
 let aiProbeCache = { at: 0, ok: false, model: null, reason: 'unprobed' };
 const AUTHORIZED_EMAIL = 'admin@attp.local';
+const AUTH_BASE = process.env.NEON_AUTH_BASE_URL || '';
 
 function cors(extra={}) { return {'access-control-allow-origin':CORS_ORIGIN,'access-control-allow-headers':'authorization, content-type','access-control-allow-methods':'GET,POST,OPTIONS','vary':'Origin',...extra}; }
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:cors({'content-type':'application/json; charset=utf-8'})});}
 function norm(v=''){return String(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9.,|]+/g,' ').trim();}
 function clamp(v){return Math.max(0,Math.min(100,Number(v)||0));}
 function b64uToBuf(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return Buffer.from(s,'base64');}
+
+function extractSessionCookie(headers){
+  const values=typeof headers.getSetCookie==='function'?headers.getSetCookie():[headers.get('set-cookie')||''];
+  for(const value of values){
+    if(!/session_token=/i.test(value)) continue;
+    const pair=value.split(';')[0].trim();
+    if(pair) return pair;
+  }
+  return '';
+}
+function validSessionCookie(value){
+  return typeof value==='string' && value.length>10 && value.length<4096 && /session_token=/i.test(value) && !/[\r\n]/.test(value);
+}
+async function authFetch(path,init={}){
+  if(!AUTH_BASE) throw new Error('AUTH_NOT_CONFIGURED');
+  const headers=new Headers(init.headers||{});
+  headers.set('origin',CORS_ORIGIN);
+  headers.set('accept','application/json');
+  return fetch(AUTH_BASE+path,{...init,headers,redirect:'manual'});
+}
+async function getJwtFromSessionCookie(sessionCookie){
+  const tokenResp=await authFetch('/token',{method:'GET',headers:{cookie:sessionCookie}});
+  const tokenBody=await tokenResp.json().catch(()=>({}));
+  if(!tokenResp.ok||!tokenBody?.token) throw new Error('SESSION_REFRESH_FAILED');
+  return tokenBody.token;
+}
+async function getAuthSession(sessionCookie){
+  const r=await authFetch('/get-session',{method:'GET',headers:{cookie:sessionCookie}});
+  const body=await r.json().catch(()=>null);
+  if(!r.ok||!body?.user||!body?.session) throw new Error('SESSION_INVALID');
+  return body;
+}
+function adminUserOk(user){
+  if(!user||String(user.email||'').toLowerCase()!==AUTHORIZED_EMAIL) return false;
+  const role=user.role;
+  return role==='admin'||(Array.isArray(role)&&role.includes('admin'))||(Array.isArray(user.roles)&&user.roles.includes('admin'));
+}
+async function handleAuthLogin(body){
+  const email=String(body?.email||'').trim().toLowerCase();
+  const password=String(body?.password||'');
+  if(email!==AUTHORIZED_EMAIL||password.length<8) return json({error:'INVALID_CREDENTIALS'},401);
+  const r=await authFetch('/sign-in/email',{
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:JSON.stringify({email,password,rememberMe:true})
+  });
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok) return json({error:'INVALID_CREDENTIALS'},401);
+  if(!adminUserOk(data.user)) return json({error:'FORBIDDEN'},403);
+  const sessionCookie=extractSessionCookie(r.headers);
+  if(!validSessionCookie(sessionCookie)) return json({error:'SESSION_COOKIE_MISSING'},502);
+  let token;
+  try{token=await getJwtFromSessionCookie(sessionCookie);}catch(e){return json({error:'JWT_EXCHANGE_FAILED',message:String(e.message||e)},502);}
+  return json({token,sessionCookie,user:{id:data.user.id,email:data.user.email,name:data.user.name,role:data.user.role}});
+}
+async function handleAuthRefresh(body){
+  const sessionCookie=String(body?.sessionCookie||'');
+  if(!validSessionCookie(sessionCookie)) return json({error:'SESSION_INVALID'},401);
+  let session;
+  try{session=await getAuthSession(sessionCookie);}catch{return json({error:'SESSION_EXPIRED'},401);}
+  if(!adminUserOk(session.user)) return json({error:'FORBIDDEN'},403);
+  let token;
+  try{token=await getJwtFromSessionCookie(sessionCookie);}catch{return json({error:'SESSION_EXPIRED'},401);}
+  return json({token,user:{id:session.user.id,email:session.user.email,name:session.user.name,role:session.user.role}});
+}
+async function handleAuthLogout(body){
+  const sessionCookie=String(body?.sessionCookie||'');
+  if(validSessionCookie(sessionCookie)){
+    try{await authFetch('/sign-out',{method:'POST',headers:{cookie:sessionCookie,'content-type':'application/json'},body:'{}'});}catch{}
+  }
+  return json({ok:true});
+}
 
 async function verifyJwt(req){
   const h=req.headers.get('authorization')||'';
@@ -145,8 +218,11 @@ async function handler(req){
   if(req.method==='OPTIONS') return new Response(null,{status:204,headers:cors()});
   const u=new URL(req.url), path=u.pathname;
   if(path==='/'||path==='/health'){
-    const models=await aiModels(); const probe=await probeAi(); return json({ok:true,service:'attpapi',dbConfigured:Boolean(DB_URL),storageConfigured:Boolean(process.env.AWS_ENDPOINT_URL_S3&&process.env.AWS_ACCESS_KEY_ID),authConfigured:Boolean(process.env.NEON_AUTH_BASE_URL&&process.env.NEON_AUTH_JWKS_URL),aiConfigured:Boolean(process.env.NEON_AI_GATEWAY_BASE_URL&&process.env.NEON_AI_GATEWAY_TOKEN),aiOperational:probe.ok,aiReason:probe.reason,localFallback:true,aiModels:models.filter(x=>/gemini|gpt-5-mini|claude-haiku/i.test(x)).slice(0,8)});
+    const models=await aiModels(); const probe=await probeAi(); return json({ok:true,service:'attpapi',dbConfigured:Boolean(DB_URL),storageConfigured:Boolean(process.env.AWS_ENDPOINT_URL_S3&&process.env.AWS_ACCESS_KEY_ID),authConfigured:Boolean(AUTH_BASE&&process.env.NEON_AUTH_JWKS_URL),aiConfigured:Boolean(process.env.NEON_AI_GATEWAY_BASE_URL&&process.env.NEON_AI_GATEWAY_TOKEN),aiOperational:probe.ok,aiReason:probe.reason,localFallback:true,aiModels:models.filter(x=>/gemini|gpt-5-mini|claude-haiku/i.test(x)).slice(0,8)});
   }
+  if(path==='/api/auth/login'&&req.method==='POST') return handleAuthLogin(await req.json());
+  if(path==='/api/auth/refresh'&&req.method==='POST') return handleAuthRefresh(await req.json());
+  if(path==='/api/auth/logout'&&req.method==='POST') return handleAuthLogout(await req.json());
   let user; try{user=await verifyJwt(req);}catch(e){return json({error:e.message==='TOKEN_EXPIRED'?'TOKEN_EXPIRED':'UNAUTHORIZED'},401);}
   const roleOk=!user.role || user.role==='admin' || (Array.isArray(user.roles)&&user.roles.includes('admin'));
   if(user.email!==AUTHORIZED_EMAIL || !roleOk) return json({error:'FORBIDDEN'},403);
