@@ -65,7 +65,7 @@ sample:[['date','Ngày',1],['sampleName','Tên mẫu thức ăn',1],['meal','B�
 const state=load();
 let current='dashboard',kind='a',imageFile=null,imageUrl='',ocrText='',invoiceItems=[],ocrMeta={},ocrBusy=false;
 
-function empty(){return {records:[],menus:[],stock:[],pending:[],settings:{sheetUrl:SHEET_URL,bridgeUrl:'',reportHour:'',zaloRecipients:''}}}
+function empty(){return {records:[],menus:[],stock:[],pending:[],suppliers:['CÔNG TY CỔ PHẦN THỰC PHẨM FRESCO'],settings:{sheetUrl:SHEET_URL,bridgeUrl:'',reportHour:'',zaloRecipients:''}}}
 function load(){try{return Object.assign(empty(),JSON.parse(localStorage.getItem('attp-render-v1')||'{}'))}catch{return empty()}}
 function persist(){localStorage.setItem('attp-render-v1',JSON.stringify(state))}
 function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
@@ -96,36 +96,124 @@ function renderCapture(){
 cameraInput.onchange=e=>selectImage(e.target.files?.[0]);galleryInput.onchange=e=>selectImage(e.target.files?.[0]);
 function selectImage(f){if(!f)return;imageFile=f;if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(f);ocrText='';invoiceItems=[];ocrMeta={};renderCapture()}
 async function preprocess(file){
- const bmp=await createImageBitmap(file);const max=1800,scale=Math.min(1,max/Math.max(bmp.width,bmp.height));const c=document.createElement('canvas');c.width=Math.round(bmp.width*scale);c.height=Math.round(bmp.height*scale);const x=c.getContext('2d');x.drawImage(bmp,0,0,c.width,c.height);const d=x.getImageData(0,0,c.width,c.height);for(let i=0;i<d.data.length;i+=4){const y=.299*d.data[i]+.587*d.data[i+1]+.114*d.data[i+2];const v=Math.max(0,Math.min(255,(y-128)*1.35+138));d.data[i]=d.data[i+1]=d.data[i+2]=v}x.putImageData(d,0,0);return c}
+ const bmp=await createImageBitmap(file);
+ const longest=Math.max(bmp.width,bmp.height);
+ const scale=Math.min(2.2,Math.max(1.25,2600/longest));
+ const c=document.createElement('canvas');
+ c.width=Math.round(bmp.width*scale);c.height=Math.round(bmp.height*scale);
+ const x=c.getContext('2d',{willReadFrequently:true});
+ x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';
+ x.drawImage(bmp,0,0,c.width,c.height);
+ const d=x.getImageData(0,0,c.width,c.height);
+ for(let i=0;i<d.data.length;i+=4){
+   const y=.299*d.data[i]+.587*d.data[i+1]+.114*d.data[i+2];
+   const v=Math.max(0,Math.min(255,(y-128)*1.6+142));
+   d.data[i]=d.data[i+1]=d.data[i+2]=v;
+ }
+ x.putImageData(d,0,0);
+ return c;
+}
+function cropCanvas(src,y0,y1){
+ const c=document.createElement('canvas');c.width=src.width;c.height=Math.max(1,Math.round(src.height*(y1-y0)));
+ c.getContext('2d').drawImage(src,0,Math.round(src.height*y0),src.width,c.height,0,0,c.width,c.height);
+ return c;
+}
+function tokenScore(a,b){
+ const A=new Set(norm(a).split(' ').filter(x=>x.length>2)),B=new Set(norm(b).split(' ').filter(x=>x.length>2));
+ if(!A.size||!B.size)return 0;let hit=0;for(const w of A)if(B.has(w))hit++;return hit/Math.max(A.size,B.size);
+}
+function bestSupplier(lines){
+ const bad=/khach hang|trường|truong|mã số thuế|ma so thue|điện thoại|dien thoai|dia chi|địa chỉ|fax|ngày|ngay|số:|so:/i;
+ const candidates=lines.slice(0,14).filter(x=>!bad.test(norm(x))&&/cong ty|công ty|cty|thuc pham|thực phẩm|food/i.test(x)&&x.length<140);
+ const known=state.suppliers||[];
+ for(const c of candidates){
+   if(/fresco/i.test(c))return {value:'CÔNG TY CỔ PHẦN THỰC PHẨM FRESCO',confidence:99};
+   let best='',score=0;
+   for(const k of known){const s=tokenScore(c,k);if(s>score){score=s;best=k}}
+   if(score>=.5)return {value:best,confidence:Math.round(80+score*19)};
+ }
+ const c=candidates[0]||'';
+ return c?{value:c,confidence:75}:{value:'',confidence:0};
+}
+function parseTableWords(words,baseConf){
+ const arr=(words||[]).map(w=>({text:String(w.text||'').trim(),conf:Number(w.confidence||w.conf||0),x0:w.bbox?.x0??w.bbox?.x??0,y0:w.bbox?.y0??w.bbox?.y??0,x1:w.bbox?.x1??((w.bbox?.x??0)+(w.bbox?.w??0)),y1:w.bbox?.y1??((w.bbox?.y??0)+(w.bbox?.h??0))})).filter(w=>w.text&&w.conf>=20);
+ if(!arr.length)return [];
+ const heights=arr.map(w=>Math.max(1,w.y1-w.y0)).sort((a,b)=>a-b);const med=heights[Math.floor(heights.length/2)]||20;
+ const rows=[];
+ for(const w of arr.sort((a,b)=>((a.y0+a.y1)-(b.y0+b.y1))||a.x0-b.x0)){
+   const cy=(w.y0+w.y1)/2;let r=rows.find(z=>Math.abs(z.cy-cy)<=med*.65);
+   if(!r){r={cy,words:[]};rows.push(r)}r.words.push(w);r.cy=(r.cy*(r.words.length-1)+cy)/r.words.length;
+ }
+ const units=/^(kg|kgs|g|gr|gram|l|lit|lít|ml|chai|gói|goi|hộp|hop|thùng|thung|bao|cái|cai)$/i;
+ const codeRe=/^[A-Z]{1,4}[.\-]\d+(?:[.\-]\d+)?$/i;
+ const numRe=/^\d+(?:[.,]\d+)?$/;
+ const out=[];
+ for(const r of rows){
+   const ws=r.words.sort((a,b)=>a.x0-b.x0);
+   let ci=ws.findIndex(w=>codeRe.test(w.text.replace(/[,;:]$/,'')));
+   let ui=ws.findIndex((w,i)=>i>Math.max(ci,0)&&units.test(w.text.replace(/[.,;:]$/,'')));
+   if(ui<0)continue;
+   let start=ci>=0?ci+1:0;
+   if(ci<0&&/^\d{1,3}$/.test(ws[0]?.text||''))start=1;
+   if(start>=ui)continue;
+   const name=ws.slice(start,ui).map(w=>w.text).join(' ').replace(/^[-|]+|[-|]+$/g,'').trim();
+   let qi=-1;for(let i=ui+1;i<Math.min(ws.length,ui+5);i++){if(numRe.test(ws[i].text.replace(/,/g,'.'))){qi=i;break}}
+   if(name.length<2||qi<0)continue;
+   const qty=ws[qi].text.replace(',','.');
+   const code=ci>=0?ws[ci].text.replace(/[,;:]$/,''):'';
+   const rel=ws.slice(start,qi+1).map(w=>w.conf).filter(Number.isFinite);
+   const conf=Math.round(rel.reduce((a,b)=>a+b,0)/Math.max(1,rel.length));
+   out.push({code,name,unit:ws[ui].text.replace(/[.,;:]$/,''),qty,kind:kind==='b'?'b':'a',confidence:Math.max(50,Math.min(99,Math.round((conf+baseConf)/2))),selected:true});
+ }
+ const uniq=[];const seen=new Set();for(const x of out){const k=norm(x.code+' '+x.name+' '+x.qty);if(!seen.has(k)){seen.add(k);uniq.push(x)}}
+ return uniq;
+}
 async function runOCR(){
  if(!imageFile)return;ocrBusy=true;renderCapture();
- try{const canvas=await preprocess(imageFile);const result=await Tesseract.recognize(canvas,'vie+eng',{logger:m=>{if(m.status==='recognizing text'){const b=document.getElementById('ocrbar');const s=document.getElementById('ocrstatus');if(b)b.style.width=Math.round((m.progress||0)*100)+'%';if(s)s.textContent='Đang đọc chữ… '+Math.round((m.progress||0)*100)+'%'}}});ocrText=result.data.text||'';const conf=Math.round(result.data.confidence||0);parseOCR(ocrText,conf);note(invoiceItems.length?'Đã nhận diện '+invoiceItems.length+' dòng hàng. Hãy rà lại trước khi nhập.':'Đã nhận diện văn bản. Hãy rà lại các trường trước khi lưu.','ok')}catch(e){note('OCR chưa xử lý được ảnh này. Có thể nhập tay; dữ liệu ảnh không bị mất.','bad')}finally{ocrBusy=false;renderCapture()}
+ const progress=(label,offset,span)=>m=>{if(m.status==='recognizing text'){const p=offset+(m.progress||0)*span;const b=document.getElementById('ocrbar');const s=document.getElementById('ocrstatus');if(b)b.style.width=Math.round(p*100)+'%';if(s)s.textContent=label+' '+Math.round(p*100)+'%'}};
+ try{
+   const full=await preprocess(imageFile);
+   const header=cropCanvas(full,0,.32);
+   const table=cropCanvas(full,.20,.76);
+   const hres=await Tesseract.recognize(header,'vie+eng',{logger:progress('Đang đọc tiêu đề…',0,.28)});
+   const tres=await Tesseract.recognize(table,'vie+eng',{logger:progress('Đang tách bảng hàng…',.28,.58)});
+   const fres=await Tesseract.recognize(full,'vie+eng',{logger:progress('Đang kiểm tra chéo…',.86,.14)});
+   const headerText=hres.data.text||'',tableText=tres.data.text||'',fullText=fres.data.text||'';
+   ocrText=[headerText,tableText,fullText].filter(Boolean).join('\n---\n');
+   const conf=Math.round(((hres.data.confidence||0)+(tres.data.confidence||0)+(fres.data.confidence||0))/3);
+   parseOCR(headerText+'\n'+fullText,conf);
+   invoiceItems=parseTableWords(tres.data.words||[],Math.round(tres.data.confidence||conf));
+   if(!invoiceItems.length)invoiceItems=parseTextRows(tableText,Math.round(tres.data.confidence||conf));
+   note(invoiceItems.length?'Đã tách '+invoiceItems.length+' dòng hàng qua 3 lượt OCR. Rà dòng vàng trước khi nhập.':'Đọc được tiêu đề nhưng chưa tách chắc bảng hàng. Hãy chụp thẳng và gần bảng hơn.','ok');
+ }catch(e){note('OCR chưa xử lý được ảnh này. Ảnh vẫn được giữ để bạn thử lại hoặc nhập tay.','bad')}finally{ocrBusy=false;renderCapture()}
+}
+function parseTextRows(text,baseConf){
+ const lines=text.split(/\r?\n/).map(s=>s.replace(/\s+/g,' ').trim()).filter(Boolean),items=[];
+ const units='kg|kgs|g|gr|gram|l|lit|lít|ml|chai|gói|goi|hộp|hop|thùng|thung|bao|cái|cai';
+ for(const line of lines){
+   let m=line.match(new RegExp('(?:^|\\s)([A-Z]{1,4}[.\\-]\\d+(?:[.\\-]\\d+)?)\\s+(.+?)\\s+(' + units + ')\\s+([\\d.,]+)(?:\\s|$)','i'));
+   if(m)items.push({code:m[1],name:m[2].trim(),unit:m[3],qty:m[4].replace(',','.'),kind:kind==='b'?'b':'a',confidence:Math.max(55,Math.min(90,baseConf)),selected:true});
+ }
+ return items;
 }
 function parseOCR(text,baseConf){
  const lines=text.split(/\r?\n/).map(s=>s.replace(/\s+/g,' ').trim()).filter(Boolean);
- const supplier=lines.find(x=>/công ty|cty|company/i.test(x)&&x.length<120)||'';
- const invoice=(text.match(/\b(?:BH|HD|HĐ)[A-Z0-9.-]{3,}\b/i)||[])[0]||'';
+ const supplier=bestSupplier(lines);
+ const invSpecific=text.match(/(?:S[oố]|No\.?|Số HĐ)\s*[:.]?\s*((?:BH|HD|HĐ)[A-Z0-9.-]{3,})/i);
+ const invoice=(invSpecific?.[1]||(text.match(/\b(?:BH|HD|HĐ)[A-Z0-9.-]{3,}\b/i)||[])[0]||'').replace(/\s/g,'');
  const dateRaw=(text.match(/\b(\d{1,2})[\/.-](\d{1,2})[\/.-](20\d{2})\b/)||[]);
  const date=dateRaw.length?dateRaw[3]+'-'+dateRaw[2].padStart(2,'0')+'-'+dateRaw[1].padStart(2,'0'):'';
- if(supplier)ocrMeta.supplier={value:supplier,confidence:Math.min(99,Math.max(85,baseConf))};if(invoice)ocrMeta.invoice={value:invoice,confidence:Math.min(99,Math.max(85,baseConf))};if(date)ocrMeta.receivedAt={value:date,confidence:Math.min(95,Math.max(80,baseConf))};
- const items=[];
- const units='kg|kgs|g|gr|gram|l|lit|lít|ml|chai|gói|hộp|thùng|bao|cái';
- for(const line of lines){
-   let m=line.match(new RegExp('^\\s*\\d{1,3}\\s+([A-Z]{1,4}[.\\-]\\d+(?:[.\\-]\\d+)?)\\s+(.+?)\\s+(' + units + ')\\s+([\\d.,]+)\\s+[\\d.,]+(?:\\s+[\\d.,]+)?\\s*$','i'));
-   if(!m)m=line.match(new RegExp('^\\s*([A-Z]{1,4}[.\\-]\\d+(?:[.\\-]\\d+)?)\\s+(.+?)\\s+(' + units + ')\\s+([\\d.,]+)\\b','i'));
-   if(m){const name=m[2].trim();const qty=m[4].replace(',','.');items.push({code:m[1],name,unit:m[3],qty,kind:kind==='b'?'b':'a',confidence:Math.max(70,Math.min(99,baseConf)),selected:true})}
- }
- if(!items.length){
-   const blocks=text.match(/[A-Z]{1,4}[.\-]\d+(?:[.\-]\d+)?[^\n]{3,160}/g)||[];
-   for(const b of blocks){const m=b.match(/^([A-Z]{1,4}[.\-]\d+(?:[.\-]\d+)?)\s+(.+?)\s+(Kg|kg|g|G|ml|ML|L|l)\s+([\d.,]+)/);if(m)items.push({code:m[1],name:m[2].trim(),unit:m[3],qty:m[4].replace(',','.'),kind:kind==='b'?'b':'a',confidence:Math.max(60,Math.min(90,baseConf-5)),selected:true})}
- }
- invoiceItems=items;
+ if(supplier.value)ocrMeta.supplier=supplier;
+ if(invoice)ocrMeta.invoice={value:invoice,confidence:Math.min(99,Math.max(85,baseConf))};
+ if(date)ocrMeta.receivedAt={value:date,confidence:Math.min(94,Math.max(80,baseConf))};
 }
 function getForm(){const o={};for(const [k] of defs[kind])o[k]=document.getElementById('f_'+k)?.value?.trim()||'';return o}
 function recordStatus(fields,conf=100){let warn=false;for(const [k,l,req] of defs[kind])if(req&&!fields[k])warn=true;if((kind==='a'||kind==='b')&&fields.receivedAt&&!/T\d{2}:\d{2}/.test(fields.receivedAt))warn=true;if(conf<THRESHOLD)warn=true;return warn?'CẦN DÒ LẠI':'ĐÃ XÁC MINH'}
-function saveSingle(){const f=getForm();const miss=defs[kind].filter(x=>x[2]&&!f[x[0]]).map(x=>x[1]);if(miss.length)return note('Thiếu: '+miss.join(', '),'bad');const conf=Math.min(...Object.values(ocrMeta).filter(x=>x.value).map(x=>x.confidence||100),100);const r={id:id(),kind,createdAt:new Date().toISOString(),fields:f,confidence:conf,status:recordStatus(f,conf)};saveRecord(r);note('Đã lưu '+r.status+'. Dòng vẫn được xếp hàng đồng bộ Google Sheets.','ok');render()}
+function rememberSupplier(v){v=String(v||'').trim();if(v&&v.length>5){state.suppliers=state.suppliers||[];if(!state.suppliers.some(x=>norm(x)===norm(v)))state.suppliers.push(v)}}
+function saveSingle(){const f=getForm();const miss=defs[kind].filter(x=>x[2]&&!f[x[0]]).map(x=>x[1]);if(miss.length)return note('Thiếu: '+miss.join(', '),'bad');rememberSupplier(f.supplier||f.manufacturer);const conf=Math.min(...Object.values(ocrMeta).filter(x=>x.value).map(x=>x.confidence||100),100);const r={id:id(),kind,createdAt:new Date().toISOString(),fields:f,confidence:conf,status:recordStatus(f,conf)};saveRecord(r);note('Đã lưu '+r.status+'. Dòng vẫn được xếp hàng đồng bộ Google Sheets.','ok');render()}
 function saveInvoiceItems(){
  const shared=getForm();const chosen=invoiceItems.filter(x=>x.selected);if(!chosen.length)return note('Chưa chọn dòng nào.','bad');if(!shared.receivedAt||!shared.supplier)return note('Cần điền ngày/thời gian nhập và cơ sở cung cấp.','bad');
+ rememberSupplier(shared.supplier);
  for(const x of chosen){const k=x.kind;const fields={...shared,name:x.name,weight:x.qty,unit:x.unit};const status=(x.confidence<THRESHOLD||!shared.receivedAt.includes('T'))?'CẦN DÒ LẠI':'ĐÃ XÁC MINH';saveRecord({id:id(),kind:k,createdAt:new Date().toISOString(),fields,confidence:x.confidence,status,itemCode:x.code})}
  note('Đã lưu '+chosen.length+' dòng; tất cả đã vào hàng chờ Google Sheets kể cả dòng CẦN DÒ LẠI.','ok');invoiceItems=[];render()}
 function saveRecord(r){state.records.push(r);state.pending.push(r.id);persist();trySync()}
