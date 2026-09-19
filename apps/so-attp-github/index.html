@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#047857">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Sổ ATTP Trường học</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <strong>SỔ ATTP TRƯỜNG HỌC</strong>
+    <small>GitHub Pages · Neon backend · OCR local</small>
+  </div>
+  <div class="top-actions">
+    <span id="health" class="status">Đang kiểm tra…</span>
+    <button id="installBtn" class="ghost hidden" type="button">Cài app</button>
+    <button id="signOutBtn" class="ghost hidden" type="button">Đăng xuất</button>
+  </div>
+</header>
+
+<section id="authGate" class="auth-gate">
+  <form id="authForm" class="card auth-card">
+    <h1>Đăng nhập</h1>
+    <p class="muted">Tài khoản quản trị: <b>admin@attp.local</b></p>
+    <label>Email
+      <input id="authEmail" type="email" value="admin@attp.local" autocomplete="username" required>
+    </label>
+    <label>Mật khẩu
+      <input id="authPassword" type="password" autocomplete="current-password" minlength="8" required>
+    </label>
+    <button id="authSubmit" class="primary" type="submit">Đăng nhập</button>
+    <p id="authMsg" class="muted"></p>
+  </form>
+</section>
+
+<div id="appShell" class="hidden">
+  <nav id="nav" class="tabs">
+    <button class="active" data-tab="ocr">OCR</button>
+    <button data-tab="records">Sổ kiểm thực</button>
+    <button data-tab="inventory">Kho</button>
+    <button data-tab="menu">Thực đơn</button>
+    <button data-tab="report">Báo cáo</button>
+  </nav>
+
+  <main>
+    <section id="tab-ocr" class="tab active">
+      <h2>Nhận diện chứng từ / biểu mẫu</h2>
+      <div class="card">
+        <div class="grid2">
+          <label>Loại biểu mẫu
+            <select id="kind">
+              <option value="1a">Bước 1a · Tươi sống/đông lạnh</option>
+              <option value="1b">Bước 1b · Khô/bao gói/phụ gia</option>
+              <option value="2">Bước 2 · Chế biến</option>
+              <option value="3">Bước 3 · Trước khi ăn</option>
+              <option value="sample">Lưu mẫu</option>
+            </select>
+          </label>
+          <div class="image-picker">
+            <span class="label-text">Ảnh chứng từ</span>
+            <div class="image-actions">
+              <button id="takePhoto" class="primary" type="button">📷 Chụp ảnh</button>
+              <button id="choosePhoto" type="button">🖼️ Tải ảnh từ máy</button>
+            </div>
+            <input id="cameraInput" class="hidden" type="file" accept="image/*" capture="environment">
+            <input id="fileInput" class="hidden" type="file" accept="image/*">
+            <span id="selectedFile" class="file-chip">Chưa chọn ảnh</span>
+          </div>
+        </div>
+        <img id="preview" class="preview" alt="Ảnh xem trước">
+        <div class="ocr-controls">
+          <button id="runOcr" class="primary" type="button">Nhận diện OCR</button>
+          <p id="ocrMsg" class="muted">OCR local chạy trước. AI chỉ hỗ trợ khi local không đủ.</p>
+        </div>
+      </div>
+      <div id="ocrResult"></div>
+    </section>
+
+    <section id="tab-records" class="tab">
+      <h2>Sổ kiểm thực gần đây</h2>
+      <div class="card table-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Loại</th><th>Trạng thái</th><th>Nội dung</th><th>Thời điểm</th></tr></thead>
+          <tbody id="recordsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-inventory" class="tab">
+      <h2>Kho & hạn sử dụng</h2>
+      <form id="inventoryForm" class="card grid3">
+        <label>Tên thực phẩm<input name="name" required></label>
+        <label>Nhóm<input name="group"></label>
+        <label>Ngày nhập<input name="received" type="date"></label>
+        <label>HSD<input name="expiry" type="date" required></label>
+        <label>Số lô<input name="lot"></label>
+        <label>Nhà cung cấp<input name="supplier"></label>
+        <label>Tồn đầu<input name="openingQty" type="number" step="any" value="0"></label>
+        <label>SL nhập<input name="inQty" type="number" step="any" required></label>
+        <label>SL xuất<input name="outQty" type="number" step="any" value="0"></label>
+        <label>Lưu mẫu<input name="sampleQty" type="number" step="any" value="0"></label>
+        <label>Đơn vị<input name="unit"></label>
+        <label>Vị trí<input name="location"></label>
+        <label>Điều kiện bảo quản<input name="storage"></label>
+        <button class="primary" type="submit">Nhập kho</button>
+      </form>
+      <div class="card table-wrap">
+        <table>
+          <thead><tr><th>Thực phẩm</th><th>Nhập</th><th>Xuất</th><th>Tồn</th><th>HSD</th><th>Trạng thái</th></tr></thead>
+          <tbody id="inventoryBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-menu" class="tab">
+      <h2>Thực đơn</h2>
+      <form id="menuForm" class="card grid2">
+        <label>Ngày<input name="date" type="date" required></label>
+        <label>Bữa<input name="meal" value="Trưa" required></label>
+        <label class="span2">Mỗi dòng: Tên món | Nguyên liệu | Số suất
+          <textarea name="lines" rows="7" placeholder="Canh rau | Rau, thịt | 120"></textarea>
+        </label>
+        <button class="primary" type="submit">Lưu thực đơn</button>
+      </form>
+    </section>
+
+    <section id="tab-report" class="tab">
+      <h2>Báo cáo</h2>
+      <div class="card">
+        <div class="actions">
+          <button data-period="today" type="button">Ngày</button>
+          <button data-period="week" type="button">7 ngày</button>
+          <button data-period="month" type="button">Tháng</button>
+        </div>
+        <pre id="reportBox">Chọn kỳ báo cáo.</pre>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast" role="status"></div>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
