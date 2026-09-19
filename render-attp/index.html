@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#087f5b" />
+<link rel="manifest" href="./manifest.json" />
+<title>Sổ ATTP trường học</title>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<style>
+:root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#172033;background:#f5f7fb}
+*{box-sizing:border-box}body{margin:0;background:#f5f7fb}.app{max-width:1180px;margin:auto;min-height:100vh}
+header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #e5e7eb;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;gap:10px;align-items:center}.logo{width:38px;height:38px;border-radius:11px;background:#087f5b;color:#fff;display:grid;place-items:center;font-weight:800}
+h1{font-size:17px;margin:0}.sub{font-size:11px;color:#697386;margin-top:2px}
+main{display:grid;grid-template-columns:190px 1fr;gap:18px;padding:18px}.side{display:flex;flex-direction:column;gap:5px}
+.nav{border:0;background:transparent;padding:10px 12px;text-align:left;border-radius:10px;color:#4b5563}.nav.active{background:#e8f7f1;color:#087f5b;font-weight:700}
+.panel{display:none}.panel.active{display:block}.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+h2{font-size:22px;margin:0 0 4px}.muted{color:#6b7280;font-size:13px}.chips{display:flex;gap:8px;overflow:auto;padding:4px 0 12px}.chip{white-space:nowrap;border:1px solid #d1d5db;background:#fff;border-radius:999px;padding:8px 12px}.chip.active{border-color:#087f5b;background:#e8f7f1;color:#087f5b;font-weight:700}
+.uploadbox{border:2px dashed #8cc7b2;background:#eefaf5;border-radius:16px;padding:24px;text-align:center}.upload-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+button,.btn{cursor:pointer;border:0;border-radius:10px;padding:10px 13px;font-weight:700}.primary{background:#087f5b;color:#fff}.secondary{background:#fff;border:1px solid #d1d5db;color:#374151}.danger{background:#fff1f2;color:#b42318;border:1px solid #fecdd3}
+.preview{max-width:100%;max-height:520px;border-radius:12px;display:block;margin:0 auto}.progress{height:9px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:10px}.progress>div{height:100%;background:#087f5b;width:0}
+.notice{padding:11px 13px;border-radius:12px;margin-bottom:12px;background:#fff8db;border:1px solid #f3dd88;font-size:13px}.ok{background:#ecfdf3;border-color:#abefc6}.bad{background:#fff1f2;border-color:#fecdd3}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:#4b5563}input,select,textarea{width:100%;padding:10px 11px;border:1px solid #d1d5db;border-radius:10px;background:#fff;font:inherit}.warn{border-color:#f59e0b;background:#fffbeb}
+.small{font-size:11px;color:#6b7280}.table-wrap{overflow:auto}.tbl{width:100%;border-collapse:collapse;min-width:760px;font-size:12px}.tbl th,.tbl td{padding:9px;border-bottom:1px solid #e5e7eb;text-align:left}.tbl th{background:#f8fafc}.badge{padding:3px 7px;border-radius:999px;font-size:10px;font-weight:800}.b-warn{background:#fff4cc;color:#8a5b00}.b-ok{background:#dcfce7;color:#166534}.b-red{background:#fee2e2;color:#991b1b}
+.item{padding:10px;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:8px}.item.warn{border-color:#f59e0b;background:#fffbeb}.itemgrid{display:grid;grid-template-columns:26px 1.8fr .65fr .55fr .8fr;gap:7px;align-items:center}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:14px}.stat strong{font-size:27px;display:block;margin-top:5px}
+.code{background:#101828;color:#e5e7eb;border-radius:12px;padding:12px;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,monospace;font-size:11px;max-height:340px;overflow:auto}
+.bottom{display:none}
+@media(max-width:780px){header{padding:9px 10px}main{display:block;padding:12px 10px 84px}.side{display:none}.grid2,.grid4,.stats{grid-template-columns:1fr 1fr}.itemgrid{grid-template-columns:24px 1fr .55fr}.itemgrid .widehide{display:none}.bottom{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e5e7eb;z-index:30}.bottom button{background:#fff;border-radius:0;padding:9px 2px;font-size:10px;color:#64748b}.bottom button.active{color:#087f5b;background:#ecfdf5}.preview{max-height:430px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="brand"><div class="logo">✓</div><div><h1>Sổ ATTP trường học</h1><div class="sub">Kiểm thực 3 bước · Lưu mẫu · Kho · QĐ 1246/QĐ-BYT · Render Free</div></div></div><button class="secondary" onclick="openSheet()">Google Sheets</button></header>
+<main>
+<aside class="side" id="side"></aside>
+<section>
+<div id="notice"></div>
+<div id="dashboard" class="panel active"></div>
+<div id="capture" class="panel"></div>
+<div id="menu" class="panel"></div>
+<div id="stock" class="panel"></div>
+<div id="reports" class="panel"></div>
+<div id="settings" class="panel"></div>
+</section>
+</main>
+<nav class="bottom" id="bottom"></nav>
+</div>
+<input id="cameraInput" type="file" accept="image/*" capture="environment" hidden />
+<input id="galleryInput" type="file" accept="image/*" hidden />
+<script>
+const SHEET_URL='https://docs.google.com/spreadsheets/d/1BcRDGO9oTiPeGFxHe7oYspvYaQKR0dxnjBPZlqZzgAI/edit';
+const THRESHOLD=95;
+const tabs=[['dashboard','Tổng quan','▥'],['capture','Chụp & nhập','📷'],['menu','Thực đơn','🍲'],['stock','Kho','▣'],['reports','Báo cáo','☑'],['settings','Cài đặt','⚙']];
+const stepMeta={a:{title:'Bước 1a · Thực phẩm tươi sống/đông lạnh'},b:{title:'Bước 1b · Khô/bao gói/phụ gia'},s2:{title:'Bước 2 · Trong chế biến'},s3:{title:'Bước 3 · Trước khi ăn'},sample:{title:'Lưu mẫu thức ăn'}};
+const defs={
+a:[['name','Tên thực phẩm',1],['receivedAt','Thời gian nhập',1],['weight','Khối lượng',1],['unit','Đơn vị',0],['supplier','Cơ sở cung cấp',1],['supplierContact','Địa chỉ / điện thoại',0],['deliverer','Người giao hàng',0],['invoice','Chứng từ / hóa đơn',0],['vetRegistration','ĐK vệ sinh thú y',0],['quarantine','Giấy kiểm dịch',0],['sensory','Kiểm tra cảm quan',0],['rapidTest','Xét nghiệm nhanh',0],['result','Kết quả',0],['action','Biện pháp xử lý / ghi chú',0]],
+b:[['name','Tên thực phẩm',1],['manufacturer','Cơ sở sản xuất',0],['manufacturerAddress','Địa chỉ sản xuất',0],['receivedAt','Thời gian nhập',1],['weight','Khối lượng',1],['unit','Đơn vị',0],['supplier','Cơ sở cung cấp',1],['supplierContact','Địa chỉ / điện thoại',0],['deliverer','Người giao hàng',0],['expiry','Hạn sử dụng',1],['storage','Điều kiện bảo quản',0],['invoice','Chứng từ / hóa đơn',0],['sensory','Kiểm tra cảm quan',0],['action','Biện pháp xử lý / ghi chú',0]],
+s2:[['date','Ngày',1],['meal','Ca / bữa ăn',1],['dish','Tên món ăn',1],['ingredients','Nguyên liệu chính',1],['servings','Số suất',1],['prepDone','Sơ chế xong',1],['cookDone','Chế biến xong',1],['staff','Người tham gia chế biến',0],['equipment','Trang thiết bị / dụng cụ',0],['area','Khu vực chế biến',0],['sensory','Cảm quan',0],['action','Ghi chú',0]],
+s3:[['date','Ngày',1],['meal','Ca / bữa ăn',1],['dish','Tên món ăn',1],['servings','Số suất',1],['splitDone','Chia xong',1],['eatStart','Bắt đầu ăn',1],['utensils','Dụng cụ chia/chứa/che đậy',0],['sensory','Cảm quan',0],['action','Ghi chú',0]],
+sample:[['date','Ngày',1],['sampleName','Tên mẫu thức ăn',1],['meal','Bữa ăn / giờ ăn',1],['servings','Số suất',1],['amount','Khối lượng/thể tích',1],['unit','Đơn vị g/ml',1],['container','Dụng cụ chứa',0],['temperature','Nhiệt độ °C',1],['takenAt','Thời gian lấy mẫu',1],['destroyAt','Thời gian hủy mẫu',0],['condition','Tình trạng/Ghi chú',0],['keeper','Người lưu mẫu',0],['destroyer','Người hủy mẫu',0],['sealed','Niêm phong',0]]
+};
+const state=load();
+let current='dashboard',kind='a',imageFile=null,imageUrl='',ocrText='',invoiceItems=[],ocrMeta={},ocrBusy=false;
+
+function empty(){return {records:[],menus:[],stock:[],pending:[],settings:{sheetUrl:SHEET_URL,bridgeUrl:'',reportHour:'',zaloRecipients:''}}}
+function load(){try{return Object.assign(empty(),JSON.parse(localStorage.getItem('attp-render-v1')||'{}'))}catch{return empty()}}
+function persist(){localStorage.setItem('attp-render-v1',JSON.stringify(state))}
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function today(){return new Date().toISOString().slice(0,10)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function norm(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9.,]+/g,' ').trim()}
+function note(msg,type=''){document.getElementById('notice').innerHTML='<div class="notice '+type+'">'+esc(msg)+'</div>';setTimeout(()=>{const n=document.getElementById('notice');if(n)n.innerHTML=''},8000)}
+function openSheet(){window.open(state.settings.sheetUrl||SHEET_URL,'_blank')}
+function setTab(t){current=t;document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));document.getElementById(t).classList.add('active');renderNav();render()}
+function renderNav(){const html=tabs.map(([id,label,ico])=>'<button class="nav '+(current===id?'active':'')+'" onclick="setTab(\''+id+'\')">'+ico+' '+label+'</button>').join('');side.innerHTML=html;bottom.innerHTML=tabs.map(([id,label,ico])=>'<button class="'+(current===id?'active':'')+'" onclick="setTab(\''+id+'\')"><div>'+ico+'</div>'+label+'</button>').join('')}
+function render(){renderDashboard();renderCapture();renderMenu();renderStock();renderReports();renderSettings()}
+function renderDashboard(){
+ const todayRecs=state.records.filter(r=>(r.fields?.date||r.createdAt?.slice(0,10))===today());
+ const review=state.records.filter(r=>r.status==='CẦN DÒ LẠI').length;
+ const exp=state.stock.filter(x=>daysLeft(x.expiry)<=7).length;
+ dashboard.innerHTML='<h2>Tổng quan hôm nay</h2><p class="muted">Dữ liệu lưu cục bộ trên máy và xếp hàng đồng bộ Google Sheets.</p><div class="stats"><div class="stat">Bản ghi hôm nay<strong>'+todayRecs.length+'</strong></div><div class="stat">Cần dò lại<strong>'+review+'</strong></div><div class="stat">HSD ≤ 7 ngày<strong>'+exp+'</strong></div><div class="stat">Chờ đồng bộ Sheet<strong>'+state.pending.length+'</strong></div></div><div class="card"><b>Nguyên tắc dữ liệu</b><p class="muted">OCR dưới 95% vẫn được phép nhập, nhưng luôn mang trạng thái CẦN DÒ LẠI. Không tự bịa HSD, giờ nhập, kiểm dịch hay cảm quan.</p></div>'
+}
+function captureActions(){return '<div class="upload-actions"><button class="primary" onclick="cameraInput.click()">📷 Chụp ảnh</button><button class="secondary" onclick="galleryInput.click()">🖼️ Tải ảnh từ máy</button>'+(imageFile?'<button class="primary" onclick="runOCR()">🔎 Nhận diện tự động</button>':'')+'</div>'}
+function renderCapture(){
+ const chips=Object.entries(stepMeta).map(([k,v])=>'<button class="chip '+(kind===k?'active':'')+'" onclick="kind=\''+k+'\';invoiceItems=[];renderCapture()">'+v.title.split(' · ')[0]+'</button>').join('');
+ const img=imageUrl?'<img class="preview" src="'+imageUrl+'">'+captureActions():'<div class="uploadbox"><div style="font-size:30px">🖼️</div><b>Chọn nguồn ảnh</b><div class="muted">Hóa đơn, phiếu giao nhận, ảnh món ăn hoặc mẫu lưu</div>'+captureActions()+'</div>';
+ const prog=ocrBusy?'<div class="progress"><div id="ocrbar"></div></div><div id="ocrstatus" class="small">Đang xử lý ảnh…</div>':'';
+ let items='';
+ if(invoiceItems.length){items='<div class="card"><b>Hóa đơn nhiều dòng · '+invoiceItems.length+' mặt hàng</b><p class="muted">Sửa tên/số lượng/đơn vị nếu cần. Dòng dưới 95% vẫn nhập được nhưng được gắn CẦN DÒ LẠI.</p>'+invoiceItems.map((x,i)=>'<div class="item '+(x.confidence<THRESHOLD?'warn':'')+'"><div class="itemgrid"><input type="checkbox" '+(x.selected?'checked':'')+' onchange="invoiceItems['+i+'].selected=this.checked"><input value="'+esc(x.name)+'" oninput="invoiceItems['+i+'].name=this.value"><input value="'+esc(x.qty)+'" oninput="invoiceItems['+i+'].qty=this.value"><input class="widehide" value="'+esc(x.unit)+'" oninput="invoiceItems['+i+'].unit=this.value"><select onchange="invoiceItems['+i+'].kind=this.value"><option value="a" '+(x.kind==='a'?'selected':'')+'>1a</option><option value="b" '+(x.kind==='b'?'selected':'')+'>1b</option></select></div><div class="small">Mã '+esc(x.code||'—')+' · OCR '+x.confidence+'% '+(x.confidence<THRESHOLD?'· cần dò lại':'')+'</div></div>').join('')+'<button class="primary" style="width:100%" onclick="saveInvoiceItems()">💾 Nhập các dòng đã chọn</button></div>'}
+ const form=defs[kind].map(([key,label,req])=>'<label>'+label+(req?' *':'')+'<input id="f_'+key+'" value="'+esc(ocrMeta[key]?.value||'')+'" class="'+((ocrMeta[key]?.confidence||100)<THRESHOLD?'warn':'')+'" placeholder="'+(key==='receivedAt'?'YYYY-MM-DD hoặc YYYY-MM-DDTHH:mm':'')+'">'+((ocrMeta[key]?.value&&ocrMeta[key]?.confidence<100)?'<span class="small">OCR '+ocrMeta[key].confidence+'%</span>':'')+'</label>').join('');
+ capture.innerHTML='<h2>Chụp & nhập sổ</h2><p class="muted">Camera và thư viện ảnh tách riêng. OCR chạy miễn phí trên thiết bị, không dùng credit AppDeploy.</p><div class="chips">'+chips+'</div><div class="card"><b>'+stepMeta[kind].title+'</b></div><div class="card">'+img+prog+(ocrText?'<details><summary>Văn bản OCR gốc</summary><pre class="code">'+esc(ocrText)+'</pre></details>':'')+'</div>'+items+'<div class="card"><b>Kiểm tra dữ liệu trước khi lưu</b><div class="grid2" style="margin-top:12px">'+form+'</div><button class="primary" style="width:100%;margin-top:14px" onclick="saveSingle()">💾 Lưu bản ghi</button></div>'
+}
+cameraInput.onchange=e=>selectImage(e.target.files?.[0]);galleryInput.onchange=e=>selectImage(e.target.files?.[0]);
+function selectImage(f){if(!f)return;imageFile=f;if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(f);ocrText='';invoiceItems=[];ocrMeta={};renderCapture()}
+async function preprocess(file){
+ const bmp=await createImageBitmap(file);const max=1800,scale=Math.min(1,max/Math.max(bmp.width,bmp.height));const c=document.createElement('canvas');c.width=Math.round(bmp.width*scale);c.height=Math.round(bmp.height*scale);const x=c.getContext('2d');x.drawImage(bmp,0,0,c.width,c.height);const d=x.getImageData(0,0,c.width,c.height);for(let i=0;i<d.data.length;i+=4){const y=.299*d.data[i]+.587*d.data[i+1]+.114*d.data[i+2];const v=Math.max(0,Math.min(255,(y-128)*1.35+138));d.data[i]=d.data[i+1]=d.data[i+2]=v}x.putImageData(d,0,0);return c}
+async function runOCR(){
+ if(!imageFile)return;ocrBusy=true;renderCapture();
+ try{const canvas=await preprocess(imageFile);const result=await Tesseract.recognize(canvas,'vie+eng',{logger:m=>{if(m.status==='recognizing text'){const b=document.getElementById('ocrbar');const s=document.getElementById('ocrstatus');if(b)b.style.width=Math.round((m.progress||0)*100)+'%';if(s)s.textContent='Đang đọc chữ… '+Math.round((m.progress||0)*100)+'%'}}});ocrText=result.data.text||'';const conf=Math.round(result.data.confidence||0);parseOCR(ocrText,conf);note(invoiceItems.length?'Đã nhận diện '+invoiceItems.length+' dòng hàng. Hãy rà lại trước khi nhập.':'Đã nhận diện văn bản. Hãy rà lại các trường trước khi lưu.','ok')}catch(e){note('OCR chưa xử lý được ảnh này. Có thể nhập tay; dữ liệu ảnh không bị mất.','bad')}finally{ocrBusy=false;renderCapture()}
+}
+function parseOCR(text,baseConf){
+ const lines=text.split(/\r?\n/).map(s=>s.replace(/\s+/g,' ').trim()).filter(Boolean);
+ const supplier=lines.find(x=>/công ty|cty|company/i.test(x)&&x.length<120)||'';
+ const invoice=(text.match(/\b(?:BH|HD|HĐ)[A-Z0-9.-]{3,}\b/i)||[])[0]||'';
+ const dateRaw=(text.match(/\b(\d{1,2})[\/.-](\d{1,2})[\/.-](20\d{2})\b/)||[]);
+ const date=dateRaw.length?dateRaw[3]+'-'+dateRaw[2].padStart(2,'0')+'-'+dateRaw[1].padStart(2,'0'):'';
+ if(supplier)ocrMeta.supplier={value:supplier,confidence:Math.min(99,Math.max(85,baseConf))};if(invoice)ocrMeta.invoice={value:invoice,confidence:Math.min(99,Math.max(85,baseConf))};if(date)ocrMeta.receivedAt={value:date,confidence:Math.min(95,Math.max(80,baseConf))};
+ const items=[];
+ const units='kg|kgs|g|gr|gram|l|lit|lít|ml|chai|gói|hộp|thùng|bao|cái';
+ for(const line of lines){
+   let m=line.match(new RegExp('^\\s*\\d{1,3}\\s+([A-Z]{1,4}[.\\-]\\d+(?:[.\\-]\\d+)?)\\s+(.+?)\\s+(' + units + ')\\s+([\\d.,]+)\\s+[\\d.,]+(?:\\s+[\\d.,]+)?\\s*$','i'));
+   if(!m)m=line.match(new RegExp('^\\s*([A-Z]{1,4}[.\\-]\\d+(?:[.\\-]\\d+)?)\\s+(.+?)\\s+(' + units + ')\\s+([\\d.,]+)\\b','i'));
+   if(m){const name=m[2].trim();const qty=m[4].replace(',','.');items.push({code:m[1],name,unit:m[3],qty,kind:kind==='b'?'b':'a',confidence:Math.max(70,Math.min(99,baseConf)),selected:true})}
+ }
+ if(!items.length){
+   const blocks=text.match(/[A-Z]{1,4}[.\-]\d+(?:[.\-]\d+)?[^\n]{3,160}/g)||[];
+   for(const b of blocks){const m=b.match(/^([A-Z]{1,4}[.\-]\d+(?:[.\-]\d+)?)\s+(.+?)\s+(Kg|kg|g|G|ml|ML|L|l)\s+([\d.,]+)/);if(m)items.push({code:m[1],name:m[2].trim(),unit:m[3],qty:m[4].replace(',','.'),kind:kind==='b'?'b':'a',confidence:Math.max(60,Math.min(90,baseConf-5)),selected:true})}
+ }
+ invoiceItems=items;
+}
+function getForm(){const o={};for(const [k] of defs[kind])o[k]=document.getElementById('f_'+k)?.value?.trim()||'';return o}
+function recordStatus(fields,conf=100){let warn=false;for(const [k,l,req] of defs[kind])if(req&&!fields[k])warn=true;if((kind==='a'||kind==='b')&&fields.receivedAt&&!/T\d{2}:\d{2}/.test(fields.receivedAt))warn=true;if(conf<THRESHOLD)warn=true;return warn?'CẦN DÒ LẠI':'ĐÃ XÁC MINH'}
+function saveSingle(){const f=getForm();const miss=defs[kind].filter(x=>x[2]&&!f[x[0]]).map(x=>x[1]);if(miss.length)return note('Thiếu: '+miss.join(', '),'bad');const conf=Math.min(...Object.values(ocrMeta).filter(x=>x.value).map(x=>x.confidence||100),100);const r={id:id(),kind,createdAt:new Date().toISOString(),fields:f,confidence:conf,status:recordStatus(f,conf)};saveRecord(r);note('Đã lưu '+r.status+'. Dòng vẫn được xếp hàng đồng bộ Google Sheets.','ok');render()}
+function saveInvoiceItems(){
+ const shared=getForm();const chosen=invoiceItems.filter(x=>x.selected);if(!chosen.length)return note('Chưa chọn dòng nào.','bad');if(!shared.receivedAt||!shared.supplier)return note('Cần điền ngày/thời gian nhập và cơ sở cung cấp.','bad');
+ for(const x of chosen){const k=x.kind;const fields={...shared,name:x.name,weight:x.qty,unit:x.unit};const status=(x.confidence<THRESHOLD||!shared.receivedAt.includes('T'))?'CẦN DÒ LẠI':'ĐÃ XÁC MINH';saveRecord({id:id(),kind:k,createdAt:new Date().toISOString(),fields,confidence:x.confidence,status,itemCode:x.code})}
+ note('Đã lưu '+chosen.length+' dòng; tất cả đã vào hàng chờ Google Sheets kể cả dòng CẦN DÒ LẠI.','ok');invoiceItems=[];render()}
+function saveRecord(r){state.records.push(r);state.pending.push(r.id);persist();trySync()}
+function sheetName(r){return r.kind==='a'||r.kind==='b'?'B1_Nhap_thuc_pham':r.kind==='s2'?'B2_Che_bien':r.kind==='s3'?'B3_Truoc_khi_an':'Luu_mau'}
+function rowFor(r){const f=r.fields||{};if(r.kind==='a'||r.kind==='b')return {'ID':r.id,'Nhóm thực phẩm':r.kind==='a'?'1a - Tươi sống/đông lạnh':'1b - Khô/bao gói/phụ gia','Tên thực phẩm':f.name||'','Thời gian nhập':f.receivedAt||'','Khối lượng':f.weight||'','Đơn vị':f.unit||'','Cơ sở SX/NCC':f.supplier||f.manufacturer||'','Địa chỉ/Điện thoại':f.supplierContact||f.manufacturerAddress||'','Người giao hàng':f.deliverer||'','Chứng từ/Hóa đơn':f.invoice||'','ĐK VS thú y':f.vetRegistration||'','Giấy kiểm dịch':f.quarantine||'','Hạn sử dụng':f.expiry||'','Điều kiện bảo quản':f.storage||'','Cảm quan':f.sensory||'','Xét nghiệm nhanh':f.rapidTest||'','Kết quả':f.result||'','Biện pháp xử lý/Ghi chú':(f.action||'')+(r.itemCode?' Mã hàng '+r.itemCode:''),'Độ tin cậy OCR (%)':r.confidence||100,'Trạng thái xác minh':r.status};return {'ID':r.id,'Ngày':f.date||'','Ca/Bữa ăn':f.meal||'','Tên món ăn':f.dish||f.sampleName||'','Số lượng/Số suất':f.servings||'','Biện pháp xử lý/Ghi chú':f.action||f.condition||'','Trạng thái xác minh':r.status}}
+async function trySync(){
+ const url=state.settings.bridgeUrl;if(!url||!state.pending.length)return;
+ const ids=[...state.pending];const records=ids.map(i=>state.records.find(r=>r.id===i)).filter(Boolean);
+ try{const payload={action:'appendBatch',spreadsheetId:'1BcRDGO9oTiPeGFxHe7oYspvYaQKR0dxnjBPZlqZzgAI',items:records.map(r=>({sheet:sheetName(r),row:rowFor(r)}))};const res=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});const j=await res.json();if(j.ok){state.pending=state.pending.filter(x=>!ids.includes(x));persist();note('Đã đồng bộ '+records.length+' dòng sang Google Sheets.','ok');renderDashboard()}}catch(e){}
+}
+function renderMenu(){menu.innerHTML='<h2>Thực đơn & đối chiếu</h2><div class="card"><div class="grid2"><label>Ngày<input id="m_date" type="date" value="'+today()+'"></label><label>Bữa<input id="m_meal" value="Trưa"></label></div><label style="margin-top:10px">Mỗi dòng: Tên món | Nguyên liệu chính | Số suất<textarea id="m_lines" rows="7"></textarea></label><button class="primary" onclick="saveMenu()">Lưu thực đơn</button></div><div class="card"><b>Thực đơn đã lưu</b>'+state.menus.slice(-30).reverse().map(x=>'<div class="item">'+esc(x.date)+' · '+esc(x.meal)+' · <b>'+esc(x.dish)+'</b> · '+x.servings+' suất</div>').join('')+'</div>'}
+function saveMenu(){const date=m_date.value,meal=m_meal.value;const lines=m_lines.value.split(/\n/).map(x=>x.trim()).filter(Boolean);for(const l of lines){const [dish,ingredients='',servings='0']=l.split('|').map(x=>x.trim());if(dish)state.menus.push({id:id(),date,meal,dish,ingredients,servings:Number(servings)||0})}persist();note('Đã lưu thực đơn.','ok');renderMenu()}
+function daysLeft(d){if(!d)return 9999;return Math.ceil((new Date(d+'T23:59:59')-Date.now())/86400000)}
+function renderStock(){stock.innerHTML='<h2>Xuất nhập kho</h2><p class="muted">Tồn = tồn đầu + nhập − xuất − lưu mẫu.</p><div class="card"><div class="grid4">'+[['name','Tên thực phẩm'],['received','Ngày nhập'],['expiry','HSD'],['lot','Số lô'],['opening','Tồn đầu'],['inQty','Nhập'],['outQty','Xuất'],['sampleQty','Lưu mẫu'],['unit','Đơn vị'],['supplier','Nhà cung cấp'],['location','Vị trí'],['storage','Bảo quản']].map(([k,l])=>'<label>'+l+'<input id="st_'+k+'" '+(k==='received'||k==='expiry'?'type="date"':'')+' value="'+(k==='received'?today():'')+'"></label>').join('')+'</div><button class="primary" style="margin-top:12px" onclick="saveStock()">Nhập kho</button></div><div class="card table-wrap"><table class="tbl"><tr><th>Thực phẩm</th><th>Tồn</th><th>HSD</th><th>Trạng thái</th></tr>'+state.stock.map(x=>{const bal=Number(x.opening||0)+Number(x.inQty||0)-Number(x.outQty||0)-Number(x.sampleQty||0),d=daysLeft(x.expiry);return '<tr><td>'+esc(x.name)+'</td><td>'+bal+' '+esc(x.unit)+'</td><td>'+esc(x.expiry)+'</td><td><span class="badge '+(d<0?'b-red':d<=7?'b-warn':'b-ok')+'">'+(d<0?'QUÁ HẠN':d<=7?'SẮP HẾT HẠN':'CÒN HẠN')+'</span></td></tr>'}).join('')+'</table></div>'}
+function saveStock(){const keys=['name','received','expiry','lot','opening','inQty','outQty','sampleQty','unit','supplier','location','storage'];const x={id:id()};keys.forEach(k=>x[k]=document.getElementById('st_'+k).value);if(!x.name||!x.expiry)return note('Kho cần tên thực phẩm và HSD.','bad');state.stock.push(x);persist();note('Đã lưu kho.','ok');renderStock()}
+function reportText(period){
+ let start,end=new Date();const now=new Date();if(period==='day')start=new Date();else if(period==='week'){start=new Date();start.setDate(now.getDate()-((now.getDay()+6)%7))}else start=new Date(now.getFullYear(),now.getMonth(),1);const s=start.toISOString().slice(0,10),e=end.toISOString().slice(0,10);const rec=state.records.filter(r=>{const d=r.fields?.date||r.fields?.receivedAt?.slice(0,10)||r.createdAt.slice(0,10);return d>=s&&d<=e});const exp=state.stock.filter(x=>daysLeft(x.expiry)<=7).length;return 'BÁO CÁO ATTP TRƯỜNG HỌC\nKỳ: '+s+' → '+e+'\n• Bước 1: '+rec.filter(r=>r.kind==='a'||r.kind==='b').length+' dòng\n• Bước 2: '+rec.filter(r=>r.kind==='s2').length+' dòng\n• Bước 3: '+rec.filter(r=>r.kind==='s3').length+' dòng\n• Mẫu lưu: '+rec.filter(r=>r.kind==='sample').length+'\n• Cần dò lại: '+rec.filter(r=>r.status==='CẦN DÒ LẠI').length+'\n• HSD ≤7 ngày/quá hạn: '+exp+'\n• Chờ đồng bộ Google Sheets: '+state.pending.length}
+function renderReports(){reports.innerHTML='<h2>Báo cáo</h2><div class="card"><div class="chips"><button class="chip" onclick="showReport(\'day\')">Ngày</button><button class="chip" onclick="showReport(\'week\')">Tuần</button><button class="chip" onclick="showReport(\'month\')">Tháng</button></div><textarea id="reportbox" rows="14">'+esc(reportText('day'))+'</textarea></div>'}
+function showReport(p){reportbox.value=reportText(p)}
+const bridgeCode=`const SPREADSHEET_ID='1BcRDGO9oTiPeGFxHe7oYspvYaQKR0dxnjBPZlqZzgAI';
+function doPost(e){try{const b=JSON.parse(e.postData.contents||'{}');if(b.action==='appendBatch'){for(const it of (b.items||[]))append(it.sheet,it.row||{});return out({ok:true,count:(b.items||[]).length});}return out({ok:false,message:'action'});}catch(err){return out({ok:false,message:String(err)});}}
+function append(name,row){const sh=SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(name);if(!sh)throw new Error('Missing '+name);const h=sh.getRange(1,1,1,sh.getLastColumn()).getDisplayValues()[0];sh.appendRow(h.map(k=>Object.prototype.hasOwnProperty.call(row,k)?row[k]:''));}
+function out(x){return ContentService.createTextOutput(JSON.stringify(x)).setMimeType(ContentService.MimeType.JSON);}`;
+function renderSettings(){settings.innerHTML='<h2>Cài đặt</h2><div class="card"><b>Google Sheets</b><label style="margin-top:10px">Apps Script Web App URL<input id="set_bridge" value="'+esc(state.settings.bridgeUrl)+'" placeholder="https://script.google.com/macros/s/.../exec"></label><button class="primary" onclick="saveSettings()" style="margin-top:10px">Lưu & đồng bộ lại</button><p class="small">Khi chưa có URL, dữ liệu vẫn lưu trên điện thoại và nằm trong hàng chờ. Sau khi có URL, cả dòng CẦN DÒ LẠI cũng được ghi sang Sheet.</p></div><div class="card"><b>Mã Apps Script cần cài một lần</b><pre class="code">'+esc(bridgeCode)+'</pre><p class="small">Vào script.google.com → New project → dán mã → Deploy → Web app → Execute as Me → cấp quyền → sao chép URL /exec vào ô trên.</p></div><div class="card"><b>Trạng thái</b><p>Google Sheet: <b>đã xác định</b></p><p>Cầu nối: <b>'+(state.settings.bridgeUrl?'đã cấu hình':'chưa cấu hình')+'</b></p><p>Chờ đồng bộ: <b>'+state.pending.length+'</b> dòng</p><p>OCR: <b>Tesseract vie+eng chạy trên thiết bị</b></p></div>'}
+function saveSettings(){state.settings.bridgeUrl=set_bridge.value.trim();persist();note('Đã lưu cấu hình. Đang thử đồng bộ hàng chờ…','ok');trySync();renderSettings()}
+renderNav();render();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>
