@@ -63,7 +63,7 @@ s3:[['date','Ngày',1],['meal','Ca / bữa ăn',1],['dish','Tên món ăn',1],['
 sample:[['date','Ngày',1],['sampleName','Tên mẫu thức ăn',1],['meal','Bữa ăn / giờ ăn',1],['servings','Số suất',1],['amount','Khối lượng/thể tích',1],['unit','Đơn vị g/ml',1],['container','Dụng cụ chứa',0],['temperature','Nhiệt độ °C',1],['takenAt','Thời gian lấy mẫu',1],['destroyAt','Thời gian hủy mẫu',0],['condition','Tình trạng/Ghi chú',0],['keeper','Người lưu mẫu',0],['destroyer','Người hủy mẫu',0],['sealed','Niêm phong',0]]
 };
 const state=load();
-let current='dashboard',kind='a',imageFile=null,imageUrl='',ocrText='',invoiceItems=[],ocrMeta={},ocrBusy=false;
+let current='dashboard',kind='a',imageFile=null,imageUrl='',ocrText='',invoiceItems=[],ocrMeta={},ocrBusy=false,syncBusy=false;
 
 function empty(){return {records:[],menus:[],stock:[],pending:[],suppliers:['CÔNG TY CỔ PHẦN THỰC PHẨM FRESCO'],settings:{sheetUrl:SHEET_URL,bridgeUrl:'',reportHour:'',zaloRecipients:''}}}
 function load(){try{return Object.assign(empty(),JSON.parse(localStorage.getItem('attp-render-v1')||'{}'))}catch{return empty()}}
@@ -168,24 +168,84 @@ function parseTableWords(words,baseConf){
  const uniq=[];const seen=new Set();for(const x of out){const k=norm(x.code+' '+x.name+' '+x.qty);if(!seen.has(k)){seen.add(k);uniq.push(x)}}
  return uniq;
 }
+async function imageForAI(file){
+ const bmp=await createImageBitmap(file);
+ const max=1800,scale=Math.min(1,max/Math.max(bmp.width,bmp.height));
+ const c=document.createElement('canvas');c.width=Math.max(1,Math.round(bmp.width*scale));c.height=Math.max(1,Math.round(bmp.height*scale));
+ c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+ const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.88));
+ const data=await blob.arrayBuffer();
+ let binary='';const bytes=new Uint8Array(data);for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));
+ return {mimeType:'image/jpeg',data:btoa(binary)};
+}
+function evidenceConfidence(value,localText,base=88){
+ const v=norm(value);if(!v)return 0;const raw=norm(localText);
+ if(raw.includes(v))return 98;
+ const words=v.split(' ').filter(x=>x.length>2);
+ if(words.length>=2&&words.slice(0,2).every(w=>raw.includes(w)))return 96;
+ return Math.min(base,92);
+}
+function applyAIResult(ai,localText){
+ ocrMeta={};
+ const f=ai.fields||{};
+ for(const key of ['supplier','supplierContact','receivedAt','invoice','deliverer','manufacturer','manufacturerAddress','expiry','storage']){
+   const value=String(f[key]||'').trim();if(value)ocrMeta[key]={value,confidence:evidenceConfidence(value,localText,90)};
+ }
+ invoiceItems=(ai.lineItems||[]).slice(0,80).filter(x=>String(x.name||'').trim()).map(x=>{
+   const code=String(x.code||'').trim(),name=String(x.name||'').trim(),unit=String(x.unit||'').trim(),qty=String(x.quantity||x.qty||'').trim().replace(',','.');
+   const raw=norm(localText),nameWords=norm(name).split(' ').filter(w=>w.length>2).slice(0,2);
+   const nameOk=nameWords.length>0&&nameWords.every(w=>raw.includes(w));
+   const qtyOk=qty&&raw.includes(norm(qty));
+   const codeOk=!code||raw.includes(norm(code));
+   const verified=nameOk&&qtyOk&&codeOk;
+   const suggested=String(x.kind||x.kindSuggestion||'').toLowerCase();
+   const itemKind=suggested==='1b'||suggested==='b'?'b':suggested==='1a'||suggested==='a'?'a':kind;
+   return {code,name,unit,qty,kind:itemKind,confidence:verified?98:90,selected:true,ai:true};
+ });
+}
+async function runHybridOCR(){
+ const bridge=state.settings.bridgeUrl;
+ const full=await preprocess(imageFile);
+ const localPromise=Tesseract.recognize(full,'vie+eng',{logger:m=>{if(m.status==='recognizing text'){const p=(m.progress||0)*.42;const b=document.getElementById('ocrbar');const st=document.getElementById('ocrstatus');if(b)b.style.width=Math.round(p*100)+'%';if(st)st.textContent='Đang OCR kiểm tra chéo… '+Math.round(p*100)+'%'}}});
+ const payload=await imageForAI(imageFile);
+ const aiPromise=fetch(bridge,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'aiOcr',kind,image:payload})}).then(r=>r.json());
+ const [local,ai]=await Promise.all([localPromise,aiPromise]);
+ if(!ai||!ai.ok)throw new Error(ai?.message||'AI OCR unavailable');
+ const b=document.getElementById('ocrbar');if(b)b.style.width='100%';
+ ocrText=local.data.text||'';
+ applyAIResult(ai.data||{},ocrText);
+ if(!invoiceItems.length&&kind==='a'||kind==='b'){
+   invoiceItems=parseTextRows(ocrText,Math.round(local.data.confidence||75));
+ }
+ note(invoiceItems.length?'AI OCR đã đọc '+invoiceItems.length+' dòng; Tesseract dùng để kiểm tra chéo. Dòng không khớp được giữ dưới 95%.':'AI OCR đã đọc thông tin chung; chưa đủ chắc để tách bảng hàng.','ok');
+}
+async function runLocalOCR(){
+ const full=await preprocess(imageFile);
+ const header=cropCanvas(full,0,.32);
+ const table=cropCanvas(full,.20,.76);
+ const progress=(label,offset,span)=>m=>{if(m.status==='recognizing text'){const p=offset+(m.progress||0)*span;const b=document.getElementById('ocrbar');const st=document.getElementById('ocrstatus');if(b)b.style.width=Math.round(p*100)+'%';if(st)st.textContent=label+' '+Math.round(p*100)+'%'}};
+ const hres=await Tesseract.recognize(header,'vie+eng',{logger:progress('Đang đọc tiêu đề…',0,.28)});
+ const tres=await Tesseract.recognize(table,'vie+eng',{logger:progress('Đang tách bảng hàng…',.28,.58)});
+ const fres=await Tesseract.recognize(full,'vie+eng',{logger:progress('Đang kiểm tra chéo…',.86,.14)});
+ const headerText=hres.data.text||'',tableText=tres.data.text||'',fullText=fres.data.text||'';
+ ocrText=[headerText,tableText,fullText].filter(Boolean).join('\n---\n');
+ const conf=Math.round(((hres.data.confidence||0)+(tres.data.confidence||0)+(fres.data.confidence||0))/3);
+ parseOCR(headerText+'\n'+fullText,conf);
+ invoiceItems=parseTableWords(tres.data.words||[],Math.round(tres.data.confidence||conf));
+ if(!invoiceItems.length)invoiceItems=parseTextRows(tableText,Math.round(tres.data.confidence||conf));
+ note(invoiceItems.length?'Fallback Tesseract đã tách '+invoiceItems.length+' dòng. Hãy rà kỹ dòng vàng.':'Fallback Tesseract chưa tách chắc bảng hàng.','ok');
+}
 async function runOCR(){
  if(!imageFile)return;ocrBusy=true;renderCapture();
- const progress=(label,offset,span)=>m=>{if(m.status==='recognizing text'){const p=offset+(m.progress||0)*span;const b=document.getElementById('ocrbar');const s=document.getElementById('ocrstatus');if(b)b.style.width=Math.round(p*100)+'%';if(s)s.textContent=label+' '+Math.round(p*100)+'%'}};
  try{
-   const full=await preprocess(imageFile);
-   const header=cropCanvas(full,0,.32);
-   const table=cropCanvas(full,.20,.76);
-   const hres=await Tesseract.recognize(header,'vie+eng',{logger:progress('Đang đọc tiêu đề…',0,.28)});
-   const tres=await Tesseract.recognize(table,'vie+eng',{logger:progress('Đang tách bảng hàng…',.28,.58)});
-   const fres=await Tesseract.recognize(full,'vie+eng',{logger:progress('Đang kiểm tra chéo…',.86,.14)});
-   const headerText=hres.data.text||'',tableText=tres.data.text||'',fullText=fres.data.text||'';
-   ocrText=[headerText,tableText,fullText].filter(Boolean).join('\n---\n');
-   const conf=Math.round(((hres.data.confidence||0)+(tres.data.confidence||0)+(fres.data.confidence||0))/3);
-   parseOCR(headerText+'\n'+fullText,conf);
-   invoiceItems=parseTableWords(tres.data.words||[],Math.round(tres.data.confidence||conf));
-   if(!invoiceItems.length)invoiceItems=parseTextRows(tableText,Math.round(tres.data.confidence||conf));
-   note(invoiceItems.length?'Đã tách '+invoiceItems.length+' dòng hàng qua 3 lượt OCR. Rà dòng vàng trước khi nhập.':'Đọc được tiêu đề nhưng chưa tách chắc bảng hàng. Hãy chụp thẳng và gần bảng hơn.','ok');
- }catch(e){note('OCR chưa xử lý được ảnh này. Ảnh vẫn được giữ để bạn thử lại hoặc nhập tay.','bad')}finally{ocrBusy=false;renderCapture()}
+   if(state.settings.bridgeUrl){
+     const st=document.getElementById('ocrstatus');if(st)st.textContent='Đang gửi ảnh tới AI OCR và chạy kiểm tra chéo trên máy…';
+     try{await runHybridOCR()}catch(err){note('AI OCR chưa sẵn sàng ('+(err?.message||'lỗi')+'). Đang chuyển sang Tesseract cục bộ.','bad');await runLocalOCR()}
+   }else{
+     note('Chưa cấu hình cầu nối AI. Đang dùng Tesseract cục bộ; chất lượng bảng phức tạp sẽ thấp hơn.','bad');
+     await runLocalOCR();
+   }
+ }catch(e){note('OCR chưa xử lý được ảnh này. Ảnh vẫn được giữ để thử lại hoặc nhập tay.','bad')}finally{ocrBusy=false;renderCapture()}
 }
 function parseTextRows(text,baseConf){
  const lines=text.split(/\r?\n/).map(s=>s.replace(/\s+/g,' ').trim()).filter(Boolean),items=[];
@@ -214,15 +274,18 @@ function saveSingle(){const f=getForm();const miss=defs[kind].filter(x=>x[2]&&!f
 function saveInvoiceItems(){
  const shared=getForm();const chosen=invoiceItems.filter(x=>x.selected);if(!chosen.length)return note('Chưa chọn dòng nào.','bad');if(!shared.receivedAt||!shared.supplier)return note('Cần điền ngày/thời gian nhập và cơ sở cung cấp.','bad');
  rememberSupplier(shared.supplier);
- for(const x of chosen){const k=x.kind;const fields={...shared,name:x.name,weight:x.qty,unit:x.unit};const status=(x.confidence<THRESHOLD||!shared.receivedAt.includes('T'))?'CẦN DÒ LẠI':'ĐÃ XÁC MINH';saveRecord({id:id(),kind:k,createdAt:new Date().toISOString(),fields,confidence:x.confidence,status,itemCode:x.code})}
+ const ids=[];
+ for(const x of chosen){const k=x.kind;const fields={...shared,name:x.name,weight:x.qty,unit:x.unit};const status=(x.confidence<THRESHOLD||!shared.receivedAt.includes('T'))?'CẦN DÒ LẠI':'ĐÃ XÁC MINH';const r={id:id(),kind:k,createdAt:new Date().toISOString(),fields,confidence:x.confidence,status,itemCode:x.code};state.records.push(r);state.pending.push(r.id);ids.push(r.id)}
+ persist();trySync();
  note('Đã lưu '+chosen.length+' dòng; tất cả đã vào hàng chờ Google Sheets kể cả dòng CẦN DÒ LẠI.','ok');invoiceItems=[];render()}
 function saveRecord(r){state.records.push(r);state.pending.push(r.id);persist();trySync()}
 function sheetName(r){return r.kind==='a'||r.kind==='b'?'B1_Nhap_thuc_pham':r.kind==='s2'?'B2_Che_bien':r.kind==='s3'?'B3_Truoc_khi_an':'Luu_mau'}
 function rowFor(r){const f=r.fields||{};if(r.kind==='a'||r.kind==='b')return {'ID':r.id,'Nhóm thực phẩm':r.kind==='a'?'1a - Tươi sống/đông lạnh':'1b - Khô/bao gói/phụ gia','Tên thực phẩm':f.name||'','Thời gian nhập':f.receivedAt||'','Khối lượng':f.weight||'','Đơn vị':f.unit||'','Cơ sở SX/NCC':f.supplier||f.manufacturer||'','Địa chỉ/Điện thoại':f.supplierContact||f.manufacturerAddress||'','Người giao hàng':f.deliverer||'','Chứng từ/Hóa đơn':f.invoice||'','ĐK VS thú y':f.vetRegistration||'','Giấy kiểm dịch':f.quarantine||'','Hạn sử dụng':f.expiry||'','Điều kiện bảo quản':f.storage||'','Cảm quan':f.sensory||'','Xét nghiệm nhanh':f.rapidTest||'','Kết quả':f.result||'','Biện pháp xử lý/Ghi chú':(f.action||'')+(r.itemCode?' Mã hàng '+r.itemCode:''),'Độ tin cậy OCR (%)':r.confidence||100,'Trạng thái xác minh':r.status};return {'ID':r.id,'Ngày':f.date||'','Ca/Bữa ăn':f.meal||'','Tên món ăn':f.dish||f.sampleName||'','Số lượng/Số suất':f.servings||'','Biện pháp xử lý/Ghi chú':f.action||f.condition||'','Trạng thái xác minh':r.status}}
 async function trySync(){
- const url=state.settings.bridgeUrl;if(!url||!state.pending.length)return;
+ const url=state.settings.bridgeUrl;if(!url||!state.pending.length||syncBusy)return;
+ syncBusy=true;
  const ids=[...state.pending];const records=ids.map(i=>state.records.find(r=>r.id===i)).filter(Boolean);
- try{const payload={action:'appendBatch',spreadsheetId:'1BcRDGO9oTiPeGFxHe7oYspvYaQKR0dxnjBPZlqZzgAI',items:records.map(r=>({sheet:sheetName(r),row:rowFor(r)}))};const res=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});const j=await res.json();if(j.ok){state.pending=state.pending.filter(x=>!ids.includes(x));persist();note('Đã đồng bộ '+records.length+' dòng sang Google Sheets.','ok');renderDashboard()}}catch(e){}
+ try{const payload={action:'appendBatch',spreadsheetId:'1BcRDGO9oTiPeGFxHe7oYspvYaQKR0dxnjBPZlqZzgAI',items:records.map(r=>({sheet:sheetName(r),row:rowFor(r)}))};const res=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});const j=await res.json();if(j.ok){state.pending=state.pending.filter(x=>!ids.includes(x));persist();note('Đã đồng bộ '+records.length+' dòng sang Google Sheets.','ok');renderDashboard()}else note('Google Sheets chưa nhận dữ liệu: '+(j.message||'không rõ lỗi'),'bad')}catch(e){note('Chưa kết nối được Google Sheets; dữ liệu vẫn nằm trong hàng chờ.','bad')}finally{syncBusy=false}
 }
 function renderMenu(){menu.innerHTML='<h2>Thực đơn & đối chiếu</h2><div class="card"><div class="grid2"><label>Ngày<input id="m_date" type="date" value="'+today()+'"></label><label>Bữa<input id="m_meal" value="Trưa"></label></div><label style="margin-top:10px">Mỗi dòng: Tên món | Nguyên liệu chính | Số suất<textarea id="m_lines" rows="7"></textarea></label><button class="primary" onclick="saveMenu()">Lưu thực đơn</button></div><div class="card"><b>Thực đơn đã lưu</b>'+state.menus.slice(-30).reverse().map(x=>'<div class="item">'+esc(x.date)+' · '+esc(x.meal)+' · <b>'+esc(x.dish)+'</b> · '+x.servings+' suất</div>').join('')+'</div>'}
 function saveMenu(){const date=m_date.value,meal=m_meal.value;const lines=m_lines.value.split(/\n/).map(x=>x.trim()).filter(Boolean);for(const l of lines){const [dish,ingredients='',servings='0']=l.split('|').map(x=>x.trim());if(dish)state.menus.push({id:id(),date,meal,dish,ingredients,servings:Number(servings)||0})}persist();note('Đã lưu thực đơn.','ok');renderMenu()}
@@ -234,10 +297,58 @@ function reportText(period){
 function renderReports(){reports.innerHTML='<h2>Báo cáo</h2><div class="card"><div class="chips"><button class="chip" onclick="showReport(\'day\')">Ngày</button><button class="chip" onclick="showReport(\'week\')">Tuần</button><button class="chip" onclick="showReport(\'month\')">Tháng</button></div><textarea id="reportbox" rows="14">'+esc(reportText('day'))+'</textarea></div>'}
 function showReport(p){reportbox.value=reportText(p)}
 const bridgeCode=`const SPREADSHEET_ID='1BcRDGO9oTiPeGFxHe7oYspvYaQKR0dxnjBPZlqZzgAI';
-function doPost(e){try{const b=JSON.parse(e.postData.contents||'{}');if(b.action==='appendBatch'){for(const it of (b.items||[]))append(it.sheet,it.row||{});return out({ok:true,count:(b.items||[]).length});}return out({ok:false,message:'action'});}catch(err){return out({ok:false,message:String(err)});}}
-function append(name,row){const sh=SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(name);if(!sh)throw new Error('Missing '+name);const h=sh.getRange(1,1,1,sh.getLastColumn()).getDisplayValues()[0];sh.appendRow(h.map(k=>Object.prototype.hasOwnProperty.call(row,k)?row[k]:''));}
+function doPost(e){
+ try{
+  const b=JSON.parse((e&&e.postData&&e.postData.contents)||'{}');
+  if(b.action==='appendBatch'){
+   for(const it of (b.items||[]))append(it.sheet,it.row||{});
+   return out({ok:true,count:(b.items||[]).length});
+  }
+  if(b.action==='aiOcr')return out(runGeminiOcr(b));
+  if(b.action==='ping')return out({ok:true,message:'connected'});
+  return out({ok:false,message:'Action không hợp lệ'});
+ }catch(err){return out({ok:false,message:String(err&&err.message?err.message:err)});}
+}
+function append(name,row){
+ const sh=SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(name);
+ if(!sh)throw new Error('Missing '+name);
+ const h=sh.getRange(1,1,1,sh.getLastColumn()).getDisplayValues()[0];
+ sh.appendRow(h.map(k=>Object.prototype.hasOwnProperty.call(row,k)?row[k]:''));
+}
+function runGeminiOcr(b){
+ const props=PropertiesService.getScriptProperties();
+ const key=props.getProperty('GEMINI_API_KEY');
+ const model=props.getProperty('GEMINI_MODEL')||'gemini-3.6-flash';
+ if(!key)return {ok:false,message:'Thiếu GEMINI_API_KEY trong Script Properties'};
+ if(!b.image||!b.image.data)return {ok:false,message:'Thiếu ảnh'};
+ const prompt=[
+  'Bạn là OCR chứng từ thực phẩm trường học tại Việt Nam.',
+  'Đọc ảnh hóa đơn/phiếu giao nhận và chỉ trả dữ liệu nhìn thấy; tuyệt đối không suy đoán HSD, giờ, số lô, kiểm dịch hoặc cảm quan nếu ảnh không có.',
+  'Phân biệt người bán/nhà cung cấp với khách hàng/trường học.',
+  'Nếu có bảng hàng, đọc TẤT CẢ dòng theo cột mã hàng, tên hàng, đơn vị, số lượng. Không nhầm đơn giá hoặc thành tiền thành số lượng.',
+  'Ngày chuẩn YYYY-MM-DD; chỉ thêm giờ nếu ảnh thực sự có giờ.',
+  'Phân nhóm kind: 1a=tươi sống/đông lạnh; 1b=khô/bao gói/phụ gia; không chắc để review.',
+  'Trả JSON duy nhất dạng: {"fields":{"supplier":"","supplierContact":"","receivedAt":"","invoice":"","deliverer":""},"lineItems":[{"code":"","name":"","unit":"","quantity":"","expiry":"","kind":"1a|1b|review"}]}'
+ ].join(' ');
+ const url='https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent';
+ const payload={
+  contents:[{parts:[
+   {inline_data:{mime_type:b.image.mimeType||'image/jpeg',data:b.image.data}},
+   {text:prompt}
+  ]}],
+  generationConfig:{temperature:0,responseMimeType:'application/json',maxOutputTokens:8192}
+ };
+ const res=UrlFetchApp.fetch(url,{method:'post',contentType:'application/json',headers:{'x-goog-api-key':key},payload:JSON.stringify(payload),muteHttpExceptions:true});
+ const code=res.getResponseCode(),body=res.getContentText();
+ if(code<200||code>=300)return {ok:false,message:'Gemini HTTP '+code,detail:body.substring(0,500)};
+ const parsed=JSON.parse(body);
+ const text=parsed.candidates&&parsed.candidates[0]&&parsed.candidates[0].content&&parsed.candidates[0].content.parts&&parsed.candidates[0].content.parts[0]&&parsed.candidates[0].content.parts[0].text;
+ if(!text)return {ok:false,message:'Gemini không trả JSON'};
+ let data;try{data=JSON.parse(text)}catch(_){return {ok:false,message:'Không parse được JSON từ Gemini'}};
+ return {ok:true,data:data,model:model};
+}
 function out(x){return ContentService.createTextOutput(JSON.stringify(x)).setMimeType(ContentService.MimeType.JSON);}`;
-function renderSettings(){settings.innerHTML='<h2>Cài đặt</h2><div class="card"><b>Google Sheets</b><label style="margin-top:10px">Apps Script Web App URL<input id="set_bridge" value="'+esc(state.settings.bridgeUrl)+'" placeholder="https://script.google.com/macros/s/.../exec"></label><button class="primary" onclick="saveSettings()" style="margin-top:10px">Lưu & đồng bộ lại</button><p class="small">Khi chưa có URL, dữ liệu vẫn lưu trên điện thoại và nằm trong hàng chờ. Sau khi có URL, cả dòng CẦN DÒ LẠI cũng được ghi sang Sheet.</p></div><div class="card"><b>Mã Apps Script cần cài một lần</b><pre class="code">'+esc(bridgeCode)+'</pre><p class="small">Vào script.google.com → New project → dán mã → Deploy → Web app → Execute as Me → cấp quyền → sao chép URL /exec vào ô trên.</p></div><div class="card"><b>Trạng thái</b><p>Google Sheet: <b>đã xác định</b></p><p>Cầu nối: <b>'+(state.settings.bridgeUrl?'đã cấu hình':'chưa cấu hình')+'</b></p><p>Chờ đồng bộ: <b>'+state.pending.length+'</b> dòng</p><p>OCR: <b>Tesseract vie+eng chạy trên thiết bị</b></p></div>'}
+function renderSettings(){settings.innerHTML='<h2>Cài đặt</h2><div class="card"><b>Google Sheets + AI OCR</b><label style="margin-top:10px">Apps Script Web App URL<input id="set_bridge" value="'+esc(state.settings.bridgeUrl)+'" placeholder="https://script.google.com/macros/s/.../exec"></label><button class="primary" onclick="saveSettings()" style="margin-top:10px">Lưu & kiểm tra kết nối</button><p class="small">Một cầu nối xử lý cả Google Sheets và Gemini OCR. Dòng CẦN DÒ LẠI vẫn được ghi sang Sheet.</p></div><div class="card"><b>Mã Apps Script cần cài một lần</b><pre class="code">'+esc(bridgeCode)+'</pre><p class="small">Trong Apps Script: Project Settings → Script Properties thêm GEMINI_API_KEY. Có thể thêm GEMINI_MODEL=gemini-3.6-flash. Sau đó Deploy → Web app → Execute as Me → cấp quyền → sao chép URL /exec vào ô trên.</p></div><div class="card"><b>Trạng thái</b><p>Google Sheet: <b>đã xác định</b></p><p>Cầu nối AI/Sheet: <b>'+(state.settings.bridgeUrl?'đã cấu hình URL':'chưa cấu hình')+'</b></p><p>Chờ đồng bộ: <b>'+state.pending.length+'</b> dòng</p><p>OCR chính: <b>'+(state.settings.bridgeUrl?'Gemini qua Apps Script':'Tesseract fallback')+'</b></p><p>Kiểm tra chéo: <b>Tesseract vie+eng trên thiết bị</b></p></div>'}
 function saveSettings(){state.settings.bridgeUrl=set_bridge.value.trim();persist();note('Đã lưu cấu hình. Đang thử đồng bộ hàng chờ…','ok');trySync();renderSettings()}
 renderNav();render();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
