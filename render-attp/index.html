@@ -214,7 +214,7 @@ async function runHybridOCR(){
  const b=document.getElementById('ocrbar');if(b)b.style.width='100%';
  ocrText=local.data.text||'';
  applyAIResult(ai.data||{},ocrText);
- if(!invoiceItems.length&&kind==='a'||kind==='b'){
+ if(!invoiceItems.length&&(kind==='a'||kind==='b')){
    invoiceItems=parseTextRows(ocrText,Math.round(local.data.confidence||75));
  }
  note(invoiceItems.length?'AI OCR đã đọc '+invoiceItems.length+' dòng; Tesseract dùng để kiểm tra chéo. Dòng không khớp được giữ dưới 95%.':'AI OCR đã đọc thông tin chung; chưa đủ chắc để tách bảng hàng.','ok');
