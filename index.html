@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f766e">
+<title>Trợ lý Y tế học đường · Demo</title>
+<style>
+:root{--bg:#f3f7f6;--card:#fff;--ink:#12312d;--muted:#6b807c;--teal:#0f766e;--teal2:#dff3ef;--line:#dfe9e6;--red:#b42318;--amber:#b54708;--green:#137333;--blue:#175cd3;--shadow:0 10px 30px rgba(21,61,54,.08)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.head{max-width:1200px;margin:auto;padding:12px 18px;display:flex;align-items:center;gap:12px}.brand{display:flex;align-items:center;gap:10px;font-weight:800}.logo{width:40px;height:40px;border-radius:13px;background:linear-gradient(145deg,#0f766e,#14532d);display:grid;place-items:center;color:#fff;font-size:22px}.demo{margin-left:auto;font-size:12px;padding:7px 10px;border-radius:999px;background:#fff3cd;color:#7a4b00;border:1px solid #f4d77b}
+.app{max-width:1200px;margin:auto;padding:18px;display:grid;grid-template-columns:240px 1fr;gap:18px}
+nav{background:#0d3e38;color:#fff;border-radius:20px;padding:14px;min-height:calc(100vh - 95px);position:sticky;top:78px;align-self:start}
+nav button{width:100%;border:0;background:transparent;color:#cce4df;padding:11px 12px;margin:3px 0;border-radius:12px;text-align:left;font:inherit;cursor:pointer}nav button:hover,nav button.active{background:#145c53;color:#fff}nav small{display:block;color:#8ab7af;margin:16px 8px 6px}
+main{min-width:0}.hero{background:linear-gradient(135deg,#0f766e,#164e63);color:#fff;border-radius:24px;padding:26px;box-shadow:var(--shadow)}.hero h1{margin:4px 0 8px;font-size:34px}.hero p{margin:0;color:#d9efeb;max-width:760px}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;color:#a7f3d0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}.stat,.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.stat{padding:17px}.stat b{display:block;font-size:28px}.stat span{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px}.card{padding:18px}.card h2{margin:0 0 12px;font-size:18px}.task{display:flex;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.task:last-child{border:0}.dot{width:10px;height:10px;border-radius:50%;background:var(--amber);flex:none}.dot.red{background:var(--red)}.dot.green{background:var(--green)}.task small,.muted{display:block;color:var(--muted);font-size:13px;margin-top:3px}
+.ask{background:#0d3e38;color:#fff}.ask textarea{width:100%;min-height:88px;border:1px solid #2d625b;border-radius:14px;background:#124a43;color:#fff;padding:12px;resize:vertical}.ask .muted{color:#bcd8d3}.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.btn{border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}.primary{background:#0f766e;color:#fff}.soft{background:#eaf5f2;color:#0f5c54}.danger{background:#fee4e2;color:#912018}.reply{margin-top:10px;padding:12px;background:#113f3a;border-radius:12px;color:#ddf3ef;display:none}
+.pagehead{margin-bottom:14px}.pagehead h1{margin:0 0 4px}.table{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:auto;box-shadow:var(--shadow)}table{border-collapse:collapse;width:100%;min-width:760px}th,td{padding:12px 13px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}th{background:#f8fbfa;color:#4b625e}tr:last-child td{border-bottom:0}
+.badge{display:inline-block;padding:5px 8px;border-radius:999px;font-size:11px;font-weight:800;background:#e7f6f2;color:#0f665c}.badge.amber{background:#fff3dc;color:#9a5b00}.badge.red{background:#fee4e2;color:#b42318}.badge.blue{background:#e7f0ff;color:#175cd3}
+.modules{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.module{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px;cursor:pointer}.module:hover{transform:translateY(-1px);box-shadow:var(--shadow)}.module b{display:block;margin-bottom:4px}.module small{color:var(--muted)}
+.notice{padding:13px 14px;border-radius:14px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;margin:12px 0}.notice.ok{background:#ecfdf3;border-color:#abefc6;color:#067647}.source{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+input,select{border:1px solid #cfdcd8;border-radius:11px;padding:10px 11px;background:#fff}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.toolbar input{min-width:260px}
+footer{max-width:1200px;margin:0 auto;padding:0 18px 28px;color:#71837f;font-size:12px}
+@media(max-width:900px){.app{grid-template-columns:1fr}nav{position:static;min-height:auto;display:grid;grid-template-columns:repeat(2,1fr)}nav small{grid-column:1/-1}.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.modules{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.stats,.modules{grid-template-columns:1fr}.hero h1{font-size:28px}.app{padding:10px}.head{padding:10px}.demo{display:none}}
+</style>
+</head>
+<body>
+<header><div class="head"><div class="brand"><div class="logo">✚</div><div>Trợ lý Y tế học đường<div class="muted">School Health Assistant</div></div></div><div class="demo">DEMO · Dữ liệu giả lập</div></div></header>
+<div class="app">
+<nav id="nav">
+<small>TỔNG QUAN</small>
+<button data-page="home">⌂ Hôm nay</button>
+<small>Y TẾ HỌC ĐƯỜNG</small>
+<button data-page="students">👧 Hồ sơ học sinh</button>
+<button data-page="health">🩺 Khám sức khỏe</button>
+<button data-page="vaccines">💉 Tiêm chủng</button>
+<button data-page="meds">💊 Thuốc học sinh</button>
+<button data-page="incident">🩹 Tai nạn & sơ cứu</button>
+<button data-page="disease">🦠 Phòng chống dịch</button>
+<small>ATTP & VẬN HÀNH</small>
+<button data-page="food">🍲 Kiểm thực 3 bước</button>
+<button data-page="inventory">📦 Kho thực phẩm & sữa</button>
+<button data-page="docs">📄 Tài liệu & chứng từ</button>
+<button data-page="connect">🔌 Dữ liệu & kết nối</button>
+</nav>
+<main id="main"></main>
+</div>
+<footer>Bản demo giao diện tĩnh trên GitHub Pages. Không chứa dữ liệu học sinh thật, CCCD, BHYT, toa thuốc hay khóa API. Backend production được thiết kế tách rời để có thể chuyển nền tảng.</footer>
+<script>
+const students=[
+ {name:'Nguyễn Minh An',cls:'Lá 1',dob:'12/03/2021',risk:'Dị ứng trứng',status:'Đang học'},
+ {name:'Trần Gia Hân',cls:'Chồi 2',dob:'21/09/2022',risk:'Không ghi nhận',status:'Đang học'},
+ {name:'Lê Hoàng Nam',cls:'Mầm 1',dob:'02/02/2023',risk:'Theo dõi hen',status:'Đang học'}
+];
+const inventory=[
+ {item:'Sữa tiệt trùng 180 ml',lot:'MILK-0926',qty:'126 hộp',exp:'10/10/2026',warn:'Còn 8 ngày'},
+ {item:'Gạo thơm',lot:'RICE-2609',qty:'42 kg',exp:'20/03/2027',warn:'Ổn định'},
+ {item:'Dầu ăn',lot:'OIL-1809',qty:'8 chai',exp:'19/11/2026',warn:'Ổn định'}
+];
+const meds=[
+ {name:'Nguyễn Minh An',cls:'Lá 1',drug:'Thuốc mẫu A',dose:'5 ml',time:'11:30',status:'Đã xác nhận'},
+ {name:'Trần Gia Hân',cls:'Chồi 2',drug:'Thuốc mẫu B',dose:'1 gói',time:'14:30',status:'Chờ thực hiện'}
+];
+const sources=[
+ ['Danh sách học sinh','Google Sheets / Excel','Hồ sơ + người giám hộ + tiền sử'],
+ ['KSK_EVENTS / KSK_REVIEW','Google Sheets','Sự kiện khám, trạng thái ghép, nguồn'],
+ ['Sổ kiểm thực 3 bước','Google Sheets','B1/B2/B3, lưu mẫu, kho, cảnh báo'],
+ ['Tiền sử tiêm chủng theo lớp','Google Sheets','Mũi tiêm + ngày tiêm + mã tiêm chủng']
+];
+const modules=[
+ ['students','Hồ sơ học sinh','Một Student ID xuyên suốt các phân hệ'],
+ ['meds','Thuốc học sinh','Nhắc liều và ghi nhận sau xác nhận'],
+ ['vaccines','Tiêm chủng','Theo dõi đủ/thiếu mũi'],
+ ['food','ATTP','Kiểm thực B1 → B2 → B3 → lưu mẫu'],
+ ['inventory','Kho','Theo lô, HSD và tồn hiện tại'],
+ ['incident','Tai nạn','Sự cố, sơ cứu, liên hệ phụ huynh']
+];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const badge=(t,c='')=>'<span class="badge '+c+'">'+esc(t)+'</span>';
+const head=(t,s)=>'<div class="pagehead"><h1>'+t+'</h1><div class="muted">'+s+'</div></div>';
+function home(){
+ return '<section class="hero"><div class="eyebrow">PORTABLE-FIRST · DEMO V0.4</div><h1>Hôm nay cần làm gì?</h1><p>Trung tâm công việc cho nhân viên y tế trường mầm non: sức khỏe học sinh, thuốc, tiêm chủng, ATTP, kho, sự cố và hồ sơ.</p></section>'+
+ '<div class="stats"><div class="stat"><b>3</b><span>Hồ sơ mẫu</span></div><div class="stat"><b>2</b><span>Lịch thuốc hôm nay</span></div><div class="stat"><b>1</b><span>Lô cần chú ý HSD</span></div><div class="stat"><b>4</b><span>Đầu nối dữ liệu</span></div></div>'+
+ '<div class="grid"><div class="card"><h2>Việc cần xử lý</h2>'+
+ '<div class="task"><i class="dot red"></i><div><b>Kiểm tra lịch thuốc đã được xác nhận</b><small>AI không tự kích hoạt toa thuốc</small></div></div>'+
+ '<div class="task"><i class="dot"></i><div><b>Sữa có lô còn 8 ngày đến HSD</b><small>Ưu tiên xuất theo lô</small></div></div>'+
+ '<div class="task"><i class="dot"></i><div><b>Hoàn tất kiểm thực & lưu mẫu bữa trưa</b><small>Luồng B1 → B2 → B3 → lưu mẫu</small></div></div>'+
+ '<div class="task"><i class="dot green"></i><div><b>Đầu nối dữ liệu đã sẵn sàng ở mức demo</b><small>Preview trước khi ghi dữ liệu thật</small></div></div></div>'+
+ '<div class="card ask"><h2>Trợ lý công việc</h2><div class="muted">Thử: “kiểm tra sữa”, “thuốc hôm nay”, “tiêm chủng”, “lưu mẫu”</div><textarea id="q" placeholder="Nhập yêu cầu..."></textarea><div class="actions"><button class="btn soft" onclick="document.getElementById(\'q\').value=\'Kiểm tra sữa còn trong kho\'">Điền mẫu</button><button class="btn primary" onclick="ask()">Thực hiện</button></div><div class="reply" id="reply"></div></div></div>'+
+ '<div style="height:14px"></div><div class="modules">'+modules.map(m=>'<div class="module" onclick="show(\''+m[0]+'\')"><b>'+m[1]+'</b><small>'+m[2]+'</small></div>').join('')+'</div>';
+}
+function studentsPage(){
+ return head('Hồ sơ học sinh','Một hồ sơ trung tâm liên kết khám, tiêm chủng, thuốc và sự cố')+
+ '<div class="toolbar"><input id="find" placeholder="Tìm học sinh hoặc lớp..." oninput="filterStudents()"><button class="btn primary">+ Thêm hồ sơ nháp</button></div>'+
+ '<div class="table"><table><thead><tr><th>Họ tên</th><th>Lớp</th><th>Ngày sinh</th><th>Lưu ý sức khỏe</th><th>Trạng thái</th></tr></thead><tbody id="studentBody">'+studentRows(students)+'</tbody></table></div>';
+}
+function studentRows(rows){return rows.map(s=>'<tr><td><b>'+esc(s.name)+'</b></td><td>'+esc(s.cls)+'</td><td>'+esc(s.dob)+'</td><td>'+esc(s.risk)+'</td><td>'+badge(s.status,'')+'</td></tr>').join('')}
+function filterStudents(){let q=(document.getElementById('find').value||'').toLowerCase();document.getElementById('studentBody').innerHTML=studentRows(students.filter(s=>(s.name+' '+s.cls).toLowerCase().includes(q)))}
+function medsPage(){return head('Thuốc học sinh','Toa thuốc được OCR thành bản nháp; nhân viên y tế xác nhận trước khi kích hoạt')+
+ '<div class="notice">Không tự suy đoán tên thuốc, liều hoặc giờ dùng khi ảnh/toa không rõ. Demo không phải công cụ kê đơn.</div>'+
+ '<div class="table"><table><thead><tr><th>Học sinh</th><th>Thuốc</th><th>Liều</th><th>Giờ</th><th>Trạng thái</th></tr></thead><tbody>'+
+ meds.map(m=>'<tr><td><b>'+esc(m.name)+'</b><div class="muted">'+esc(m.cls)+'</div></td><td>'+esc(m.drug)+'</td><td>'+esc(m.dose)+'</td><td>'+esc(m.time)+'</td><td>'+badge(m.status,m.status.includes('Đã')?'':'amber')+'</td></tr>').join('')+'</tbody></table></div>'}
+function inventoryPage(){return head('Kho thực phẩm & sữa','Quản lý theo lô, số lượng, HSD và cảnh báo')+
+ '<div class="table"><table><thead><tr><th>Mặt hàng</th><th>Lô</th><th>Tồn hiện tại</th><th>HSD</th><th>Cảnh báo</th></tr></thead><tbody>'+
+ inventory.map(x=>'<tr><td><b>'+esc(x.item)+'</b></td><td>'+esc(x.lot)+'</td><td>'+esc(x.qty)+'</td><td>'+esc(x.exp)+'</td><td>'+badge(x.warn,x.warn.includes('8 ngày')?'amber':'')+'</td></tr>').join('')+'</tbody></table></div>'}
+function foodPage(){return head('ATTP & kiểm thực 3 bước','Nhập thực phẩm → chế biến → trước khi ăn → lưu mẫu')+
+ '<div class="notice ok">Đã map được cấu trúc nguồn B1_Nhap_thuc_pham, B2_Che_bien, B3_Truoc_khi_an, Luu_mau, Thuc_don, Kho, Canh_bao.</div>'+
+ '<div class="modules"><div class="module"><b>Bước 1 · Nhập thực phẩm</b><small>NCC, hóa đơn, HSD, cảm quan, ảnh chứng từ</small></div><div class="module"><b>Bước 2 · Chế biến</b><small>Món ăn, nguyên liệu, thời gian, người chế biến</small></div><div class="module"><b>Bước 3 · Trước khi ăn</b><small>Chia suất, cảm quan, đối chiếu thực đơn</small></div><div class="module"><b>Lưu mẫu</b><small>Khối lượng, nhiệt độ, thời gian lấy/hủy, niêm phong</small></div></div>'}
+function healthPage(){return head('Khám sức khỏe','Theo dõi đã khám, chưa khám, kết quả và nguồn dữ liệu')+
+ '<div class="stats"><div class="stat"><b>3</b><span>Hồ sơ mẫu</span></div><div class="stat"><b>2</b><span>Đã khám</span></div><div class="stat"><b>1</b><span>Chờ đối chiếu</span></div><div class="stat"><b>1</b><span>Cần review ghép</span></div></div>'+
+ '<div class="notice">Luồng nhập KSK giữ Source, MatchMethod, Status và ReviewReason để không tự ghép nhầm học sinh.</div>'}
+function vaccinesPage(){return head('Tiêm chủng','Theo dõi lịch sử tiêm, mũi đã tiêm và danh sách cần rà soát')+
+ '<div class="table"><table><thead><tr><th>Học sinh</th><th>Lớp</th><th>Mã tiêm chủng</th><th>BCG</th><th>Sởi 1</th><th>Trạng thái</th></tr></thead><tbody>'+
+ '<tr><td>Nguyễn Minh An</td><td>Lá 1</td><td>DEMO-001</td><td>Đã tiêm</td><td>Đã tiêm</td><td>'+badge('Đang rà soát')+'</td></tr>'+
+ '<tr><td>Trần Gia Hân</td><td>Chồi 2</td><td>DEMO-002</td><td>Đã tiêm</td><td>Chưa đủ dữ liệu</td><td>'+badge('Cần bổ sung','amber')+'</td></tr></tbody></table></div>'}
+function incidentPage(){return head('Tai nạn & sơ cấp cứu','Ghi nhận sự cố, xử trí, liên hệ phụ huynh và chuyển tuyến')+
+ '<div class="notice ok">Mẫu phiếu sự cố có thể được tạo từ giọng nói hoặc ảnh, nhưng phải được người phụ trách xác nhận trước khi lưu chính thức.</div>'+
+ '<div class="card"><b>Sự cố mẫu</b><div class="muted">09:35 · Sân chơi · Trầy xước đầu gối · Đã rửa sạch và theo dõi · Đã thông báo phụ huynh</div></div>'}
+function diseasePage(){return head('Phòng chống dịch','Theo dõi ca bệnh, nghỉ bệnh và cụm triệu chứng theo lớp')+
+ '<div class="stats"><div class="stat"><b>0</b><span>Ca cảnh báo</span></div><div class="stat"><b>2</b><span>Nghỉ bệnh mẫu</span></div><div class="stat"><b>0</b><span>Cụm triệu chứng</span></div><div class="stat"><b>—</b><span>Dữ liệu thật chưa kết nối</span></div></div>'}
+function docsPage(){return head('Tài liệu & chứng từ','Toa thuốc, hóa đơn, phiếu giao hàng, biên lai, ảnh lưu mẫu')+
+ '<div class="notice">Bản production sẽ lưu file ở object storage riêng tư; repository GitHub không chứa tài liệu y tế thật.</div>'+
+ '<div class="modules"><div class="module"><b>Toa thuốc</b><small>OCR → bản nháp → xác nhận</small></div><div class="module"><b>Hóa đơn thực phẩm</b><small>OCR nhà cung cấp, mặt hàng, số lượng</small></div><div class="module"><b>Ảnh lưu mẫu</b><small>Liên kết bản ghi lưu mẫu theo ngày/bữa</small></div></div>'}
+function connectPage(){return head('Dữ liệu & kết nối','Đấu nối dữ liệu theo kiểu portable-first, không khóa Cloudflare')+
+ '<div class="notice ok"><b>Nguyên tắc:</b> Source → Staging/Preview → Mapping → Xác nhận → Database. File nguồn không bị ghi đè.</div>'+
+ '<div class="card"><h2>Nguồn đã xác định cấu trúc</h2>'+sources.map(s=>'<div class="source"><div><b>'+s[0]+'</b><small>'+s[1]+' · '+s[2]+'</small></div>'+badge('Sẵn sàng mapping')+'</div>').join('')+'</div>'+
+ '<div style="height:12px"></div><div class="card"><h2>Khả năng di chuyển</h2><div class="muted">Frontend: GitHub Pages / Netlify / Cloudflare Pages. Backend: FastAPI/Node trên Render hoặc container bất kỳ. Database: SQLite demo → PostgreSQL (Neon/Supabase/Render). Storage: R2 hoặc S3-compatible. Không chứa SDK khóa nền tảng trong business logic.</div></div>'}
+function ask(){const q=(document.getElementById('q').value||'').toLowerCase();let r='Tôi có thể mô phỏng tra cứu kho, thuốc, tiêm chủng, kiểm thực và hồ sơ học sinh.';if(q.includes('sữa')||q.includes('kho'))r='Sữa tiệt trùng 180 ml còn 126 hộp; lô MILK-0926 còn 8 ngày đến HSD.';else if(q.includes('thuốc')||q.includes('uống'))r='Có 2 lịch thuốc mẫu hôm nay; mọi liều dùng phải dựa trên toa đã được xác nhận.';else if(q.includes('tiêm'))r='Có 1 hồ sơ mẫu cần bổ sung dữ liệu tiêm chủng.';else if(q.includes('lưu mẫu')||q.includes('kiểm thực'))r='Luồng B1 → B2 → B3 → lưu mẫu đã được thiết kế và đầu nối nguồn đã map.';const e=document.getElementById('reply');e.style.display='block';e.textContent=r}
+const pages={home,students:studentsPage,health:healthPage,vaccines:vaccinesPage,meds:medsPage,incident:incidentPage,disease:diseasePage,food:foodPage,inventory:inventoryPage,docs:docsPage,connect:connectPage};
+function show(p){document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===p));document.getElementById('main').innerHTML=(pages[p]||home)();history.replaceState(null,'','#'+p);scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>show(b.dataset.page));
+show(location.hash.slice(1)||'home');
+</script>
+</body></html>
