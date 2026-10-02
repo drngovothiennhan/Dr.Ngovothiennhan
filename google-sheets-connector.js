@@ -3,6 +3,9 @@
 // Configure OAuth client ID in the browser localStorage or replace at deployment time.
 
 const DEFAULT_GOOGLE_CLIENT_ID = '1074784573482-dvc8m31rhmhv4uucas7hq6bdd30jcusm.apps.googleusercontent.com';
+const GOOGLE_PROJECT_NUMBER = '1074784573482';
+const SHEETS_ENABLE_URL = 'https://console.cloud.google.com/apis/library/sheets.googleapis.com?project=' + GOOGLE_PROJECT_NUMBER;
+const DRIVE_ENABLE_URL = 'https://console.cloud.google.com/apis/library/drive.googleapis.com?project=' + GOOGLE_PROJECT_NUMBER;
 const DEFAULT_CLIENT_ID = '1074784573482-dvc8m31rhmhv4uucas7hq6bdd30jcusm.apps.googleusercontent.com';
 const DEFAULT_SHEET_ID = '15UIjrBO0yHBU5jwzFYUYeMiEcKxKWQ6CRR9ZktQ3wG4';
 const APP_FOLDER_ID = '1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ';
@@ -68,7 +71,15 @@ const GoogleSheetsConnector = (() => {
     });
     if (!res.ok) {
       const body = await res.text();
-      throw new Error('Google Sheets API ' + res.status + ': ' + body);
+      let parsed = null;
+      try { parsed = JSON.parse(body); } catch (_) {}
+      const reason = parsed?.error?.details?.find?.(d => d?.reason)?.reason || parsed?.error?.status || '';
+      if (res.status === 403 && (reason === 'SERVICE_DISABLED' || body.includes('SERVICE_DISABLED'))) {
+        const isDrive = body.includes('drive.googleapis.com');
+        const url = isDrive ? DRIVE_ENABLE_URL : SHEETS_ENABLE_URL;
+        throw new Error((isDrive ? 'Google Drive API' : 'Google Sheets API') + ' chưa được bật cho project. Mở link sau, bấm ENABLE rồi chờ 1–3 phút: ' + url);
+      }
+      throw new Error('Google API ' + res.status + ': ' + (parsed?.error?.message || body));
     }
     return res.json();
   }
@@ -97,5 +108,5 @@ const GoogleSheetsConnector = (() => {
     ]]);
   }
 
-  return {getConfig,saveConfig,ready,connect,disconnect,readRange,appendRows,appendAudit,DEFAULT_GOOGLE_CLIENT_ID,DEFAULT_SHEET_ID,APP_FOLDER_ID};
+  return {getConfig,saveConfig,ready,connect,disconnect,readRange,appendRows,appendAudit,DEFAULT_GOOGLE_CLIENT_ID,DEFAULT_SHEET_ID,APP_FOLDER_ID,GOOGLE_PROJECT_NUMBER,SHEETS_ENABLE_URL,DRIVE_ENABLE_URL};
 })();
