@@ -2,6 +2,8 @@
 // Public-safe source: no access token, password, service-account key, or health data here.
 // Configure OAuth client ID in the browser localStorage or replace at deployment time.
 
+const DEFAULT_SHEET_ID = '15UIjrBO0yHBU5jwzFYUYeMiEcKxKWQ6CRR9ZktQ3wG4';
+const APP_FOLDER_ID = '1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ';
 const SHEETS_SCOPE = 'https://www.googleapis.com/auth/spreadsheets';
 const DRIVE_FILE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
@@ -12,13 +14,13 @@ const GoogleSheetsConnector = (() => {
   function getConfig() {
     return {
       clientId: localStorage.getItem('sha_google_client_id') || '',
-      sheetId: localStorage.getItem('sha_sheet_id') || ''
+      sheetId: localStorage.getItem('sha_sheet_id') || DEFAULT_SHEET_ID
     };
   }
 
   function saveConfig(clientId, sheetId) {
     localStorage.setItem('sha_google_client_id', clientId.trim());
-    localStorage.setItem('sha_sheet_id', sheetId.trim());
+    localStorage.setItem('sha_sheet_id', (sheetId.trim() || DEFAULT_SHEET_ID));
   }
 
   function ready() {
@@ -93,5 +95,5 @@ const GoogleSheetsConnector = (() => {
     ]]);
   }
 
-  return {getConfig,saveConfig,ready,connect,disconnect,readRange,appendRows,appendAudit};
+  return {getConfig,saveConfig,ready,connect,disconnect,readRange,appendRows,appendAudit,DEFAULT_SHEET_ID,APP_FOLDER_ID};
 })();
