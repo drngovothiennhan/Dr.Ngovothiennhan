@@ -4,197 +4,141 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e">
-<title>Trợ lý Y tế học đường · Demo</title>
+<title>App Y tế VK</title>
 <style>
-:root{--bg:#f3f7f6;--card:#fff;--ink:#12312d;--muted:#6b807c;--teal:#0f766e;--teal2:#dff3ef;--line:#dfe9e6;--red:#b42318;--amber:#b54708;--green:#137333;--blue:#175cd3;--shadow:0 10px 30px rgba(21,61,54,.08)}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
-header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.head{max-width:1200px;margin:auto;padding:12px 18px;display:flex;align-items:center;gap:12px}.brand{display:flex;align-items:center;gap:10px;font-weight:800}.logo{width:40px;height:40px;border-radius:13px;background:linear-gradient(145deg,#0f766e,#14532d);display:grid;place-items:center;color:#fff;font-size:22px}.config-top{margin-left:auto;border:0;border-radius:12px;padding:9px 12px;background:#eaf5f2;color:#0f5c54;font-weight:800;cursor:pointer}.demo{font-size:12px;padding:7px 10px;border-radius:999px;background:#fff3cd;color:#7a4b00;border:1px solid #f4d77b}
-.app{max-width:1200px;margin:auto;padding:18px;display:grid;grid-template-columns:240px 1fr;gap:18px}
-nav{background:#0d3e38;color:#fff;border-radius:20px;padding:14px;min-height:calc(100vh - 95px);position:sticky;top:78px;align-self:start}
-nav button{width:100%;border:0;background:transparent;color:#cce4df;padding:11px 12px;margin:3px 0;border-radius:12px;text-align:left;font:inherit;cursor:pointer}nav button:hover,nav button.active{background:#145c53;color:#fff}nav small{display:block;color:#8ab7af;margin:16px 8px 6px}
-main{min-width:0}.hero{background:linear-gradient(135deg,#0f766e,#164e63);color:#fff;border-radius:24px;padding:26px;box-shadow:var(--shadow)}.hero h1{margin:4px 0 8px;font-size:34px}.hero p{margin:0;color:#d9efeb;max-width:760px}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;color:#a7f3d0}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}.stat,.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.stat{padding:17px}.stat b{display:block;font-size:28px}.stat span{color:var(--muted);font-size:13px}
-.grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px}.card{padding:18px}.card h2{margin:0 0 12px;font-size:18px}.task{display:flex;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.task:last-child{border:0}.dot{width:10px;height:10px;border-radius:50%;background:var(--amber);flex:none}.dot.red{background:var(--red)}.dot.green{background:var(--green)}.task small,.muted{display:block;color:var(--muted);font-size:13px;margin-top:3px}
-.ask{background:#0d3e38;color:#fff}.ask textarea{width:100%;min-height:88px;border:1px solid #2d625b;border-radius:14px;background:#124a43;color:#fff;padding:12px;resize:vertical}.ask .muted{color:#bcd8d3}.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.btn{border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}.primary{background:#0f766e;color:#fff}.soft{background:#eaf5f2;color:#0f5c54}.danger{background:#fee4e2;color:#912018}.reply{margin-top:10px;padding:12px;background:#113f3a;border-radius:12px;color:#ddf3ef;display:none}
-.pagehead{margin-bottom:14px}.pagehead h1{margin:0 0 4px}.table{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:auto;box-shadow:var(--shadow)}table{border-collapse:collapse;width:100%;min-width:760px}th,td{padding:12px 13px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}th{background:#f8fbfa;color:#4b625e}tr:last-child td{border-bottom:0}
-.badge{display:inline-block;padding:5px 8px;border-radius:999px;font-size:11px;font-weight:800;background:#e7f6f2;color:#0f665c}.badge.amber{background:#fff3dc;color:#9a5b00}.badge.red{background:#fee4e2;color:#b42318}.badge.blue{background:#e7f0ff;color:#175cd3}
-.modules{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.module{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px;cursor:pointer}.module:hover{transform:translateY(-1px);box-shadow:var(--shadow)}.module b{display:block;margin-bottom:4px}.module small{color:var(--muted)}
-.notice{padding:13px 14px;border-radius:14px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;margin:12px 0}.notice.ok{background:#ecfdf3;border-color:#abefc6;color:#067647}.source{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
-input,select{border:1px solid #cfdcd8;border-radius:11px;padding:10px 11px;background:#fff}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.toolbar input{min-width:260px}
-footer{max-width:1200px;margin:0 auto;padding:0 18px 28px;color:#71837f;font-size:12px}
-.modal-backdrop{position:fixed;inset:0;background:rgba(5,26,23,.58);z-index:100;display:none;align-items:center;justify-content:center;padding:18px}
-.modal-backdrop.open{display:flex}.modal{width:min(760px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.25);padding:22px}.modal-head{display:flex;align-items:flex-start;gap:12px}.modal-head h2{margin:0 0 4px}.modal-close{margin-left:auto;border:0;background:#eef5f3;border-radius:10px;width:38px;height:38px;font-size:20px;cursor:pointer}.setup-step{padding:13px 0;border-bottom:1px solid var(--line)}.setup-step:last-child{border-bottom:0}.setup-step b{display:block;margin-bottom:5px}.setup-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.setup-links a{display:inline-block;text-decoration:none;background:#eaf5f2;color:#0f5c54;padding:9px 11px;border-radius:10px;font-size:13px;font-weight:750}.codebox{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#f7faf9;border:1px solid var(--line);padding:10px;border-radius:12px}.codebox code{word-break:break-all}.modal input{width:100%;margin-top:8px}.modal-foot{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:14px}
-@media(max-width:900px){.app{grid-template-columns:1fr}nav{position:static;min-height:auto;display:grid;grid-template-columns:repeat(2,1fr)}nav small{grid-column:1/-1}.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.modules{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:560px){.stats,.modules{grid-template-columns:1fr}.hero h1{font-size:28px}.app{padding:10px}.head{padding:10px}.demo{display:none}}
+:root{--bg:#f3f7f6;--card:#fff;--ink:#12312d;--muted:#6b807c;--teal:#0f766e;--teal2:#e2f3ef;--line:#dfe9e6;--red:#b42318;--amber:#b54708;--green:#137333;--shadow:0 12px 34px rgba(21,61,54,.09)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}button,input{font:inherit}
+header{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.head{max-width:1240px;margin:auto;padding:11px 16px;display:flex;align-items:center;gap:10px}.brand{display:flex;align-items:center;gap:10px;font-weight:850}.logo{width:40px;height:40px;border-radius:13px;background:linear-gradient(145deg,#0f766e,#14532d);display:grid;place-items:center;color:#fff;font-size:22px}.head-actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{display:inline-block;padding:6px 9px;border-radius:999px;font-size:11px;font-weight:800;background:#e7f6f2;color:#0f665c}.badge.amber{background:#fff3dc;color:#9a5b00}.badge.red{background:#fee4e2;color:#b42318}.badge.blue{background:#e7f0ff;color:#175cd3}
+.btn{border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}.primary{background:var(--teal);color:#fff}.soft{background:var(--teal2);color:#0f5c54}.danger{background:#fee4e2;color:#912018}.btn:disabled{opacity:.45;cursor:not-allowed}
+.login-wrap{max-width:920px;margin:42px auto;padding:18px}.login-card{background:#fff;border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);padding:28px}.login-card h1{font-size:34px;margin:8px 0}.login-card p{color:var(--muted);line-height:1.55}.login-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}.safe{background:#ecfdf3;border:1px solid #abefc6;color:#067647;border-radius:16px;padding:14px}.setup{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:16px;padding:14px}
+.app{max-width:1240px;margin:auto;padding:16px;display:grid;grid-template-columns:245px 1fr;gap:16px}nav{background:#0d3e38;color:#fff;border-radius:20px;padding:13px;min-height:calc(100vh - 92px);position:sticky;top:76px;align-self:start}nav button{width:100%;border:0;background:transparent;color:#cce4df;padding:10px 11px;margin:2px 0;border-radius:11px;text-align:left;cursor:pointer}nav button.active,nav button:hover{background:#145c53;color:#fff}nav small{display:block;color:#8ab7af;margin:14px 8px 5px}
+main{min-width:0}.hero{background:linear-gradient(135deg,#0f766e,#164e63);color:#fff;border-radius:24px;padding:24px;box-shadow:var(--shadow)}.hero h1{margin:4px 0 7px;font-size:32px}.hero p{margin:0;color:#d9efeb}.eyebrow{font-size:12px;font-weight:850;letter-spacing:.08em;color:#a7f3d0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:13px 0}.stat,.card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.stat{padding:16px}.stat b{display:block;font-size:26px}.stat span,.muted{color:var(--muted);font-size:13px}.card{padding:18px}.card h2{margin:0 0 12px;font-size:18px}.notice{padding:13px 14px;border-radius:14px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;margin:12px 0}.notice.ok{background:#ecfdf3;border-color:#abefc6;color:#067647}.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:13px}.modules{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.module{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px;cursor:pointer}.module:hover{box-shadow:var(--shadow)}.module b{display:block;margin-bottom:4px}.module small{color:var(--muted)}
+.table{background:#fff;border:1px solid var(--line);border-radius:17px;overflow:auto;box-shadow:var(--shadow)}table{border-collapse:collapse;width:100%;min-width:760px}th,td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:top}th{background:#f8fbfa;color:#4b625e;position:sticky;top:0}tr:last-child td{border-bottom:0}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.toolbar input{border:1px solid #cfdcd8;border-radius:11px;padding:10px 11px;min-width:270px}
+.row{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.row:last-child{border:0}.grow{flex:1}.empty{padding:26px;text-align:center;color:var(--muted)}
+.modal-backdrop{position:fixed;inset:0;background:rgba(5,26,23,.58);z-index:100;display:none;align-items:center;justify-content:center;padding:18px}.modal-backdrop.open{display:flex}.modal{width:min(760px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.25);padding:22px}.modal-head{display:flex;gap:12px}.modal-head h2{margin:0}.modal-close{margin-left:auto;border:0;border-radius:10px;width:38px;height:38px;background:#eef5f3;cursor:pointer}.setup-step{padding:13px 0;border-bottom:1px solid var(--line)}.setup-step:last-child{border:0}.setup-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.setup-links a{display:inline-block;text-decoration:none;background:#eaf5f2;color:#0f5c54;padding:9px 11px;border-radius:10px;font-size:13px;font-weight:800}.modal input{width:100%;border:1px solid #cfdcd8;border-radius:11px;padding:10px 11px;margin-top:7px}.modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;flex-wrap:wrap}
+footer{max-width:1240px;margin:0 auto;padding:0 18px 26px;color:#71837f;font-size:12px}footer a{color:#0f766e}
+@media(max-width:900px){.app{grid-template-columns:1fr}nav{position:static;min-height:auto;display:grid;grid-template-columns:repeat(2,1fr)}nav small{grid-column:1/-1}.stats{grid-template-columns:repeat(2,1fr)}.grid,.login-grid{grid-template-columns:1fr}.modules{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.stats,.modules{grid-template-columns:1fr}.login-card h1{font-size:28px}.head .badge{display:none}.app{padding:9px}.login-wrap{padding:9px;margin-top:18px}}
 </style>
 </head>
 <body>
-<header><div class="head"><div class="brand"><div class="logo">✚</div><div>Trợ lý Y tế học đường<div class="muted">School Health Assistant</div></div></div><button class="config-top" onclick="openGoogleSetup()">⚙ Cấu hình Google</button><div class="demo">DEMO · Dữ liệu giả lập</div></div></header>
-<div id="gSetupModal" class="modal-backdrop" onclick="if(event.target===this)closeGoogleSetup()">
- <div class="modal" role="dialog" aria-modal="true" aria-labelledby="gSetupTitle">
-  <div class="modal-head"><div><h2 id="gSetupTitle">Cấu hình Google cho App Y tế VK</h2><div class="muted">Thực hiện một lần để GitHub Pages đọc/ghi Google Sheets bằng tài khoản Google của bạn.</div></div><button class="modal-close" onclick="closeGoogleSetup()" aria-label="Đóng">×</button></div>
-  <div class="notice ok"><b>Đã tạo sẵn Drive.</b> Master Sheet nằm trong thư mục <b>App Y tế VK → 01_Dữ liệu</b>. Bạn chỉ cần tạo OAuth Web Client ID.</div>
-  <div class="setup-step"><b>1. Mở hoặc tạo Google Cloud Project</b><div class="setup-links"><a target="_blank" rel="noopener" href="https://console.cloud.google.com/projectselector2/home/dashboard">Mở Google Cloud Console</a></div></div>
-  <div class="setup-step"><b>2. Bật 2 API cho project 1074784573482</b><div class="setup-links"><a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/sheets.googleapis.com?project=1074784573482">Bật Google Sheets API</a><a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/drive.googleapis.com?project=1074784573482">Bật Google Drive API</a></div></div>
-  <div class="setup-step"><b>3. Sửa lỗi 403 khi app đang ở Testing</b><div class="muted">Tài khoản đăng nhập phải nằm trong <b>Audience → Test users</b>. Với cấu hình hiện tại, hãy thêm chính xác: <code>dr.ngovothiennhan@gmail.com</code>.</div><div class="setup-links"><a target="_blank" rel="noopener" href="https://console.cloud.google.com/auth/audience?project=1074784573482">Mở Audience / Test users</a><button class="btn soft" onclick="copyTestUser()">Sao chép email test</button></div></div>
-  <div class="setup-step"><b>4. Tạo OAuth Client → Web application</b><div class="muted">Trong Authorized JavaScript origins, thêm đúng origin sau, không thêm đường dẫn phía sau:</div><div class="codebox"><code id="originText">https://drngovothiennhan.github.io</code><button class="btn soft" onclick="copyOrigin()">Sao chép</button></div><div class="setup-links"><a target="_blank" rel="noopener" href="https://console.cloud.google.com/auth/clients?project=1074784573482/create?project=1074784573482">Tạo OAuth Client ngay</a><a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/credentials">Credentials dự phòng</a></div></div>
-  <div class="setup-step"><b>5. OAuth Client ID</b><div class="muted">Đã cấu hình sẵn cho App Y tế VK. Không dán Client Secret, access token hay service-account key.</div><input id="modalClientId" placeholder="xxxxxxxxxxxx-xxxxxxxx.apps.googleusercontent.com"></div>
-  <div class="setup-step"><b>Dữ liệu dự án đã tạo</b><div class="setup-links"><a target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ">Mở thư mục App Y tế VK</a><a target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/15UIjrBO0yHBU5jwzFYUYeMiEcKxKWQ6CRR9ZktQ3wG4/edit">Mở Master Sheet</a><a target="_blank" rel="noopener" href="https://docs.google.com/document/d/1sNGdR-1z20BIE8rkWDtLze6YtVGzEapNCmTmVyLC_kQ/edit">Mở hướng dẫn</a></div></div>
-  <div id="modalStatus" class="notice" style="display:none"></div>
-     <div id="apiRepair" class="notice" style="display:none">
-       <b>Cần bật API cho project 1074784573482</b>
-       <div class="muted" style="margin-top:6px">Bật Google Sheets API trước. Tôi cũng khuyên bật luôn Google Drive API để tránh lỗi kế tiếp khi lưu tài liệu.</div>
-       <div class="setup-links" style="margin-top:10px">
-         <a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/sheets.googleapis.com?project=1074784573482">Bật Google Sheets API</a>
-         <a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/drive.googleapis.com?project=1074784573482">Bật Google Drive API</a>
-       </div>
-     </div>
-  <div class="modal-foot"><button class="btn soft" onclick="saveClientFromModal()">Lưu Client ID</button><button class="btn primary" onclick="connectFromModal()">Lưu + Kết nối Google</button></div>
- </div>
-</div>
-<div class="app">
-<nav id="nav">
-<small>TỔNG QUAN</small>
-<button data-page="home">⌂ Hôm nay</button>
-<small>Y TẾ HỌC ĐƯỜNG</small>
-<button data-page="students">👧 Hồ sơ học sinh</button>
-<button data-page="health">🩺 Khám sức khỏe</button>
-<button data-page="vaccines">💉 Tiêm chủng</button>
-<button data-page="meds">💊 Thuốc học sinh</button>
-<button data-page="incident">🩹 Tai nạn & sơ cứu</button>
-<button data-page="disease">🦠 Phòng chống dịch</button>
-<small>ATTP & VẬN HÀNH</small>
-<button data-page="food">🍲 Kiểm thực 3 bước</button>
-<button data-page="inventory">📦 Kho thực phẩm & sữa</button>
-<button data-page="docs">📄 Tài liệu & chứng từ</button>
-<button data-page="connect">🔌 Dữ liệu & kết nối</button>
-</nav>
-<main id="main"></main>
-</div>
-<footer>GitHub Pages chỉ chạy giao diện. Google Sheets lưu dữ liệu vận hành và Google Drive lưu tài liệu; xác thực qua Google Identity Services OAuth. Repository không chứa dữ liệu y tế thật hay khóa bí mật.</footer>
+<header><div class="head"><div class="brand"><div class="logo">✚</div><div>App Y tế VK<div class="muted">Trợ lý y tế học đường</div></div></div><div class="head-actions"><span id="envBadge" class="badge blue">PRODUCTION</span><span id="accountBadge" class="badge amber">Chưa đăng nhập</span><button class="btn soft" onclick="openSetup()">⚙ Google</button><button id="logoutBtn" class="btn danger" style="display:none" onclick="logout()">Đăng xuất</button></div></div></header>
+<div id="root"></div>
+<footer>App Y tế VK · GitHub Pages chỉ chạy giao diện; dữ liệu nằm trong Google Drive/Sheets riêng tư. <a href="privacy.html">Chính sách quyền riêng tư</a> · <a href="terms.html">Điều khoản sử dụng</a></footer>
+
+<div id="setupModal" class="modal-backdrop" onclick="if(event.target===this)closeSetup()"><div class="modal">
+<div class="modal-head"><div><h2>Cấu hình Google Production</h2><div class="muted">Production dùng quyền tối thiểu <code>drive.file</code> và Google Picker.</div></div><button class="modal-close" onclick="closeSetup()">×</button></div>
+<div class="safe" style="margin-top:14px"><b>Đã hoàn tất:</b> OAuth Client ID, Google Sheets API, Google Drive API, thư mục App Y tế VK và Master Sheet production.</div>
+<div class="setup-step"><b>1. Bật Google Picker API</b><div class="setup-links"><a target="_blank" href="https://console.cloud.google.com/apis/library/picker.googleapis.com?project=1074784573482">Bật Google Picker API</a></div></div>
+<div class="setup-step"><b>2. Tạo API key cho Picker</b><div class="muted">Tạo API key rồi giới hạn theo website <code>https://drngovothiennhan.github.io/*</code> và <code>https://docs.google.com/*</code>; giới hạn API: Google Picker API + Google Drive API.</div><div class="setup-links"><a target="_blank" href="https://console.cloud.google.com/apis/credentials?project=1074784573482">Mở Credentials / API key</a></div><input id="pickerKeyInput" placeholder="AIza..."></div>
+<div class="setup-step"><b>3. Master Sheet production</b><div class="muted">Sau khi lưu API key, đăng nhập Google rồi chọn đúng file <b>App Y tế VK - MASTER PRODUCTION</b>.</div><div class="setup-links"><a target="_blank" href="https://docs.google.com/spreadsheets/d/169Iu_tlE8LkbSLsNiEsnTdkjyLSsVzDM7_fQl_HTXUI/edit">Mở Master Sheet</a><a target="_blank" href="https://drive.google.com/drive/folders/1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ">Mở App Y tế VK</a></div></div>
+<div id="setupMsg" class="notice" style="display:none"></div>
+<div class="modal-foot"><button class="btn soft" onclick="saveSetup()">Lưu API key</button><button class="btn primary" onclick="saveSetup();closeSetup();startLogin()">Đăng nhập & chọn Master Sheet</button></div>
+</div></div>
+
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/api.js" async defer></script>
 <script src="google-sheets-connector.js"></script>
 <script>
-const students=[
- {name:'Nguyễn Minh An',cls:'Lá 1',dob:'12/03/2021',risk:'Dị ứng trứng',status:'Đang học'},
- {name:'Trần Gia Hân',cls:'Chồi 2',dob:'21/09/2022',risk:'Không ghi nhận',status:'Đang học'},
- {name:'Lê Hoàng Nam',cls:'Mầm 1',dob:'02/02/2023',risk:'Theo dõi hen',status:'Đang học'}
-];
-const inventory=[
- {item:'Sữa tiệt trùng 180 ml',lot:'MILK-0926',qty:'126 hộp',exp:'10/10/2026',warn:'Còn 8 ngày'},
- {item:'Gạo thơm',lot:'RICE-2609',qty:'42 kg',exp:'20/03/2027',warn:'Ổn định'},
- {item:'Dầu ăn',lot:'OIL-1809',qty:'8 chai',exp:'19/11/2026',warn:'Ổn định'}
-];
-const meds=[
- {name:'Nguyễn Minh An',cls:'Lá 1',drug:'Thuốc mẫu A',dose:'5 ml',time:'11:30',status:'Đã xác nhận'},
- {name:'Trần Gia Hân',cls:'Chồi 2',drug:'Thuốc mẫu B',dose:'1 gói',time:'14:30',status:'Chờ thực hiện'}
-];
-const sources=[
- ['Danh sách học sinh','Google Sheets / Excel','Hồ sơ + người giám hộ + tiền sử'],
- ['KSK_EVENTS / KSK_REVIEW','Google Sheets','Sự kiện khám, trạng thái ghép, nguồn'],
- ['Sổ kiểm thực 3 bước','Google Sheets','B1/B2/B3, lưu mẫu, kho, cảnh báo'],
- ['Tiền sử tiêm chủng theo lớp','Google Sheets','Mũi tiêm + ngày tiêm + mã tiêm chủng']
-];
-const modules=[
- ['students','Hồ sơ học sinh','Một Student ID xuyên suốt các phân hệ'],
- ['meds','Thuốc học sinh','Nhắc liều và ghi nhận sau xác nhận'],
- ['vaccines','Tiêm chủng','Theo dõi đủ/thiếu mũi'],
- ['food','ATTP','Kiểm thực B1 → B2 → B3 → lưu mẫu'],
- ['inventory','Kho','Theo lô, HSD và tồn hiện tại'],
- ['incident','Tai nạn','Sự cố, sơ cứu, liên hệ phụ huynh']
-];
+let appState={authorized:false,user:null,role:null,data:{},page:'home'};
+
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const badge=(t,c='')=>'<span class="badge '+c+'">'+esc(t)+'</span>';
-const head=(t,s)=>'<div class="pagehead"><h1>'+t+'</h1><div class="muted">'+s+'</div></div>';
-function home(){
- return '<section class="hero"><div class="eyebrow">GITHUB PAGES + GOOGLE SHEETS · DEMO V0.5</div><h1>Hôm nay cần làm gì?</h1><p>Trung tâm công việc cho nhân viên y tế trường mầm non: sức khỏe học sinh, thuốc, tiêm chủng, ATTP, kho, sự cố và hồ sơ.</p></section>'+
- '<div class="stats"><div class="stat"><b>3</b><span>Hồ sơ mẫu</span></div><div class="stat"><b>2</b><span>Lịch thuốc hôm nay</span></div><div class="stat"><b>1</b><span>Lô cần chú ý HSD</span></div><div class="stat"><b>4</b><span>Đầu nối dữ liệu</span></div></div>'+
- '<div class="grid"><div class="card"><h2>Việc cần xử lý</h2>'+
- '<div class="task"><i class="dot red"></i><div><b>Kiểm tra lịch thuốc đã được xác nhận</b><small>AI không tự kích hoạt toa thuốc</small></div></div>'+
- '<div class="task"><i class="dot"></i><div><b>Sữa có lô còn 8 ngày đến HSD</b><small>Ưu tiên xuất theo lô</small></div></div>'+
- '<div class="task"><i class="dot"></i><div><b>Hoàn tất kiểm thực & lưu mẫu bữa trưa</b><small>Luồng B1 → B2 → B3 → lưu mẫu</small></div></div>'+
- '<div class="task"><i class="dot green"></i><div><b>Đầu nối dữ liệu đã sẵn sàng ở mức demo</b><small>Preview trước khi ghi dữ liệu thật</small></div></div></div>'+
- '<div class="card ask"><h2>Trợ lý công việc</h2><div class="muted">Thử: “kiểm tra sữa”, “thuốc hôm nay”, “tiêm chủng”, “lưu mẫu”</div><textarea id="q" placeholder="Nhập yêu cầu..."></textarea><div class="actions"><button class="btn soft" onclick="document.getElementById(\'q\').value=\'Kiểm tra sữa còn trong kho\'">Điền mẫu</button><button class="btn primary" onclick="ask()">Thực hiện</button></div><div class="reply" id="reply"></div></div></div>'+
- '<div style="height:14px"></div><div class="modules">'+modules.map(m=>'<div class="module" onclick="show(\''+m[0]+'\')"><b>'+m[1]+'</b><small>'+m[2]+'</small></div>').join('')+'</div>';
+const toObjects=values=>{if(!values||values.length<2)return[];const h=values[0];return values.slice(1).filter(r=>r.some(x=>String(x??'').trim()!=='')).map(r=>Object.fromEntries(h.map((k,i)=>[k,r[i]??''])))};
+const countRows=k=>Math.max(0,(appState.data[k]||[]).length-1);
+
+function setAccount(text,cls='amber'){const e=document.getElementById('accountBadge');e.textContent=text;e.className='badge '+cls}
+function openSetup(){const c=GoogleSheetsConnector.getConfig();document.getElementById('pickerKeyInput').value=c.pickerApiKey||'';document.getElementById('setupModal').classList.add('open')}
+function closeSetup(){document.getElementById('setupModal').classList.remove('open')}
+function setupMsg(m,ok=false){const e=document.getElementById('setupMsg');e.style.display='block';e.className='notice'+(ok?' ok':'');e.textContent=m}
+function saveSetup(){const key=(document.getElementById('pickerKeyInput').value||'').trim();GoogleSheetsConnector.saveConfig({pickerApiKey:key,sheetId:GoogleSheetsConnector.PRODUCTION_MASTER_ID});setupMsg(key?'Đã lưu API key trên trình duyệt này.':'Chưa nhập API key.',Boolean(key))}
+function ensurePickerLoaded(){return new Promise((resolve,reject)=>{let n=0;const t=setInterval(()=>{n++;if(window.gapi){clearInterval(t);gapi.load('picker',()=>resolve())}else if(n>30){clearInterval(t);reject(new Error('Không tải được Google Picker.'))}},150)})}
+
+function renderLogin(msg=''){
+ const cfg=GoogleSheetsConnector.getConfig();
+ document.getElementById('root').innerHTML='<div class="login-wrap"><div class="login-card"><div class="login-grid"><div><div class="eyebrow" style="color:#0f766e">PRODUCTION · KHÔNG CÓ DỮ LIỆU MẪU</div><h1>App Y tế VK</h1><p>Đăng nhập bằng tài khoản Google được cấp quyền. Ứng dụng chỉ dùng quyền <b>drive.file</b> đối với file bạn chọn bằng Google Picker; GitHub không lưu hồ sơ sức khỏe.</p>'+
+ (msg?'<div class="notice">'+esc(msg)+'</div>':'')+
+ '<div class="toolbar"><button class="btn primary" onclick="startLogin()">Đăng nhập Google</button><button class="btn soft" onclick="openSetup()">Cấu hình Google Picker</button></div><div class="muted">Master Sheet: App Y tế VK - MASTER PRODUCTION</div></div>'+
+ '<div><div class="safe"><b>Đã chuyển sang production</b><br>Master Sheet mới đang trống, Users có 1 quản trị viên, AuditLog hoạt động. Dữ liệu demo đã đưa vào Backup.</div>'+
+ '<div class="setup" style="margin-top:12px"><b>'+ (cfg.pickerApiKey?'Google Picker API key đã có':'Còn 1 cấu hình Google') +'</b><br>'+ (cfg.pickerApiKey?'Bạn có thể đăng nhập và chọn Master Sheet.':'Mở ⚙ Google để bật Picker API và tạo API key giới hạn theo domain.') +'</div></div></div></div></div>';
 }
-function studentsPage(){
- return head('Hồ sơ học sinh','Một hồ sơ trung tâm liên kết khám, tiêm chủng, thuốc và sự cố')+
- '<div class="toolbar"><input id="find" placeholder="Tìm học sinh hoặc lớp..." oninput="filterStudents()"><button class="btn primary">+ Thêm hồ sơ nháp</button></div>'+
- '<div class="table"><table><thead><tr><th>Họ tên</th><th>Lớp</th><th>Ngày sinh</th><th>Lưu ý sức khỏe</th><th>Trạng thái</th></tr></thead><tbody id="studentBody">'+studentRows(students)+'</tbody></table></div>';
+
+async function startLogin(){
+ try{
+   setAccount('Đang đăng nhập…','amber');
+   const c=GoogleSheetsConnector.getConfig();
+   if(!c.pickerApiKey){openSetup();setAccount('Cần Picker API key','amber');return}
+   await GoogleSheetsConnector.connect();
+   await ensurePickerLoaded();
+   const session=GoogleSheetsConnector.getSession();
+   setAccount(session.user?.email||'Đã đăng nhập','blue');
+   if(!GoogleSheetsConnector.hasPickerGrant()){
+     GoogleSheetsConnector.openSpreadsheetPicker(async(doc)=>{
+       if(doc.id!==GoogleSheetsConnector.PRODUCTION_MASTER_ID){
+         renderLogin('Bạn đã chọn nhầm file. Hãy chọn đúng “App Y tế VK - MASTER PRODUCTION”.');
+         return;
+       }
+       await authorizeAndLoad();
+     });
+   }else await authorizeAndLoad();
+ }catch(e){setAccount('Lỗi đăng nhập','red');renderLogin(String(e.message||e))}
 }
-function studentRows(rows){return rows.map(s=>'<tr><td><b>'+esc(s.name)+'</b></td><td>'+esc(s.cls)+'</td><td>'+esc(s.dob)+'</td><td>'+esc(s.risk)+'</td><td>'+badge(s.status,'')+'</td></tr>').join('')}
-function filterStudents(){let q=(document.getElementById('find').value||'').toLowerCase();document.getElementById('studentBody').innerHTML=studentRows(students.filter(s=>(s.name+' '+s.cls).toLowerCase().includes(q)))}
-function medsPage(){return head('Thuốc học sinh','Toa thuốc được OCR thành bản nháp; nhân viên y tế xác nhận trước khi kích hoạt')+
- '<div class="notice">Không tự suy đoán tên thuốc, liều hoặc giờ dùng khi ảnh/toa không rõ. Demo không phải công cụ kê đơn.</div>'+
- '<div class="table"><table><thead><tr><th>Học sinh</th><th>Thuốc</th><th>Liều</th><th>Giờ</th><th>Trạng thái</th></tr></thead><tbody>'+
- meds.map(m=>'<tr><td><b>'+esc(m.name)+'</b><div class="muted">'+esc(m.cls)+'</div></td><td>'+esc(m.drug)+'</td><td>'+esc(m.dose)+'</td><td>'+esc(m.time)+'</td><td>'+badge(m.status,m.status.includes('Đã')?'':'amber')+'</td></tr>').join('')+'</tbody></table></div>'}
-function inventoryPage(){return head('Kho thực phẩm & sữa','Quản lý theo lô, số lượng, HSD và cảnh báo')+
- '<div class="table"><table><thead><tr><th>Mặt hàng</th><th>Lô</th><th>Tồn hiện tại</th><th>HSD</th><th>Cảnh báo</th></tr></thead><tbody>'+
- inventory.map(x=>'<tr><td><b>'+esc(x.item)+'</b></td><td>'+esc(x.lot)+'</td><td>'+esc(x.qty)+'</td><td>'+esc(x.exp)+'</td><td>'+badge(x.warn,x.warn.includes('8 ngày')?'amber':'')+'</td></tr>').join('')+'</tbody></table></div>'}
-function foodPage(){return head('ATTP & kiểm thực 3 bước','Nhập thực phẩm → chế biến → trước khi ăn → lưu mẫu')+
- '<div class="notice ok">Đã map được cấu trúc nguồn B1_Nhap_thuc_pham, B2_Che_bien, B3_Truoc_khi_an, Luu_mau, Thuc_don, Kho, Canh_bao.</div>'+
- '<div class="modules"><div class="module"><b>Bước 1 · Nhập thực phẩm</b><small>NCC, hóa đơn, HSD, cảm quan, ảnh chứng từ</small></div><div class="module"><b>Bước 2 · Chế biến</b><small>Món ăn, nguyên liệu, thời gian, người chế biến</small></div><div class="module"><b>Bước 3 · Trước khi ăn</b><small>Chia suất, cảm quan, đối chiếu thực đơn</small></div><div class="module"><b>Lưu mẫu</b><small>Khối lượng, nhiệt độ, thời gian lấy/hủy, niêm phong</small></div></div>'}
-function healthPage(){return head('Khám sức khỏe','Theo dõi đã khám, chưa khám, kết quả và nguồn dữ liệu')+
- '<div class="stats"><div class="stat"><b>3</b><span>Hồ sơ mẫu</span></div><div class="stat"><b>2</b><span>Đã khám</span></div><div class="stat"><b>1</b><span>Chờ đối chiếu</span></div><div class="stat"><b>1</b><span>Cần review ghép</span></div></div>'+
- '<div class="notice">Luồng nhập KSK giữ Source, MatchMethod, Status và ReviewReason để không tự ghép nhầm học sinh.</div>'}
-function vaccinesPage(){return head('Tiêm chủng','Theo dõi lịch sử tiêm, mũi đã tiêm và danh sách cần rà soát')+
- '<div class="table"><table><thead><tr><th>Học sinh</th><th>Lớp</th><th>Mã tiêm chủng</th><th>BCG</th><th>Sởi 1</th><th>Trạng thái</th></tr></thead><tbody>'+
- '<tr><td>Nguyễn Minh An</td><td>Lá 1</td><td>DEMO-001</td><td>Đã tiêm</td><td>Đã tiêm</td><td>'+badge('Đang rà soát')+'</td></tr>'+
- '<tr><td>Trần Gia Hân</td><td>Chồi 2</td><td>DEMO-002</td><td>Đã tiêm</td><td>Chưa đủ dữ liệu</td><td>'+badge('Cần bổ sung','amber')+'</td></tr></tbody></table></div>'}
-function incidentPage(){return head('Tai nạn & sơ cấp cứu','Ghi nhận sự cố, xử trí, liên hệ phụ huynh và chuyển tuyến')+
- '<div class="notice ok">Mẫu phiếu sự cố có thể được tạo từ giọng nói hoặc ảnh, nhưng phải được người phụ trách xác nhận trước khi lưu chính thức.</div>'+
- '<div class="card"><b>Sự cố mẫu</b><div class="muted">09:35 · Sân chơi · Trầy xước đầu gối · Đã rửa sạch và theo dõi · Đã thông báo phụ huynh</div></div>'}
-function diseasePage(){return head('Phòng chống dịch','Theo dõi ca bệnh, nghỉ bệnh và cụm triệu chứng theo lớp')+
- '<div class="stats"><div class="stat"><b>0</b><span>Ca cảnh báo</span></div><div class="stat"><b>2</b><span>Nghỉ bệnh mẫu</span></div><div class="stat"><b>0</b><span>Cụm triệu chứng</span></div><div class="stat"><b>—</b><span>Dữ liệu thật chưa kết nối</span></div></div>'}
-function docsPage(){return head('Tài liệu & chứng từ','Toa thuốc, hóa đơn, phiếu giao hàng, biên lai, ảnh lưu mẫu')+
- '<div class="notice">Toa thuốc, hóa đơn, phiếu giao hàng và ảnh lưu mẫu sẽ lưu trong Google Drive riêng tư của App Y tế VK; repository GitHub không chứa tài liệu y tế thật.</div>'+
- '<div class="modules"><div class="module"><b>Toa thuốc</b><small>OCR → bản nháp → xác nhận</small></div><div class="module"><b>Hóa đơn thực phẩm</b><small>OCR nhà cung cấp, mặt hàng, số lượng</small></div><div class="module"><b>Ảnh lưu mẫu</b><small>Liên kết bản ghi lưu mẫu theo ngày/bữa</small></div></div>'}
-function connectPage(){return head('Dữ liệu & kết nối','Kiến trúc đã chốt: GitHub Pages + Google Sheets')+
- '<div class="notice ok"><b>Đã loại Netlify.</b> GitHub Pages chạy giao diện; Google Sheets lưu dữ liệu; Google Drive lưu tài liệu; Google OAuth cấp quyền theo người dùng. File nguồn cũ không bị ghi đè.</div>'+ '<div class="toolbar"><button class="btn primary" onclick="openGoogleSetup()">⚙ Mở cấu hình Google</button><button class="btn soft" onclick="window.open(\'https://console.cloud.google.com/auth/audience?project=1074784573482\',\'_blank\')">Sửa lỗi 403 / Test users</button><button class="btn soft" onclick="window.open(\'https://drive.google.com/drive/folders/1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ\',\'_blank\')">Mở App Y tế VK trên Drive</button></div>'+
- '<div class="card"><h2>Kết nối Google Sheets</h2><div class="muted">OAuth Client ID đã được cấu hình sẵn cho App Y tế VK. Chỉ cần bấm Đăng nhập Google rồi Kiểm tra Sheet. Không nhập Client Secret, access token hay service-account key.</div>'+
- '<div class="toolbar" style="margin-top:12px"><input id="gClient" style="min-width:360px" placeholder="Google OAuth Web Client ID"><input id="gSheet" style="min-width:360px" placeholder="Spreadsheet ID"><button class="btn soft" onclick="saveGoogleConfig()">Lưu cấu hình trên máy này</button><button class="btn primary" onclick="connectGoogle()">Đăng nhập Google</button><button class="btn primary" onclick="testGoogleSheet()">Kiểm tra Sheet</button></div><div id="gStatus" class="notice" style="display:none"></div></div>'+
- '<div style="height:12px"></div><div class="card"><h2>Nguồn đã xác định cấu trúc</h2>'+sources.map(s=>'<div class="source"><div><b>'+s[0]+'</b><small>'+s[1]+' · '+s[2]+'</small></div>'+badge('Sẵn sàng mapping')+'</div>').join('')+'</div>'+
- '<div style="height:12px"></div><div class="card"><h2>Kiến trúc vận hành</h2><div class="muted"><b>GitHub Pages</b> → Google Identity Services → <b>Google Sheets API</b> → Master Sheet trong Drive. Tài liệu nằm trong thư mục Google Drive riêng tư và Sheet chỉ giữ File ID. Nhật ký thao tác ghi vào AuditLog.</div></div>'}
 
+async function authorizeAndLoad(){
+ try{
+   const access=await GoogleSheetsConnector.verifyUserAccess();
+   appState.user=access;appState.role=access.role;appState.authorized=true;
+   setAccount(access.email+' · '+access.role,'');
+   document.getElementById('logoutBtn').style.display='inline-block';
+   try{await GoogleSheetsConnector.appendAudit('LOGIN','Session','','Đăng nhập production')}catch(_){}
+   appState.data=await GoogleSheetsConnector.loadProductionData();
+   renderShell('home');
+ }catch(e){appState.authorized=false;renderLogin(String(e.message||e))}
+}
 
-function modalMessage(msg,ok=false){const e=document.getElementById('modalStatus');if(!e)return;e.style.display='block';e.className='notice'+(ok?' ok':'');e.textContent=msg}
-function showApiRepair(show=true){const e=document.getElementById('apiRepair');if(e)e.style.display=show?'block':'none'}
-function openGoogleSetup(){const m=document.getElementById('gSetupModal');if(!m)return;const cfg=window.GoogleSheetsConnector?GoogleSheetsConnector.getConfig():{clientId:''};const i=document.getElementById('modalClientId');if(i)i.value=cfg.clientId||'';m.classList.add('open')}
-function closeGoogleSetup(){const m=document.getElementById('gSetupModal');if(m)m.classList.remove('open')}
-async function copyOrigin(){try{await navigator.clipboard.writeText('https://drngovothiennhan.github.io');modalMessage('Đã sao chép Authorized JavaScript origin.',true)}catch(e){modalMessage('Không sao chép tự động được. Hãy sao chép: https://drngovothiennhan.github.io')}}
-async function copyTestUser(){try{await navigator.clipboard.writeText('dr.ngovothiennhan@gmail.com');modalMessage('Đã sao chép email test user.',true)}catch(e){modalMessage('Hãy sao chép email: dr.ngovothiennhan@gmail.com')}}
-function saveClientFromModal(){try{const client=(document.getElementById('modalClientId').value||'').trim();if(!client)throw new Error('Bạn chưa nhập OAuth Client ID.');GoogleSheetsConnector.saveConfig(client,GoogleSheetsConnector.DEFAULT_SHEET_ID);modalMessage('Đã lưu Client ID trên trình duyệt này. Master Sheet đã được cấu hình sẵn.',true);const pageInput=document.getElementById('gClient');if(pageInput)pageInput.value=client}catch(e){modalMessage(e.message)}}
-async function connectFromModal(){try{saveClientFromModal();await GoogleSheetsConnector.connect();const r=await GoogleSheetsConnector.readRange('Config!A1:D10');modalMessage('Kết nối Google thành công. Đã đọc được Master Sheet App Y tế VK ('+Math.max(0,(r.values||[]).length-1)+' dòng cấu hình).',true)}catch(e){const m=String(e&&e.message||e);if(m.includes('access_denied')){modalMessage('Google đang chặn vì app ở chế độ Testing nhưng tài khoản chưa có trong Test users. Bấm "Mở Audience / Test users", thêm dr.ngovothiennhan@gmail.com rồi thử lại.')}else if(m.includes('chưa được bật')){const box=document.getElementById('modalStatus');box.style.display='block';box.className='notice';box.innerHTML=esc(m)+'<div class="setup-links" style="margin-top:10px"><a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/sheets.googleapis.com?project=1074784573482">Bật Google Sheets API</a><a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/drive.googleapis.com?project=1074784573482">Bật Google Drive API</a></div>'}else{modalMessage(m)}}}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeGoogleSetup()});
+function logout(){try{GoogleSheetsConnector.disconnect()}catch(_){}appState={authorized:false,user:null,role:null,data:{},page:'home'};document.getElementById('logoutBtn').style.display='none';setAccount('Chưa đăng nhập','amber');renderLogin()}
 
-function setGStatus(msg,ok=false){const e=document.getElementById('gStatus');if(!e)return;e.style.display='block';e.className='notice'+(ok?' ok':'');e.textContent=msg}
-function loadGoogleConfig(){if(!window.GoogleSheetsConnector)return;const cfg=GoogleSheetsConnector.getConfig();const a=document.getElementById('gClient'),b=document.getElementById('gSheet');if(a&&!a.value)a.value=cfg.clientId||'';if(b&&!b.value)b.value=cfg.sheetId||''}
-function saveGoogleConfig(){try{GoogleSheetsConnector.saveConfig(document.getElementById('gClient').value,document.getElementById('gSheet').value);setGStatus('Đã lưu cấu hình cục bộ trên trình duyệt này.',true)}catch(e){setGStatus(e.message)}}
-async function connectGoogle(){try{saveGoogleConfig();await GoogleSheetsConnector.connect();setGStatus('Đã đăng nhập Google và cấp quyền Sheets cho phiên hiện tại.',true)}catch(e){setGStatus(e.message)}}
-async function testGoogleSheet(){try{
-    saveGoogleConfig();
-    const [s,i]=await Promise.all([
-      GoogleSheetsConnector.readRange('Students!A1:N10'),
-      GoogleSheetsConnector.readRange('Inventory!A1:R10')
-    ]);
-    const sc=Math.max(0,(s.values||[]).length-1),ic=Math.max(0,(i.values||[]).length-1);
-    setGStatus('Kết nối thành công. Students: '+sc+' dòng dữ liệu; Inventory: '+ic+' dòng dữ liệu.',true);
-  }catch(e){
-    const m=String(e&&e.message||e);
-    if(m.includes('SERVICE_DISABLED')||m.includes('Sheets API has not been used')||m.includes('sheets.googleapis.com')){
-      setGStatus('Google Sheets API chưa bật cho project 1074784573482. Hãy bấm "⚙ Mở cấu hình Google" → "Bật Google Sheets API", chờ 1–3 phút rồi kiểm tra lại.');
-      openGoogleSetup();
-      showApiRepair(true);
-    }else{
-      setGStatus(m);
-    }
-  }}
+function navButton(p,label){return '<button data-page="'+p+'" onclick="renderShell(\''+p+'\')">'+label+'</button>'}
+function renderShell(page='home'){
+ if(!appState.authorized)return renderLogin();
+ appState.page=page;
+ document.getElementById('root').innerHTML='<div class="app"><nav><small>TỔNG QUAN</small>'+navButton('home','⌂ Hôm nay')+
+ '<small>Y TẾ HỌC ĐƯỜNG</small>'+navButton('students','👧 Hồ sơ học sinh')+navButton('health','🩺 Khám sức khỏe')+navButton('vaccines','💉 Tiêm chủng')+navButton('meds','💊 Thuốc học sinh')+navButton('incidents','🩹 Tai nạn & sơ cứu')+
+ '<small>ATTP & VẬN HÀNH</small>'+navButton('food','🍲 Kiểm thực 3 bước')+navButton('inventory','📦 Kho thực phẩm & sữa')+navButton('docs','📄 Tài liệu & chứng từ')+navButton('data','🔌 Dữ liệu & kết nối')+
+ (appState.role==='ADMIN'?'<small>QUẢN TRỊ</small>'+navButton('admin','⚙ Quản trị'):'')+
+ '</nav><main id="main"></main></div>';
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+ document.getElementById('main').innerHTML=(pages[page]||pages.home)();
+}
 
-function ask(){const q=(document.getElementById('q').value||'').toLowerCase();let r='Tôi có thể mô phỏng tra cứu kho, thuốc, tiêm chủng, kiểm thực và hồ sơ học sinh.';if(q.includes('sữa')||q.includes('kho'))r='Sữa tiệt trùng 180 ml còn 126 hộp; lô MILK-0926 còn 8 ngày đến HSD.';else if(q.includes('thuốc')||q.includes('uống'))r='Có 2 lịch thuốc mẫu hôm nay; mọi liều dùng phải dựa trên toa đã được xác nhận.';else if(q.includes('tiêm'))r='Có 1 hồ sơ mẫu cần bổ sung dữ liệu tiêm chủng.';else if(q.includes('lưu mẫu')||q.includes('kiểm thực'))r='Luồng B1 → B2 → B3 → lưu mẫu đã được thiết kế và đầu nối nguồn đã map.';const e=document.getElementById('reply');e.style.display='block';e.textContent=r}
-const pages={home,students:studentsPage,health:healthPage,vaccines:vaccinesPage,meds:medsPage,incident:incidentPage,disease:diseasePage,food:foodPage,inventory:inventoryPage,docs:docsPage,connect:connectPage};
-function show(p){document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===p));document.getElementById('main').innerHTML=(pages[p]||home)();if(p==='connect')setTimeout(loadGoogleConfig,0);history.replaceState(null,'','#'+p);scrollTo({top:0,behavior:'smooth'})}
-document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>show(b.dataset.page));
-show(location.hash.slice(1)||'home');
+const pages={
+ home:()=>'<section class="hero"><div class="eyebrow">APP Y TẾ VK · PRODUCTION</div><h1>Hôm nay</h1><p>Dữ liệu được đọc trực tiếp từ Master Sheet riêng tư sau khi xác thực Google.</p></section>'+
+ '<div class="stats"><div class="stat"><b>'+countRows('Students')+'</b><span>Học sinh</span></div><div class="stat"><b>'+countRows('Tasks')+'</b><span>Công việc</span></div><div class="stat"><b>'+countRows('Inventory')+'</b><span>Lô kho</span></div><div class="stat"><b>'+countRows('Incidents')+'</b><span>Sự cố</span></div></div>'+
+ '<div class="grid"><div class="card"><h2>Sẵn sàng nhập dữ liệu thật</h2><div class="notice ok">Production master đang tách biệt hoàn toàn với bản demo. Bước kế tiếp có thể nhập danh sách học sinh qua Preview → Mapping → Xác nhận.</div><button class="btn primary" onclick="alert(\'Hệ thống đã sẵn sàng. Hãy cung cấp file học sinh ở bước tiếp theo.\')">Nhập danh sách học sinh</button></div><div class="card"><h2>Phiên hiện tại</h2><div class="row"><div class="grow"><b>'+esc(appState.user?.name||'')+'</b><div class="muted">'+esc(appState.user?.email||'')+'</div></div>'+badge(appState.role)+'</div><div class="muted">Quyền Google: drive.file · chỉ file được chọn.</div></div></div>',
+ students:()=>tablePage('Hồ sơ học sinh','Students',['StudentID','FullName','DOB','Gender','Class','HealthNotes','Status']),
+ health:()=>tablePage('Khám sức khỏe','HealthScreenings',['ScreeningID','StudentID','ExamDate','ExamUnit','ExamType','GeneralResult','Recommendation','ReviewStatus']),
+ vaccines:()=>tablePage('Tiêm chủng','Immunizations',['ImmunizationID','StudentID','VaccineName','DoseNumber','DateGiven','Status']),
+ meds:()=>tablePage('Thuốc học sinh','MedicationOrders',['OrderID','StudentID','DrugName','Dose','Route','Schedule','StartDate','EndDate','Status']),
+ incidents:()=>tablePage('Tai nạn & sơ cứu','Incidents',['IncidentID','StudentID','OccurredAt','Location','IncidentType','FirstAid','Status']),
+ inventory:()=>tablePage('Kho thực phẩm & sữa','Inventory',['LotID','ItemName','Group','ReceivedDate','ExpiryDate','CurrentQty','Unit','ExpiryStatus']),
+ docs:()=>tablePage('Tài liệu & chứng từ','Documents',['DocumentID','DocumentType','RelatedEntityType','RelatedEntityID','FileName','CapturedAt','VerificationStatus']),
+ food:()=>'<div class="card"><h2>ATTP & kiểm thực 3 bước</h2><div class="stats"><div class="stat"><b>'+countRows('FoodB1')+'</b><span>Bước 1</span></div><div class="stat"><b>'+countRows('FoodB2')+'</b><span>Bước 2</span></div><div class="stat"><b>'+countRows('FoodB3')+'</b><span>Bước 3</span></div><div class="stat"><b>'+countRows('FoodSamples')+'</b><span>Lưu mẫu</span></div></div><div class="notice ok">Các bảng production đã sẵn sàng; chưa có dữ liệu mẫu.</div></div>',
+ data:()=>'<div class="card"><h2>Dữ liệu & kết nối</h2><div class="row"><div class="grow"><b>Master production</b><div class="muted">169Iu_tlE8LkbSLsNiEsnTdkjyLSsVzDM7_fQl_HTXUI</div></div>'+badge('CONNECTED')+'</div><div class="row"><div class="grow"><b>Google OAuth</b><div class="muted">drive.file + openid/email/profile</div></div>'+badge('MINIMUM SCOPE')+'</div><div class="row"><div class="grow"><b>App Y tế VK trên Drive</b><div class="muted">Dữ liệu · chứng từ · nhập liệu · backup · cấu hình</div></div><button class="btn soft" onclick="window.open(\'https://drive.google.com/drive/folders/1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ\',\'_blank\')">Mở Drive</button></div><div class="toolbar"><button class="btn soft" onclick="openSetup()">Cấu hình Google Picker</button><button class="btn soft" onclick="GoogleSheetsConnector.openSpreadsheetPicker(()=>authorizeAndLoad())">Chọn lại Master Sheet</button></div></div>',
+ admin:()=>'<div class="card"><h2>Quản trị</h2><div class="notice ok">Role hiện tại: ADMIN. Danh sách Users và AuditLog nằm trong Master Sheet production.</div><div class="modules"><div class="module" onclick="showAdminUsers()"><b>Người dùng</b><small>ADMIN · NVYT · ATTP · VIEWER</small></div><div class="module" onclick="showAudit()"><b>Audit Log</b><small>Đăng nhập và thao tác ghi</small></div><div class="module"><b>Backup</b><small>Thư mục 04_Backup đã sẵn sàng</small></div></div><div id="adminDetail" style="margin-top:12px"></div></div>'
+};
+
+function tablePage(title,key,cols){
+ const objs=toObjects(appState.data[key]||[]);
+ if(!objs.length)return '<div class="card"><h2>'+title+'</h2><div class="empty">Chưa có dữ liệu production.</div></div>';
+ return '<div class="card"><h2>'+title+'</h2><div class="table"><table><thead><tr>'+cols.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'+objs.map(o=>'<tr>'+cols.map(c=>'<td>'+esc(o[c]||'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></div>';
+}
+async function showAdminUsers(){try{const r=await GoogleSheetsConnector.readRange('Users!A1:G500');document.getElementById('adminDetail').innerHTML=rawTable(r.values||[])}catch(e){document.getElementById('adminDetail').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}}
+async function showAudit(){try{const r=await GoogleSheetsConnector.readRange('AuditLog!A1:K300');document.getElementById('adminDetail').innerHTML=rawTable(r.values||[])}catch(e){document.getElementById('adminDetail').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}}
+function rawTable(v){if(!v.length)return'<div class="empty">Không có dữ liệu.</div>';return'<div class="table"><table><thead><tr>'+v[0].map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+v.slice(1).reverse().map(r=>'<tr>'+v[0].map((_,i)=>'<td>'+esc(r[i]||'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSetup()});
+renderLogin();
 </script>
 </body></html>
