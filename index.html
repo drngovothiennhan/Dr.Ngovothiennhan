@@ -36,12 +36,20 @@ footer{max-width:1200px;margin:0 auto;padding:0 18px 28px;color:#71837f;font-siz
   <div class="modal-head"><div><h2 id="gSetupTitle">Cấu hình Google cho App Y tế VK</h2><div class="muted">Thực hiện một lần để GitHub Pages đọc/ghi Google Sheets bằng tài khoản Google của bạn.</div></div><button class="modal-close" onclick="closeGoogleSetup()" aria-label="Đóng">×</button></div>
   <div class="notice ok"><b>Đã tạo sẵn Drive.</b> Master Sheet nằm trong thư mục <b>App Y tế VK → 01_Dữ liệu</b>. Bạn chỉ cần tạo OAuth Web Client ID.</div>
   <div class="setup-step"><b>1. Mở hoặc tạo Google Cloud Project</b><div class="setup-links"><a target="_blank" rel="noopener" href="https://console.cloud.google.com/projectselector2/home/dashboard">Mở Google Cloud Console</a></div></div>
-  <div class="setup-step"><b>2. Bật 2 API</b><div class="setup-links"><a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/sheets.googleapis.com">Bật Google Sheets API</a><a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/drive.googleapis.com">Bật Google Drive API</a></div></div>
-  <div class="setup-step"><b>3. Sửa lỗi 403 khi app đang ở Testing</b><div class="muted">Tài khoản đăng nhập phải nằm trong <b>Audience → Test users</b>. Với cấu hình hiện tại, hãy thêm chính xác: <code>dr.ngovothiennhan@gmail.com</code>.</div><div class="setup-links"><a target="_blank" rel="noopener" href="https://console.cloud.google.com/auth/audience">Mở Audience / Test users</a><button class="btn soft" onclick="copyTestUser()">Sao chép email test</button></div></div>
-  <div class="setup-step"><b>4. Tạo OAuth Client → Web application</b><div class="muted">Trong Authorized JavaScript origins, thêm đúng origin sau, không thêm đường dẫn phía sau:</div><div class="codebox"><code id="originText">https://drngovothiennhan.github.io</code><button class="btn soft" onclick="copyOrigin()">Sao chép</button></div><div class="setup-links"><a target="_blank" rel="noopener" href="https://console.cloud.google.com/auth/clients/create">Tạo OAuth Client ngay</a><a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/credentials">Credentials dự phòng</a></div></div>
+  <div class="setup-step"><b>2. Bật 2 API cho project 1074784573482</b><div class="setup-links"><a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/sheets.googleapis.com?project=1074784573482">Bật Google Sheets API</a><a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/drive.googleapis.com?project=1074784573482">Bật Google Drive API</a></div></div>
+  <div class="setup-step"><b>3. Sửa lỗi 403 khi app đang ở Testing</b><div class="muted">Tài khoản đăng nhập phải nằm trong <b>Audience → Test users</b>. Với cấu hình hiện tại, hãy thêm chính xác: <code>dr.ngovothiennhan@gmail.com</code>.</div><div class="setup-links"><a target="_blank" rel="noopener" href="https://console.cloud.google.com/auth/audience?project=1074784573482">Mở Audience / Test users</a><button class="btn soft" onclick="copyTestUser()">Sao chép email test</button></div></div>
+  <div class="setup-step"><b>4. Tạo OAuth Client → Web application</b><div class="muted">Trong Authorized JavaScript origins, thêm đúng origin sau, không thêm đường dẫn phía sau:</div><div class="codebox"><code id="originText">https://drngovothiennhan.github.io</code><button class="btn soft" onclick="copyOrigin()">Sao chép</button></div><div class="setup-links"><a target="_blank" rel="noopener" href="https://console.cloud.google.com/auth/clients?project=1074784573482/create?project=1074784573482">Tạo OAuth Client ngay</a><a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/credentials">Credentials dự phòng</a></div></div>
   <div class="setup-step"><b>5. OAuth Client ID</b><div class="muted">Đã cấu hình sẵn cho App Y tế VK. Không dán Client Secret, access token hay service-account key.</div><input id="modalClientId" placeholder="xxxxxxxxxxxx-xxxxxxxx.apps.googleusercontent.com"></div>
   <div class="setup-step"><b>Dữ liệu dự án đã tạo</b><div class="setup-links"><a target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ">Mở thư mục App Y tế VK</a><a target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/15UIjrBO0yHBU5jwzFYUYeMiEcKxKWQ6CRR9ZktQ3wG4/edit">Mở Master Sheet</a><a target="_blank" rel="noopener" href="https://docs.google.com/document/d/1sNGdR-1z20BIE8rkWDtLze6YtVGzEapNCmTmVyLC_kQ/edit">Mở hướng dẫn</a></div></div>
   <div id="modalStatus" class="notice" style="display:none"></div>
+     <div id="apiRepair" class="notice" style="display:none">
+       <b>Cần bật API cho project 1074784573482</b>
+       <div class="muted" style="margin-top:6px">Bật Google Sheets API trước. Tôi cũng khuyên bật luôn Google Drive API để tránh lỗi kế tiếp khi lưu tài liệu.</div>
+       <div class="setup-links" style="margin-top:10px">
+         <a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/sheets.googleapis.com?project=1074784573482">Bật Google Sheets API</a>
+         <a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/drive.googleapis.com?project=1074784573482">Bật Google Drive API</a>
+       </div>
+     </div>
   <div class="modal-foot"><button class="btn soft" onclick="saveClientFromModal()">Lưu Client ID</button><button class="btn primary" onclick="connectFromModal()">Lưu + Kết nối Google</button></div>
  </div>
 </div>
@@ -143,7 +151,7 @@ function docsPage(){return head('Tài liệu & chứng từ','Toa thuốc, hóa 
  '<div class="notice">Toa thuốc, hóa đơn, phiếu giao hàng và ảnh lưu mẫu sẽ lưu trong Google Drive riêng tư của App Y tế VK; repository GitHub không chứa tài liệu y tế thật.</div>'+
  '<div class="modules"><div class="module"><b>Toa thuốc</b><small>OCR → bản nháp → xác nhận</small></div><div class="module"><b>Hóa đơn thực phẩm</b><small>OCR nhà cung cấp, mặt hàng, số lượng</small></div><div class="module"><b>Ảnh lưu mẫu</b><small>Liên kết bản ghi lưu mẫu theo ngày/bữa</small></div></div>'}
 function connectPage(){return head('Dữ liệu & kết nối','Kiến trúc đã chốt: GitHub Pages + Google Sheets')+
- '<div class="notice ok"><b>Đã loại Netlify.</b> GitHub Pages chạy giao diện; Google Sheets lưu dữ liệu; Google Drive lưu tài liệu; Google OAuth cấp quyền theo người dùng. File nguồn cũ không bị ghi đè.</div>'+ '<div class="toolbar"><button class="btn primary" onclick="openGoogleSetup()">⚙ Mở cấu hình Google</button><button class="btn soft" onclick="window.open(\'https://console.cloud.google.com/auth/audience\',\'_blank\')">Sửa lỗi 403 / Test users</button><button class="btn soft" onclick="window.open(\'https://drive.google.com/drive/folders/1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ\',\'_blank\')">Mở App Y tế VK trên Drive</button></div>'+
+ '<div class="notice ok"><b>Đã loại Netlify.</b> GitHub Pages chạy giao diện; Google Sheets lưu dữ liệu; Google Drive lưu tài liệu; Google OAuth cấp quyền theo người dùng. File nguồn cũ không bị ghi đè.</div>'+ '<div class="toolbar"><button class="btn primary" onclick="openGoogleSetup()">⚙ Mở cấu hình Google</button><button class="btn soft" onclick="window.open(\'https://console.cloud.google.com/auth/audience?project=1074784573482\',\'_blank\')">Sửa lỗi 403 / Test users</button><button class="btn soft" onclick="window.open(\'https://drive.google.com/drive/folders/1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ\',\'_blank\')">Mở App Y tế VK trên Drive</button></div>'+
  '<div class="card"><h2>Kết nối Google Sheets</h2><div class="muted">OAuth Client ID đã được cấu hình sẵn cho App Y tế VK. Chỉ cần bấm Đăng nhập Google rồi Kiểm tra Sheet. Không nhập Client Secret, access token hay service-account key.</div>'+
  '<div class="toolbar" style="margin-top:12px"><input id="gClient" style="min-width:360px" placeholder="Google OAuth Web Client ID"><input id="gSheet" style="min-width:360px" placeholder="Spreadsheet ID"><button class="btn soft" onclick="saveGoogleConfig()">Lưu cấu hình trên máy này</button><button class="btn primary" onclick="connectGoogle()">Đăng nhập Google</button><button class="btn primary" onclick="testGoogleSheet()">Kiểm tra Sheet</button></div><div id="gStatus" class="notice" style="display:none"></div></div>'+
  '<div style="height:12px"></div><div class="card"><h2>Nguồn đã xác định cấu trúc</h2>'+sources.map(s=>'<div class="source"><div><b>'+s[0]+'</b><small>'+s[1]+' · '+s[2]+'</small></div>'+badge('Sẵn sàng mapping')+'</div>').join('')+'</div>'+
@@ -151,6 +159,7 @@ function connectPage(){return head('Dữ liệu & kết nối','Kiến trúc đ�
 
 
 function modalMessage(msg,ok=false){const e=document.getElementById('modalStatus');if(!e)return;e.style.display='block';e.className='notice'+(ok?' ok':'');e.textContent=msg}
+function showApiRepair(show=true){const e=document.getElementById('apiRepair');if(e)e.style.display=show?'block':'none'}
 function openGoogleSetup(){const m=document.getElementById('gSetupModal');if(!m)return;const cfg=window.GoogleSheetsConnector?GoogleSheetsConnector.getConfig():{clientId:''};const i=document.getElementById('modalClientId');if(i)i.value=cfg.clientId||'';m.classList.add('open')}
 function closeGoogleSetup(){const m=document.getElementById('gSetupModal');if(m)m.classList.remove('open')}
 async function copyOrigin(){try{await navigator.clipboard.writeText('https://drngovothiennhan.github.io');modalMessage('Đã sao chép Authorized JavaScript origin.',true)}catch(e){modalMessage('Không sao chép tự động được. Hãy sao chép: https://drngovothiennhan.github.io')}}
@@ -163,7 +172,24 @@ function setGStatus(msg,ok=false){const e=document.getElementById('gStatus');if(
 function loadGoogleConfig(){if(!window.GoogleSheetsConnector)return;const cfg=GoogleSheetsConnector.getConfig();const a=document.getElementById('gClient'),b=document.getElementById('gSheet');if(a&&!a.value)a.value=cfg.clientId||'';if(b&&!b.value)b.value=cfg.sheetId||''}
 function saveGoogleConfig(){try{GoogleSheetsConnector.saveConfig(document.getElementById('gClient').value,document.getElementById('gSheet').value);setGStatus('Đã lưu cấu hình cục bộ trên trình duyệt này.',true)}catch(e){setGStatus(e.message)}}
 async function connectGoogle(){try{saveGoogleConfig();await GoogleSheetsConnector.connect();setGStatus('Đã đăng nhập Google và cấp quyền Sheets cho phiên hiện tại.',true)}catch(e){setGStatus(e.message)}}
-async function testGoogleSheet(){try{saveGoogleConfig();const [s,i]=await Promise.all([GoogleSheetsConnector.readRange('Students!A1:N10'),GoogleSheetsConnector.readRange('Inventory!A1:R10')]);const sc=Math.max(0,(s.values||[]).length-1),ic=Math.max(0,(i.values||[]).length-1);setGStatus('Kết nối thành công. Students: '+sc+' dòng dữ liệu; Inventory: '+ic+' dòng dữ liệu.',true)}catch(e){setGStatus(e.message)}}
+async function testGoogleSheet(){try{
+    saveGoogleConfig();
+    const [s,i]=await Promise.all([
+      GoogleSheetsConnector.readRange('Students!A1:N10'),
+      GoogleSheetsConnector.readRange('Inventory!A1:R10')
+    ]);
+    const sc=Math.max(0,(s.values||[]).length-1),ic=Math.max(0,(i.values||[]).length-1);
+    setGStatus('Kết nối thành công. Students: '+sc+' dòng dữ liệu; Inventory: '+ic+' dòng dữ liệu.',true);
+  }catch(e){
+    const m=String(e&&e.message||e);
+    if(m.includes('SERVICE_DISABLED')||m.includes('Sheets API has not been used')||m.includes('sheets.googleapis.com')){
+      setGStatus('Google Sheets API chưa bật cho project 1074784573482. Hãy bấm "⚙ Mở cấu hình Google" → "Bật Google Sheets API", chờ 1–3 phút rồi kiểm tra lại.');
+      openGoogleSetup();
+      showApiRepair(true);
+    }else{
+      setGStatus(m);
+    }
+  }}
 
 function ask(){const q=(document.getElementById('q').value||'').toLowerCase();let r='Tôi có thể mô phỏng tra cứu kho, thuốc, tiêm chủng, kiểm thực và hồ sơ học sinh.';if(q.includes('sữa')||q.includes('kho'))r='Sữa tiệt trùng 180 ml còn 126 hộp; lô MILK-0926 còn 8 ngày đến HSD.';else if(q.includes('thuốc')||q.includes('uống'))r='Có 2 lịch thuốc mẫu hôm nay; mọi liều dùng phải dựa trên toa đã được xác nhận.';else if(q.includes('tiêm'))r='Có 1 hồ sơ mẫu cần bổ sung dữ liệu tiêm chủng.';else if(q.includes('lưu mẫu')||q.includes('kiểm thực'))r='Luồng B1 → B2 → B3 → lưu mẫu đã được thiết kế và đầu nối nguồn đã map.';const e=document.getElementById('reply');e.style.display='block';e.textContent=r}
 const pages={home,students:studentsPage,health:healthPage,vaccines:vaccinesPage,meds:medsPage,incident:incidentPage,disease:diseasePage,food:foodPage,inventory:inventoryPage,docs:docsPage,connect:connectPage};
