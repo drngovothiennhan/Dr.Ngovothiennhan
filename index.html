@@ -9,7 +9,7 @@
 :root{--bg:#f3f7f6;--card:#fff;--ink:#12312d;--muted:#6b807c;--teal:#0f766e;--teal2:#dff3ef;--line:#dfe9e6;--red:#b42318;--amber:#b54708;--green:#137333;--blue:#175cd3;--shadow:0 10px 30px rgba(21,61,54,.08)}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
 header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.head{max-width:1200px;margin:auto;padding:12px 18px;display:flex;align-items:center;gap:12px}.brand{display:flex;align-items:center;gap:10px;font-weight:800}.logo{width:40px;height:40px;border-radius:13px;background:linear-gradient(145deg,#0f766e,#14532d);display:grid;place-items:center;color:#fff;font-size:22px}.demo{margin-left:auto;font-size:12px;padding:7px 10px;border-radius:999px;background:#fff3cd;color:#7a4b00;border:1px solid #f4d77b}
+.head{max-width:1200px;margin:auto;padding:12px 18px;display:flex;align-items:center;gap:12px}.brand{display:flex;align-items:center;gap:10px;font-weight:800}.logo{width:40px;height:40px;border-radius:13px;background:linear-gradient(145deg,#0f766e,#14532d);display:grid;place-items:center;color:#fff;font-size:22px}.config-top{margin-left:auto;border:0;border-radius:12px;padding:9px 12px;background:#eaf5f2;color:#0f5c54;font-weight:800;cursor:pointer}.demo{font-size:12px;padding:7px 10px;border-radius:999px;background:#fff3cd;color:#7a4b00;border:1px solid #f4d77b}
 .app{max-width:1200px;margin:auto;padding:18px;display:grid;grid-template-columns:240px 1fr;gap:18px}
 nav{background:#0d3e38;color:#fff;border-radius:20px;padding:14px;min-height:calc(100vh - 95px);position:sticky;top:78px;align-self:start}
 nav button{width:100%;border:0;background:transparent;color:#cce4df;padding:11px 12px;margin:3px 0;border-radius:12px;text-align:left;font:inherit;cursor:pointer}nav button:hover,nav button.active{background:#145c53;color:#fff}nav small{display:block;color:#8ab7af;margin:16px 8px 6px}
@@ -23,12 +23,28 @@ main{min-width:0}.hero{background:linear-gradient(135deg,#0f766e,#164e63);color:
 .notice{padding:13px 14px;border-radius:14px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;margin:12px 0}.notice.ok{background:#ecfdf3;border-color:#abefc6;color:#067647}.source{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 input,select{border:1px solid #cfdcd8;border-radius:11px;padding:10px 11px;background:#fff}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.toolbar input{min-width:260px}
 footer{max-width:1200px;margin:0 auto;padding:0 18px 28px;color:#71837f;font-size:12px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(5,26,23,.58);z-index:100;display:none;align-items:center;justify-content:center;padding:18px}
+.modal-backdrop.open{display:flex}.modal{width:min(760px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.25);padding:22px}.modal-head{display:flex;align-items:flex-start;gap:12px}.modal-head h2{margin:0 0 4px}.modal-close{margin-left:auto;border:0;background:#eef5f3;border-radius:10px;width:38px;height:38px;font-size:20px;cursor:pointer}.setup-step{padding:13px 0;border-bottom:1px solid var(--line)}.setup-step:last-child{border-bottom:0}.setup-step b{display:block;margin-bottom:5px}.setup-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.setup-links a{display:inline-block;text-decoration:none;background:#eaf5f2;color:#0f5c54;padding:9px 11px;border-radius:10px;font-size:13px;font-weight:750}.codebox{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#f7faf9;border:1px solid var(--line);padding:10px;border-radius:12px}.codebox code{word-break:break-all}.modal input{width:100%;margin-top:8px}.modal-foot{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:14px}
 @media(max-width:900px){.app{grid-template-columns:1fr}nav{position:static;min-height:auto;display:grid;grid-template-columns:repeat(2,1fr)}nav small{grid-column:1/-1}.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.modules{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.stats,.modules{grid-template-columns:1fr}.hero h1{font-size:28px}.app{padding:10px}.head{padding:10px}.demo{display:none}}
 </style>
 </head>
 <body>
-<header><div class="head"><div class="brand"><div class="logo">✚</div><div>Trợ lý Y tế học đường<div class="muted">School Health Assistant</div></div></div><div class="demo">DEMO · Dữ liệu giả lập</div></div></header>
+<header><div class="head"><div class="brand"><div class="logo">✚</div><div>Trợ lý Y tế học đường<div class="muted">School Health Assistant</div></div></div><button class="config-top" onclick="openGoogleSetup()">⚙ Cấu hình Google</button><div class="demo">DEMO · Dữ liệu giả lập</div></div></header>
+<div id="gSetupModal" class="modal-backdrop" onclick="if(event.target===this)closeGoogleSetup()">
+ <div class="modal" role="dialog" aria-modal="true" aria-labelledby="gSetupTitle">
+  <div class="modal-head"><div><h2 id="gSetupTitle">Cấu hình Google cho App Y tế VK</h2><div class="muted">Thực hiện một lần để GitHub Pages đọc/ghi Google Sheets bằng tài khoản Google của bạn.</div></div><button class="modal-close" onclick="closeGoogleSetup()" aria-label="Đóng">×</button></div>
+  <div class="notice ok"><b>Đã tạo sẵn Drive.</b> Master Sheet nằm trong thư mục <b>App Y tế VK → 01_Dữ liệu</b>. Bạn chỉ cần tạo OAuth Web Client ID.</div>
+  <div class="setup-step"><b>1. Mở hoặc tạo Google Cloud Project</b><div class="setup-links"><a target="_blank" rel="noopener" href="https://console.cloud.google.com/projectselector2/home/dashboard">Mở Google Cloud Console</a></div></div>
+  <div class="setup-step"><b>2. Bật 2 API</b><div class="setup-links"><a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/sheets.googleapis.com">Bật Google Sheets API</a><a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/drive.googleapis.com">Bật Google Drive API</a></div></div>
+  <div class="setup-step"><b>3. Cấu hình Google Auth Platform</b><div class="muted">Nếu dự án ở chế độ Testing, thêm chính tài khoản Google của bạn làm test user khi Google yêu cầu.</div><div class="setup-links"><a target="_blank" rel="noopener" href="https://console.cloud.google.com/auth/overview">Mở Google Auth Platform</a></div></div>
+  <div class="setup-step"><b>4. Tạo OAuth Client → Web application</b><div class="muted">Trong Authorized JavaScript origins, thêm đúng origin sau, không thêm đường dẫn phía sau:</div><div class="codebox"><code id="originText">https://drngovothiennhan.github.io</code><button class="btn soft" onclick="copyOrigin()">Sao chép</button></div><div class="setup-links"><a target="_blank" rel="noopener" href="https://console.cloud.google.com/auth/clients">Mở OAuth Clients</a><a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/credentials">Credentials dự phòng</a></div></div>
+  <div class="setup-step"><b>5. Dán OAuth Client ID vào đây</b><div class="muted">Không dán Client Secret, access token hay service-account key.</div><input id="modalClientId" placeholder="xxxxxxxxxxxx-xxxxxxxx.apps.googleusercontent.com"></div>
+  <div class="setup-step"><b>Dữ liệu dự án đã tạo</b><div class="setup-links"><a target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ">Mở thư mục App Y tế VK</a><a target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/15UIjrBO0yHBU5jwzFYUYeMiEcKxKWQ6CRR9ZktQ3wG4/edit">Mở Master Sheet</a><a target="_blank" rel="noopener" href="https://docs.google.com/document/d/1sNGdR-1z20BIE8rkWDtLze6YtVGzEapNCmTmVyLC_kQ/edit">Mở hướng dẫn</a></div></div>
+  <div id="modalStatus" class="notice" style="display:none"></div>
+  <div class="modal-foot"><button class="btn soft" onclick="saveClientFromModal()">Lưu Client ID</button><button class="btn primary" onclick="connectFromModal()">Lưu + Kết nối Google</button></div>
+ </div>
+</div>
 <div class="app">
 <nav id="nav">
 <small>TỔNG QUAN</small>
@@ -48,7 +64,7 @@ footer{max-width:1200px;margin:0 auto;padding:0 18px 28px;color:#71837f;font-siz
 </nav>
 <main id="main"></main>
 </div>
-<footer>Bản demo chạy trên GitHub Pages. Kiến trúc dữ liệu đã chốt: Google Sheets làm kho dữ liệu vận hành; Google Apps Script Web App làm API trung gian; tài liệu nhạy cảm không lưu trong repository.</footer>
+<footer>GitHub Pages chỉ chạy giao diện. Google Sheets lưu dữ liệu vận hành và Google Drive lưu tài liệu; xác thực qua Google Identity Services OAuth. Repository không chứa dữ liệu y tế thật hay khóa bí mật.</footer>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="google-sheets-connector.js"></script>
 <script>
@@ -124,14 +140,23 @@ function incidentPage(){return head('Tai nạn & sơ cấp cứu','Ghi nhận s�
 function diseasePage(){return head('Phòng chống dịch','Theo dõi ca bệnh, nghỉ bệnh và cụm triệu chứng theo lớp')+
  '<div class="stats"><div class="stat"><b>0</b><span>Ca cảnh báo</span></div><div class="stat"><b>2</b><span>Nghỉ bệnh mẫu</span></div><div class="stat"><b>0</b><span>Cụm triệu chứng</span></div><div class="stat"><b>—</b><span>Dữ liệu thật chưa kết nối</span></div></div>'}
 function docsPage(){return head('Tài liệu & chứng từ','Toa thuốc, hóa đơn, phiếu giao hàng, biên lai, ảnh lưu mẫu')+
- '<div class="notice">Bản production sẽ lưu file ở object storage riêng tư; repository GitHub không chứa tài liệu y tế thật.</div>'+
+ '<div class="notice">Toa thuốc, hóa đơn, phiếu giao hàng và ảnh lưu mẫu sẽ lưu trong Google Drive riêng tư của App Y tế VK; repository GitHub không chứa tài liệu y tế thật.</div>'+
  '<div class="modules"><div class="module"><b>Toa thuốc</b><small>OCR → bản nháp → xác nhận</small></div><div class="module"><b>Hóa đơn thực phẩm</b><small>OCR nhà cung cấp, mặt hàng, số lượng</small></div><div class="module"><b>Ảnh lưu mẫu</b><small>Liên kết bản ghi lưu mẫu theo ngày/bữa</small></div></div>'}
 function connectPage(){return head('Dữ liệu & kết nối','Kiến trúc đã chốt: GitHub Pages + Google Sheets')+
- '<div class="notice ok"><b>Đã loại Netlify.</b> GitHub Pages chạy giao diện; Google Sheets lưu dữ liệu; Google OAuth cấp quyền theo người dùng. File nguồn cũ không bị ghi đè.</div>'+
+ '<div class="notice ok"><b>Đã loại Netlify.</b> GitHub Pages chạy giao diện; Google Sheets lưu dữ liệu; Google Drive lưu tài liệu; Google OAuth cấp quyền theo người dùng. File nguồn cũ không bị ghi đè.</div>'+ '<div class="toolbar"><button class="btn primary" onclick="openGoogleSetup()">⚙ Mở cấu hình Google</button><button class="btn soft" onclick="window.open(\'https://drive.google.com/drive/folders/1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ\',\'_blank\')">Mở App Y tế VK trên Drive</button></div>'+
  '<div class="card"><h2>Kết nối Google Sheets</h2><div class="muted">Client ID không phải mật khẩu. Không nhập Client Secret, access token hay service-account key vào trang này.</div>'+
  '<div class="toolbar" style="margin-top:12px"><input id="gClient" style="min-width:360px" placeholder="Google OAuth Web Client ID"><input id="gSheet" style="min-width:360px" placeholder="Spreadsheet ID"><button class="btn soft" onclick="saveGoogleConfig()">Lưu cấu hình trên máy này</button><button class="btn primary" onclick="connectGoogle()">Đăng nhập Google</button><button class="btn primary" onclick="testGoogleSheet()">Kiểm tra Sheet</button></div><div id="gStatus" class="notice" style="display:none"></div></div>'+
  '<div style="height:12px"></div><div class="card"><h2>Nguồn đã xác định cấu trúc</h2>'+sources.map(s=>'<div class="source"><div><b>'+s[0]+'</b><small>'+s[1]+' · '+s[2]+'</small></div>'+badge('Sẵn sàng mapping')+'</div>').join('')+'</div>'+
- '<div style="height:12px"></div><div class="card"><h2>Kiến trúc vận hành</h2><div class="muted"><b>GitHub Pages</b> → Google Identity Services → <b>Google Sheets API</b> → Master Sheet. Ảnh/toa thuốc/hóa đơn để trong Google Drive riêng tư và Sheet chỉ giữ File ID. Nhật ký thao tác ghi vào AuditLog.</div></div>'}
+ '<div style="height:12px"></div><div class="card"><h2>Kiến trúc vận hành</h2><div class="muted"><b>GitHub Pages</b> → Google Identity Services → <b>Google Sheets API</b> → Master Sheet trong Drive. Tài liệu nằm trong thư mục Google Drive riêng tư và Sheet chỉ giữ File ID. Nhật ký thao tác ghi vào AuditLog.</div></div>'}
+
+
+function modalMessage(msg,ok=false){const e=document.getElementById('modalStatus');if(!e)return;e.style.display='block';e.className='notice'+(ok?' ok':'');e.textContent=msg}
+function openGoogleSetup(){const m=document.getElementById('gSetupModal');if(!m)return;const cfg=window.GoogleSheetsConnector?GoogleSheetsConnector.getConfig():{clientId:''};const i=document.getElementById('modalClientId');if(i)i.value=cfg.clientId||'';m.classList.add('open')}
+function closeGoogleSetup(){const m=document.getElementById('gSetupModal');if(m)m.classList.remove('open')}
+async function copyOrigin(){try{await navigator.clipboard.writeText('https://drngovothiennhan.github.io');modalMessage('Đã sao chép Authorized JavaScript origin.',true)}catch(e){modalMessage('Không sao chép tự động được. Hãy sao chép: https://drngovothiennhan.github.io')}}
+function saveClientFromModal(){try{const client=(document.getElementById('modalClientId').value||'').trim();if(!client)throw new Error('Bạn chưa nhập OAuth Client ID.');GoogleSheetsConnector.saveConfig(client,GoogleSheetsConnector.DEFAULT_SHEET_ID);modalMessage('Đã lưu Client ID trên trình duyệt này. Master Sheet đã được cấu hình sẵn.',true);const pageInput=document.getElementById('gClient');if(pageInput)pageInput.value=client}catch(e){modalMessage(e.message)}}
+async function connectFromModal(){try{saveClientFromModal();await GoogleSheetsConnector.connect();const r=await GoogleSheetsConnector.readRange('Config!A1:D10');modalMessage('Kết nối Google thành công. Đã đọc được Master Sheet App Y tế VK ('+Math.max(0,(r.values||[]).length-1)+' dòng cấu hình).',true)}catch(e){modalMessage(e.message)}}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeGoogleSetup()});
 
 function setGStatus(msg,ok=false){const e=document.getElementById('gStatus');if(!e)return;e.style.display='block';e.className='notice'+(ok?' ok':'');e.textContent=msg}
 function loadGoogleConfig(){if(!window.GoogleSheetsConnector)return;const cfg=GoogleSheetsConnector.getConfig();const a=document.getElementById('gClient'),b=document.getElementById('gSheet');if(a&&!a.value)a.value=cfg.clientId||'';if(b&&!b.value)b.value=cfg.sheetId||''}
