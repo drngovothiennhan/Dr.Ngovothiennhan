@@ -317,9 +317,11 @@ async function createUserAccount(){
    const iEmail=h.indexOf('Email');
    const exists=v.slice(1).some(x=>String(x[iEmail]||'').trim().toLowerCase()===email);
    if(exists){msg.innerHTML='<div class="notice">Email này đã có trong hệ thống. Không tạo bản ghi trùng.</div>';return}
+   msg.innerHTML='<div class="notice">Đang cấp quyền dữ liệu và tạo tài khoản…</div>';
+   await GoogleSheetsConnector.grantMasterAccess(email,role==='VIEWER'?'reader':'writer');
    await GoogleSheetsConnector.appendRows('Users!A:G',[[email,role,'ACTIVE',name,new Date().toISOString(),appState.user?.email||'ADMIN',note]]);
-   try{await GoogleSheetsConnector.appendAudit('CREATE_USER','User',email,'Role='+role)}catch(_){}
-   msg.innerHTML='<div class="notice ok"><b>Đã tạo tài khoản.</b> '+esc(email)+' có thể đăng nhập bằng Google ngay.</div>';
+   try{await GoogleSheetsConnector.appendAudit('CREATE_USER','User',email,'Role='+role+'; Master access granted')}catch(_){}
+   msg.innerHTML='<div class="notice ok"><b>Đã tạo tài khoản và cấp quyền Master.</b> '+esc(email)+' có thể đăng nhập ngay.</div>';
    setTimeout(()=>showUserManager(),900);
  }catch(e){msg.innerHTML='<div class="notice">'+esc(e.message||e)+'</div>'}
 }
