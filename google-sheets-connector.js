@@ -7,6 +7,8 @@ const GOOGLE_PROJECT_NUMBER = '1074784573482';
 const PRODUCTION_MASTER_ID = '169Iu_tlE8LkbSLsNiEsnTdkjyLSsVzDM7_fQl_HTXUI';
 const APP_FOLDER_ID = '1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ';
 const DATA_FOLDER_ID = '1L7OQpPJzMq51LOHQCcvJ1E-KAyJfg157';
+const DOCUMENTS_FOLDER_ID = '13mkICOI56J8fm7_6IUFl27K5SRtRqkhz';
+const IMPORT_FOLDER_ID = '1tSAAZWbldASeY5zJaJKiEdvxpSxsqQim';
 
 const DRIVE_FILE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const IDENTITY_SCOPES = 'openid email profile';
@@ -151,13 +153,49 @@ const GoogleSheetsConnector = (() => {
     ]]);
   }
 
+  async function uploadDriveFile(file,folderId=DOCUMENTS_FOLDER_ID){
+    if(!file) throw new Error('Chưa chọn file.');
+    if(!accessToken) await connect();
+    const meta={name:file.name,mimeType:file.type||'application/octet-stream',parents:[folderId]};
+    const init=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,mimeType,webViewLink',{
+      method:'POST',
+      headers:{
+        Authorization:'Bearer '+accessToken,
+        'Content-Type':'application/json; charset=UTF-8',
+        'X-Upload-Content-Type':file.type||'application/octet-stream',
+        'X-Upload-Content-Length':String(file.size||0)
+      },
+      body:JSON.stringify(meta)
+    });
+    if(!init.ok) throw new Error('Không khởi tạo được tải file lên Drive: '+await init.text());
+    const location=init.headers.get('Location');
+    if(!location) throw new Error('Google Drive không trả về phiên tải file.');
+    const done=await fetch(location,{method:'PUT',headers:{'Content-Type':file.type||'application/octet-stream'},body:file});
+    if(!done.ok) throw new Error('Tải file lên Drive thất bại: '+await done.text());
+    return done.json();
+  }
+
+  async function grantMasterAccess(email,role='writer'){
+    if(!accessToken) await connect();
+    const safeRole=role==='reader'?'reader':'writer';
+    const res=await fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(PRODUCTION_MASTER_ID)+'/permissions?sendNotificationEmail=false&fields=id',{
+      method:'POST',
+      headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},
+      body:JSON.stringify({type:'user',role:safeRole,emailAddress:String(email||'').trim().toLowerCase()})
+    });
+    if(!res.ok) throw new Error('Không cấp được quyền Master Sheet: '+await res.text());
+    return res.json();
+  }
+
   async function loadProductionData(){
     const ranges=[
       ['Students','Students!A1:N5000'],
       ['HealthScreenings','HealthScreenings!A1:O5000'],
       ['Immunizations','Immunizations!A1:J5000'],
       ['MedicationOrders','MedicationOrders!A1:N5000'],
+      ['MedicationAdministrations','MedicationAdministrations!A1:J5000'],
       ['Incidents','Incidents!A1:M5000'],
+      ['DiseaseSurveillance','DiseaseSurveillance!A1:M5000'],
       ['FoodB1','FoodB1!A1:R5000'],
       ['FoodB2','FoodB2!A1:O5000'],
       ['FoodB3','FoodB3!A1:O5000'],
@@ -202,8 +240,8 @@ const GoogleSheetsConnector = (() => {
 
   return {
     getConfig,saveConfig,setSelectedSheet,hasPickerGrant,connect,disconnect,getUserInfo,getSession,getAccessToken,
-    readRange,appendRows,verifyUserAccess,appendAudit,loadProductionData,openSpreadsheetPicker,
-    DEFAULT_GOOGLE_CLIENT_ID,GOOGLE_PROJECT_NUMBER,PRODUCTION_MASTER_ID,APP_FOLDER_ID,DATA_FOLDER_ID,
+    readRange,appendRows,verifyUserAccess,appendAudit,uploadDriveFile,grantMasterAccess,loadProductionData,openSpreadsheetPicker,
+    DEFAULT_GOOGLE_CLIENT_ID,GOOGLE_PROJECT_NUMBER,PRODUCTION_MASTER_ID,APP_FOLDER_ID,DATA_FOLDER_ID,DOCUMENTS_FOLDER_ID,IMPORT_FOLDER_ID,
     SHEETS_ENABLE_URL,DRIVE_ENABLE_URL,PICKER_ENABLE_URL,API_KEYS_URL
   };
 })();
