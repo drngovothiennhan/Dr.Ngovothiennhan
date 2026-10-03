@@ -58,11 +58,12 @@ function ensurePickerLoaded(){return new Promise((resolve,reject)=>{let n=0;cons
 
 function renderLogin(msg=''){
  const cfg=GoogleSheetsConnector.getConfig();
- document.getElementById('root').innerHTML='<div class="login-wrap"><div class="login-card"><div class="login-grid"><div><div class="eyebrow" style="color:#0f766e">PRODUCTION · KHÔNG CÓ DỮ LIỆU MẪU</div><h1>App Y tế VK</h1><p>Đăng nhập bằng tài khoản Google được cấp quyền. Ứng dụng chỉ dùng quyền <b>drive.file</b> đối với file bạn chọn bằng Google Picker; GitHub không lưu hồ sơ sức khỏe.</p>'+
+ const ready=Boolean(cfg.pickerApiKey&&GoogleSheetsConnector.hasPickerGrant());
+ document.getElementById('root').innerHTML='<div class="login-wrap"><div class="login-card"><div class="login-grid"><div><div class="eyebrow" style="color:#0f766e">APP Y TẾ VK · PRODUCTION</div><h1>Đăng nhập</h1><p>Dùng tài khoản Google đã được quản trị viên cấp quyền. Trên thiết bị đã cấu hình, chỉ cần một nút để vào hệ thống.</p>'+
  (msg?'<div class="notice">'+esc(msg)+'</div>':'')+
- '<div class="toolbar"><button class="btn primary" onclick="startLogin()">Đăng nhập Google</button><button class="btn soft" onclick="openSetup()">Cấu hình Google Picker</button></div><div class="muted">Master Sheet: App Y tế VK - MASTER PRODUCTION</div></div>'+
- '<div><div class="safe"><b>Đã chuyển sang production</b><br>Master Sheet mới đang trống, Users có 1 quản trị viên, AuditLog hoạt động. Dữ liệu demo đã đưa vào Backup.</div>'+
- '<div class="setup" style="margin-top:12px"><b>'+ (cfg.pickerApiKey?'Google Picker API key đã có':'Còn 1 cấu hình Google') +'</b><br>'+ (cfg.pickerApiKey?'Bạn có thể đăng nhập và chọn Master Sheet.':'Mở ⚙ Google để bật Picker API và tạo API key giới hạn theo domain.') +'</div></div></div></div></div>';
+ '<div class="toolbar"><button class="btn primary" onclick="startLogin()">'+(ready?'Đăng nhập & vào hệ thống':'Thiết lập / đăng nhập lần đầu')+'</button>'+(ready?'':'<button class="btn soft" onclick="openSetup()">Cấu hình Google</button>')+'</div><div class="muted">Master Sheet: App Y tế VK - MASTER PRODUCTION</div></div>'+
+ '<div><div class="safe"><b>'+(ready?'Thiết bị đã sẵn sàng':'Production đã sẵn sàng')+'</b><br>'+(ready?'Master Sheet đã được ghi nhớ trên trình duyệt này. Không cần chọn lại mỗi lần đăng nhập.':'Lần đầu cần cấu hình Picker và chọn Master Sheet; các lần sau hệ thống ghi nhớ trên thiết bị.')+'</div>'+
+ '<div class="setup" style="margin-top:12px"><b>Tài khoản người dùng</b><br>Admin có thể tạo tài khoản Google mới trong mục Quản trị → Người dùng. Tài khoản ACTIVE có thể đăng nhập ngay sau khi được cấp.</div></div></div></div></div>';
 }
 
 async function startLogin(){
@@ -126,7 +127,7 @@ const pages={
  docs:()=>tablePage('Tài liệu & chứng từ','Documents',['DocumentID','DocumentType','RelatedEntityType','RelatedEntityID','FileName','CapturedAt','VerificationStatus']),
  food:()=>'<div class="card"><h2>ATTP & kiểm thực 3 bước</h2><div class="stats"><div class="stat"><b>'+countRows('FoodB1')+'</b><span>Bước 1</span></div><div class="stat"><b>'+countRows('FoodB2')+'</b><span>Bước 2</span></div><div class="stat"><b>'+countRows('FoodB3')+'</b><span>Bước 3</span></div><div class="stat"><b>'+countRows('FoodSamples')+'</b><span>Lưu mẫu</span></div></div><div class="notice ok">Các bảng production đã sẵn sàng; chưa có dữ liệu mẫu.</div></div>',
  data:()=>'<div class="card"><h2>Dữ liệu & kết nối</h2><div class="row"><div class="grow"><b>Master production</b><div class="muted">169Iu_tlE8LkbSLsNiEsnTdkjyLSsVzDM7_fQl_HTXUI</div></div>'+badge('CONNECTED')+'</div><div class="row"><div class="grow"><b>Google OAuth</b><div class="muted">drive.file + openid/email/profile</div></div>'+badge('MINIMUM SCOPE')+'</div><div class="row"><div class="grow"><b>App Y tế VK trên Drive</b><div class="muted">Dữ liệu · chứng từ · nhập liệu · backup · cấu hình</div></div><button class="btn soft" onclick="window.open(\'https://drive.google.com/drive/folders/1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ\',\'_blank\')">Mở Drive</button></div><div class="toolbar"><button class="btn soft" onclick="openSetup()">Cấu hình Google Picker</button><button class="btn soft" onclick="GoogleSheetsConnector.openSpreadsheetPicker(()=>authorizeAndLoad())">Chọn lại Master Sheet</button></div></div>',
- admin:()=>'<div class="card"><h2>Quản trị</h2><div class="notice ok">Role hiện tại: ADMIN. Danh sách Users và AuditLog nằm trong Master Sheet production.</div><div class="modules"><div class="module" onclick="showAdminUsers()"><b>Người dùng</b><small>ADMIN · NVYT · ATTP · VIEWER</small></div><div class="module" onclick="showAudit()"><b>Audit Log</b><small>Đăng nhập và thao tác ghi</small></div><div class="module"><b>Backup</b><small>Thư mục 04_Backup đã sẵn sàng</small></div></div><div id="adminDetail" style="margin-top:12px"></div></div>'
+ admin:()=>'<div class="card"><h2>Quản trị</h2><div class="notice ok">Role hiện tại: ADMIN. Có thể tạo tài khoản sử dụng ngay bằng email Google.</div><div class="modules"><div class="module" onclick="showUserManager()"><b>Người dùng</b><small>Tạo nhanh · ADMIN · NVYT · ATTP · VIEWER</small></div><div class="module" onclick="showAudit()"><b>Audit Log</b><small>Đăng nhập và thao tác ghi</small></div><div class="module"><b>Backup</b><small>Thư mục 04_Backup đã sẵn sàng</small></div></div><div id="adminDetail" style="margin-top:12px"></div></div>'
 };
 
 function tablePage(title,key,cols){
@@ -134,7 +135,39 @@ function tablePage(title,key,cols){
  if(!objs.length)return '<div class="card"><h2>'+title+'</h2><div class="empty">Chưa có dữ liệu production.</div></div>';
  return '<div class="card"><h2>'+title+'</h2><div class="table"><table><thead><tr>'+cols.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'+objs.map(o=>'<tr>'+cols.map(c=>'<td>'+esc(o[c]||'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></div>';
 }
-async function showAdminUsers(){try{const r=await GoogleSheetsConnector.readRange('Users!A1:G500');document.getElementById('adminDetail').innerHTML=rawTable(r.values||[])}catch(e){document.getElementById('adminDetail').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}}
+async function showUserManager(){
+ try{
+   const r=await GoogleSheetsConnector.readRange('Users!A1:G500');
+   const v=r.values||[];
+   const form='<div class="card" style="box-shadow:none;margin-bottom:12px"><h2>Tạo tài khoản sử dụng ngay</h2><div class="muted">Nhập đúng email Google của người dùng. Tài khoản mới được tạo ở trạng thái ACTIVE.</div>'+
+   '<div style="display:grid;grid-template-columns:1.2fr 1fr .8fr;gap:8px;margin-top:12px"><input id="newUserEmail" placeholder="email@gmail.com" style="border:1px solid #cfdcd8;border-radius:11px;padding:10px 11px"><input id="newUserName" placeholder="Họ tên" style="border:1px solid #cfdcd8;border-radius:11px;padding:10px 11px"><select id="newUserRole" style="border:1px solid #cfdcd8;border-radius:11px;padding:10px 11px;background:#fff"><option value="NVYT">NVYT</option><option value="ATTP">ATTP</option><option value="VIEWER">VIEWER</option><option value="ADMIN">ADMIN</option></select></div>'+
+   '<input id="newUserNote" placeholder="Ghi chú (không bắt buộc)" style="width:100%;border:1px solid #cfdcd8;border-radius:11px;padding:10px 11px;margin-top:8px">'+
+   '<div class="toolbar"><button class="btn primary" onclick="createUserAccount()">Tạo tài khoản</button></div><div id="userCreateMsg"></div></div>';
+   document.getElementById('adminDetail').innerHTML=form+rawTable(v);
+ }catch(e){document.getElementById('adminDetail').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}
+}
+async function createUserAccount(){
+ if(appState.role!=='ADMIN')return;
+ const email=String(document.getElementById('newUserEmail')?.value||'').trim().toLowerCase();
+ const name=String(document.getElementById('newUserName')?.value||'').trim();
+ const role=String(document.getElementById('newUserRole')?.value||'NVYT').toUpperCase();
+ const note=String(document.getElementById('newUserNote')?.value||'').trim();
+ const msg=document.getElementById('userCreateMsg');
+ const allowed=['ADMIN','NVYT','ATTP','VIEWER'];
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg.innerHTML='<div class="notice">Email không hợp lệ.</div>';return}
+ if(!allowed.includes(role)){msg.innerHTML='<div class="notice">Role không hợp lệ.</div>';return}
+ try{
+   const r=await GoogleSheetsConnector.readRange('Users!A1:G500');
+   const v=r.values||[], h=v[0]||[];
+   const iEmail=h.indexOf('Email');
+   const exists=v.slice(1).some(x=>String(x[iEmail]||'').trim().toLowerCase()===email);
+   if(exists){msg.innerHTML='<div class="notice">Email này đã có trong hệ thống. Không tạo bản ghi trùng.</div>';return}
+   await GoogleSheetsConnector.appendRows('Users!A:G',[[email,role,'ACTIVE',name,new Date().toISOString(),appState.user?.email||'ADMIN',note]]);
+   try{await GoogleSheetsConnector.appendAudit('CREATE_USER','User',email,'Role='+role)}catch(_){}
+   msg.innerHTML='<div class="notice ok"><b>Đã tạo tài khoản.</b> '+esc(email)+' có thể đăng nhập bằng Google ngay.</div>';
+   setTimeout(()=>showUserManager(),900);
+ }catch(e){msg.innerHTML='<div class="notice">'+esc(e.message||e)+'</div>'}
+}
 async function showAudit(){try{const r=await GoogleSheetsConnector.readRange('AuditLog!A1:K300');document.getElementById('adminDetail').innerHTML=rawTable(r.values||[])}catch(e){document.getElementById('adminDetail').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}}
 function rawTable(v){if(!v.length)return'<div class="empty">Không có dữ liệu.</div>';return'<div class="table"><table><thead><tr>'+v[0].map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+v.slice(1).reverse().map(r=>'<tr>'+v[0].map((_,i)=>'<td>'+esc(r[i]||'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'}
 
