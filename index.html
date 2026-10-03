@@ -219,6 +219,126 @@ function openRecordModal(sheet){
  document.getElementById('recordModal').classList.add('open');
 }
 function closeRecordModal(){document.getElementById('recordModal').classList.remove('open');activeRecordSheet=null}
+
+function ocrCleanText(t){return String(t||'').replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim()}
+function ocrNormLabel(t){return norm(String(t||'').replace(/đ/g,'d').replace(/Đ/g,'D'))}
+function ocrFindLine(text,labels){
+ const lines=ocrCleanText(text).split('\n').map(x=>x.trim()).filter(Boolean);
+ const aliases=labels.map(ocrNormLabel);
+ for(const line of lines){
+   const n=ocrNormLabel(line);
+   if(aliases.some(a=>n.startsWith(a)||n.includes(a+':')||n.includes(a+'-'))){
+     const parts=line.split(/[:：-]/);
+     if(parts.length>1)return parts.slice(1).join('-').trim();
+   }
+ }
+ return '';
+}
+function ocrFirstDate(text){
+ const m=String(text||'').match(/\b([0-3]?\d)[\/\-.]([01]?\d)[\/\-.]((?:19|20)?\d{2})\b/);
+ if(!m)return '';
+ let y=m[3]; if(y.length===2)y=(Number(y)>40?'19':'20')+y;
+ return [String(m[1]).padStart(2,'0'),String(m[2]).padStart(2,'0'),y].join('/');
+}
+function ocrFirstPhone(text){
+ const ms=String(text||'').match(/(?:\+?84|0)[\s.\-]?(?:3|5|7|8|9)(?:[\s.\-]?\d){8}/g)||[];
+ return ms.length?ms[0].replace(/[^\d+]/g,''):'';
+}
+function ocrFirstCCCD(text){const ms=String(text||'').match(/\b\d{12}\b/g)||[];return ms[0]||''}
+function ocrNumAfter(text,labels,unitPattern=''){
+ const escaped=labels.map(x=>x.replace(/[.*+?^$()|[\]\\]/g,'\\function closeRecordModal(){document.getElementById('recordModal').classList.remove('open');activeRecordSheet=null}
+async function saveRecord(){')).join('|');
+ const re=new RegExp('(?:'+escaped+')[^\\d]{0,20}(\\d+(?:[.,]\\d+)?)\\s*'+unitPattern,'i');
+ const m=String(text||'').match(re); return m?m[1].replace(',','.'):'';
+}
+function ocrTextAfter(text,labels){return ocrFindLine(text,labels).trim()}
+function extractOCRFields(text,sheet){
+ const out={};
+ const name=ocrTextAfter(text,['Họ và tên','Họ tên','Tên học sinh','Tên trẻ','Bệnh nhân']);
+ const dob=ocrTextAfter(text,['Ngày sinh','Sinh ngày'])||ocrFirstDate(text);
+ const gender=ocrTextAfter(text,['Giới tính']);
+ const address=ocrTextAfter(text,['Địa chỉ','Nơi ở','Thường trú']);
+ const phone=ocrTextAfter(text,['Số điện thoại','Điện thoại','SĐT'])||ocrFirstPhone(text);
+ const cccd=ocrTextAfter(text,['CCCD','Căn cước công dân','Số định danh'])||ocrFirstCCCD(text);
+ const bhyt=ocrTextAfter(text,['BHYT','Mã thẻ BHYT','Số thẻ BHYT']);
+ const cls=ocrTextAfter(text,['Lớp','Nhóm lớp']);
+ if(name)out.FullName=name;if(dob)out.DOB=dob;if(gender)out.Gender=/nu|nữ/i.test(gender)?'Nữ':(/nam/i.test(gender)?'Nam':gender);
+ if(address)out.Address=address;if(phone)out.GuardianPhone=phone;if(cccd)out.NationalID=cccd;if(bhyt)out.BHYT=bhyt;if(cls)out.Class=cls;
+ if(sheet==='HealthScreenings'){
+   out.StudentID=ocrTextAfter(text,['Mã học sinh','StudentID']);
+   out.ExamDate=ocrTextAfter(text,['Ngày khám','Ngày kiểm tra'])||ocrFirstDate(text);
+   out.ExamUnit=ocrTextAfter(text,['Đơn vị khám','Cơ sở khám']);
+   out.HeightCm=ocrNumAfter(text,['chiều cao','chieu cao'],'(?:cm)?');
+   out.WeightKg=ocrNumAfter(text,['cân nặng','can nang','trọng lượng','trong luong'],'(?:kg)?');
+   out.BMI=ocrNumAfter(text,['BMI'],'');
+   out.Vision=ocrTextAfter(text,['Thị lực','Thị giác']);
+   out.Dental=ocrTextAfter(text,['Răng hàm mặt','Răng miệng']);
+ }
+ if(sheet==='MedicationOrders'){
+   out.StudentID=ocrTextAfter(text,['Mã học sinh','StudentID']);
+   out.DrugName=ocrTextAfter(text,['Tên thuốc','Thuốc']);
+   out.Strength=ocrTextAfter(text,['Hàm lượng','Nồng độ']);
+   out.Dose=ocrTextAfter(text,['Liều dùng','Liều']);
+   out.Route=ocrTextAfter(text,['Đường dùng']);
+   out.Schedule=ocrTextAfter(text,['Cách dùng','Lịch dùng','Số lần']);
+   out.StartDate=ocrTextAfter(text,['Từ ngày','Ngày bắt đầu']);
+   out.EndDate=ocrTextAfter(text,['Đến ngày','Ngày kết thúc']);
+ }
+ if(sheet==='Inventory'||sheet==='FoodB1'){
+   const item=ocrTextAfter(text,['Tên hàng','Tên thực phẩm','Hàng hóa','Sản phẩm']);
+   if(item){out.ItemName=item;out.FoodName=item;}
+   out.Supplier=ocrTextAfter(text,['Nhà cung cấp','Đơn vị giao','Công ty']);
+   out.InvoiceNo=ocrTextAfter(text,['Số hóa đơn','Hóa đơn số','Phiếu giao hàng số']);
+   out.BatchNo=ocrTextAfter(text,['Số lô','Lô']);
+   out.ExpiryDate=ocrTextAfter(text,['Hạn sử dụng','HSD','Ngày hết hạn']);
+   const qty=ocrNumAfter(text,['số lượng','so luong','khối lượng','khoi luong'],'');
+   if(qty){out.Quantity=qty;out.QtyIn=qty;out.OpeningQty=qty;}
+   const unit=ocrTextAfter(text,['Đơn vị tính','ĐVT','Đơn vị']);if(unit)out.Unit=unit;
+ }
+ if(sheet==='Incidents'){
+   out.StudentID=ocrTextAfter(text,['Mã học sinh','StudentID']);
+   out.Location=ocrTextAfter(text,['Địa điểm','Nơi xảy ra']);
+   out.IncidentType=ocrTextAfter(text,['Loại tai nạn','Sự cố']);
+   out.Description=ocrTextAfter(text,['Mô tả','Diễn biến']);
+ }
+ if(sheet==='FoodSamples'){
+   out.SampleName=ocrTextAfter(text,['Tên mẫu','Mẫu thức ăn','Tên món']);
+   out.Meal=ocrTextAfter(text,['Bữa ăn','Bữa']);
+   out.SampleAmount=ocrNumAfter(text,['khối lượng mẫu','lượng mẫu','mẫu'],'');
+   out.StorageTempC=ocrNumAfter(text,['nhiệt độ','nhiet do'],'(?:°?C)?');
+ }
+ return Object.fromEntries(Object.entries(out).filter(([_,v])=>String(v||'').trim()!==''));
+}
+function applyOCRFields(fields){
+ const headers=(appState.data[activeRecordSheet]||[])[0]||[];let applied=0;
+ Object.entries(fields).forEach(([h,v])=>{const i=headers.indexOf(h);if(i<0)return;const el=document.querySelector('#recordBody [data-field="'+i+'"]');if(el&&!String(el.value||'').trim()){el.value=v;applied++}});
+ return applied;
+}
+async function runRecordOCR(){
+ const file=document.getElementById('ocrFile')?.files?.[0];
+ const st=document.getElementById('ocrStatus'),res=document.getElementById('ocrResult');
+ if(!file){st.textContent='Hãy chụp hoặc chọn ảnh trước.';return}
+ if(!window.Tesseract){st.textContent='Thư viện OCR chưa tải được. Hãy bấm ↻ Cập nhật và thử lại.';return}
+ let worker=null;
+ try{
+   st.textContent='Đang nhận diện ảnh… lần đầu có thể mất thêm thời gian tải ngôn ngữ tiếng Việt.';
+   worker=await Tesseract.createWorker('vie+eng',1,{logger:m=>{if(m?.status)st.textContent='OCR: '+m.status+(m.progress!=null?' '+Math.round(m.progress*100)+'%':'')}});
+   const result=await worker.recognize(file);
+   const text=ocrCleanText(result?.data?.text||'');
+   const conf=Math.round(result?.data?.confidence||0);
+   const fields=extractOCRFields(text,activeRecordSheet);
+   const applied=applyOCRFields(fields);
+   const nums=(text.match(/\b\d+(?:[.,]\d+)?\b/g)||[]).slice(0,20);
+   if(activeRecordSheet==='FoodB1'){const headers=(appState.data.FoodB1||[])[0]||[],i=headers.indexOf('OCRConfidence');const el=document.querySelector('#recordBody [data-field="'+i+'"]');if(el&&!el.value)el.value=String(conf)}
+   res.innerHTML='<div class="notice ok"><b>Đã nhận diện.</b> Độ tin cậy OCR khoảng '+conf+'%. Đã điền '+applied+' trường còn trống; hãy kiểm tra lại trước khi lưu.</div>'+
+     '<div class="ocr-candidates">'+Object.entries(fields).map(([k,v])=>'<span class="ocr-chip">'+esc(k)+': '+esc(v)+'</span>').join('')+'</div>'+
+     (nums.length?'<div class="ocr-candidates"><span class="ocr-chip">Số liệu phát hiện: '+esc(nums.join(' · '))+'</span></div>':'')+
+     '<details style="margin-top:8px"><summary class="muted">Xem văn bản OCR</summary><div class="ocr-preview">'+esc(text||'Không đọc được văn bản')+'</div></details>';
+   st.textContent='Hoàn tất nhận diện. Không tự lưu dữ liệu.';
+ }catch(e){st.textContent='Nhận diện thất bại: '+String(e.message||e)}
+ finally{try{if(worker)await worker.terminate()}catch(_){}}
+}
+
 async function saveRecord(){
  const sheet=activeRecordSheet;if(!sheet)return;
  const headers=(appState.data[sheet]||[])[0]||[];
