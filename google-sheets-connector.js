@@ -10,7 +10,9 @@ const DOCUMENTS_FOLDER_ID='13mkICOI56J8fm7_6IUFl27K5SRtRqkhz';
 const IMPORT_FOLDER_ID='1tSAAZWbldASeY5zJaJKiEdvxpSxsqQim';
 
 const DRIVE_FILE_SCOPE='https://www.googleapis.com/auth/drive.file';
-const OAUTH_SCOPES='openid email profile '+DRIVE_FILE_SCOPE;
+const BASIC_SCOPES='openid email profile';
+const OAUTH_SCOPES=BASIC_SCOPES+' '+DRIVE_FILE_SCOPE;
+// Chế độ Bridge: chỉ cần đăng nhập cơ bản (không xin quyền Drive/Sheets từ người dùng).
 // Dán URL Web App của Apps Script Bridge vào đây (sau khi deploy) để mọi thiết bị dùng ngay, không cần Picker API key.
 const DEFAULT_BRIDGE_URL='';
 const AUTO_ADMIN_EMAILS=['dr.ngovothiennhan@gmail.com','nguyenhao1707@gmail.com'];
@@ -66,6 +68,7 @@ const GoogleSheetsConnector=(()=>{
       bridgeUrl:localStorage.getItem('sha_bridge_url')||DEFAULT_BRIDGE_URL
     };
   }
+  const scopesFor=()=>getConfig().bridgeUrl?BASIC_SCOPES:OAUTH_SCOPES;
   function saveConfig(next={}){
     const c=getConfig();
     localStorage.setItem('sha_google_client_id',String(next.clientId??c.clientId).trim()||DEFAULT_GOOGLE_CLIENT_ID);
@@ -85,7 +88,7 @@ const GoogleSheetsConnector=(()=>{
     if(!window.google?.accounts?.oauth2)throw new Error('Google Identity Services chưa tải xong.');
     return new Promise((resolve,reject)=>{
       tokenClient=google.accounts.oauth2.initTokenClient({
-        client_id:c.clientId,scope:OAUTH_SCOPES,
+        client_id:c.clientId,scope:scopesFor(),
         callback:async resp=>{
           if(resp?.error)return reject(new Error(resp.error));
           accessToken=resp.access_token;
@@ -126,8 +129,13 @@ const GoogleSheetsConnector=(()=>{
     const {bridgeUrl}=getConfig();
     if(!bridgeUrl)throw new Error('Bridge API chưa được cấu hình.');
     if(!accessToken)await connect();
-    const r=await fetch(bridgeUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,payload,access_token:accessToken})});
-    const text=await r.text();let data={};try{data=JSON.parse(text)}catch(_){throw new Error('Bridge trả dữ liệu không hợp lệ.')}
+    const call=async()=>{
+      const r=await fetch(bridgeUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,payload,access_token:accessToken})});
+      const text=await r.text();let data={};try{data=JSON.parse(text)}catch(_){throw new Error('Bridge trả dữ liệu không hợp lệ.')}
+      return{r,data};
+    };
+    let {r,data}=await call();
+    if(data.ok===false&&/Phiên Google/.test(data.error||'')){accessToken=null;await connect();({r,data}=await call())}
     if(!r.ok||data.ok===false)throw new Error(data.error||'Bridge API lỗi.');
     return data;
   }
