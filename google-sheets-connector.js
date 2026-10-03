@@ -36,7 +36,7 @@ const SHEET_RANGES={
   FoodB2:'FoodB2!A1:P10000',
   FoodB3:'FoodB3!A1:P10000',
   FoodSamples:'FoodSamples!A1:R10000',
-  MealSessions:'MealSessions!A1:J5000',
+  MealSessions:'MealSessions!A1:N5000',
   Inventory:'Inventory!A1:R10000',
   Documents:'Documents!A1:K10000',
   Tasks:'Tasks!A1:L10000',
