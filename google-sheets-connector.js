@@ -35,7 +35,7 @@ const SHEET_RANGES={
   IntegrationQueue:'IntegrationQueue!A1:L10000',
   MenuPlan:'MenuPlan!A1:O5000',
   StockIssuePlan:'StockIssuePlan!A1:N10000',
-  WarehouseCatalog:'WarehouseCatalog!A1:H1000',
+  WarehouseCatalog:'WarehouseCatalog!A1:M1000',
   WarehouseLedger:'WarehouseLedger!A1:Q20000',
   FoodB2:'FoodB2!A1:P10000',
   FoodB3:'FoodB3!A1:P10000',
