@@ -196,10 +196,9 @@ async function newMealSession1246(){
   const servings=prompt('Số suất ăn dự kiến','');
   const id='MEAL-'+today().replaceAll('-','')+'-'+Date.now().toString().slice(-5);
   const now=new Date().toISOString();
-  const row=[id,today(),meal,'','','','','','OPEN',now];
+  const row=[id,today(),meal,'','','','','','OPEN',now,String(servings||''),state.user?.name||state.user?.email||'', '', ''];
   try{
-    await GoogleSheetsConnector.appendRows('MealSessions!A:J',[row]);
-    // Số suất giữ trong MenuSummary để không phá schema hiện tại; form bước 2/3 cho nhập lại chính xác.
+    await GoogleSheetsConnector.appendRows('MealSessions!A:N',[row]);
     GoogleSheetsConnector.appendAudit('CREATE_MEAL_SESSION_1246','MealSession',id,'meal='+meal+'; servings='+String(servings||'')).catch(()=>{});
     state.kitchenSession=id;state.attpFocus='b1';await refresh(['MealSessions']);renderPage();
   }catch(e){alert(e.message||e)}
