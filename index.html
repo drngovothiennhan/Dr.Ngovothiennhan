@@ -46,7 +46,7 @@ main{min-width:0}.hero{background:linear-gradient(135deg,var(--brand),var(--bran
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="google-sheets-connector.js"></script>
 <script>
-const APP_BUILD='2026.10.03.V2.3-ATTP-LINK';
+const APP_BUILD='2026.10.03.V2.3.1-ATTP-LINK';
 let state={authorized:false,user:null,role:null,page:'today',data:{},loaded:new Set(),loading:new Set(),healthTab:'meds',studentQuery:'',kitchenSession:''};
 let importState={headers:[],rows:[],map:{},fileName:''};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
