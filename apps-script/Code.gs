@@ -45,6 +45,7 @@ function doPost(e){
     if(action==='whoami')return json({ok:true,email:user.email,name:account.name,role:account.role});
     if(action==='readRanges')return handleRead_(account,payload);
     if(action==='appendRows')return handleAppend_(account,payload,user.email);
+    if(action==='updateRange')return handleUpdate_(account,payload,user.email);
     throw new Error('Action không được hỗ trợ.');
   }catch(err){return json({ok:false,error:String(err && err.message || err)});}
 }
@@ -109,6 +110,18 @@ function handleAppend_(account,payload,email){
   sh.getRange(start,1,safe.length,width).setValues(safe);
   if(sheetName!=='AuditLog')appendAudit_(ss,email,account.role,'BRIDGE_APPEND',sheetName,safe[0]&&safe[0][0]||'','rows='+safe.length);
   return json({ok:true,updatedRows:safe.length});
+}
+
+function handleUpdate_(account,payload,email){
+  const range=String(payload.range||''),rows=Array.isArray(payload.rows)?payload.rows:[];
+  const sheetName=sheetFromRange_(range);
+  if(!allowed_(account.role,sheetName,true))throw new Error('Không có quyền cập nhật '+sheetName);
+  if(!rows.length)throw new Error('Không có dữ liệu cập nhật.');
+  const ss=SpreadsheetApp.openById(MASTER_ID);
+  const target=ss.getRange(range);
+  target.setValues(rows);
+  if(sheetName!=='AuditLog')appendAudit_(ss,email,account.role,'BRIDGE_UPDATE',sheetName,range,'rows='+rows.length);
+  return json({ok:true,updatedRows:rows.length});
 }
 
 function handlePortalSnapshot_(){
