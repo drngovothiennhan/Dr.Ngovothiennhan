@@ -246,8 +246,8 @@ function ocrFirstPhone(text){
 }
 function ocrFirstCCCD(text){const ms=String(text||'').match(/\b\d{12}\b/g)||[];return ms[0]||''}
 function ocrNumAfter(text,labels,unitPattern=''){
- const escaped=labels.map(x=>x.replace(/[.*+?^$()|[\]\\]/g,'\\function closeRecordModal(){document.getElementById('recordModal').classList.remove('open');activeRecordSheet=null}
-async function saveRecord(){')).join('|');
+ const special='.*+?^$()[]{}|\\';
+ const escaped=labels.map(x=>String(x).split('').map(ch=>special.includes(ch)?'\\'+ch:ch).join('')).join('|');
  const re=new RegExp('(?:'+escaped+')[^\\d]{0,20}(\\d+(?:[.,]\\d+)?)\\s*'+unitPattern,'i');
  const m=String(text||'').match(re); return m?m[1].replace(',','.'):'';
 }
