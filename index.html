@@ -1,493 +1,287 @@
 <!doctype html>
 <html lang="vi">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0f766e">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0f766e">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>App Y tế VK</title>
+<title>App Y tế VK V2</title>
 <style>
-:root{--bg:#f3f7f6;--card:#fff;--ink:#12312d;--muted:#6b807c;--teal:#0f766e;--teal2:#e2f3ef;--line:#dfe9e6;--red:#b42318;--amber:#b54708;--green:#137333;--shadow:0 12px 34px rgba(21,61,54,.09)}
+:root{--bg:#f3f7f6;--card:#fff;--ink:#15332e;--muted:#667d78;--brand:#0f766e;--brand2:#164e63;--soft:#e7f5f2;--line:#dce8e5;--warn:#b54708;--danger:#b42318;--ok:#087443;--shadow:0 10px 30px rgba(21,61,54,.08)}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}
-header{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.head{max-width:1240px;margin:auto;padding:11px 16px;display:flex;align-items:center;gap:10px}.brand{display:flex;align-items:center;gap:10px;font-weight:850}.logo{width:40px;height:40px;border-radius:13px;background:linear-gradient(145deg,#0f766e,#14532d);display:grid;place-items:center;color:#fff;font-size:22px}.head-actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.badge{display:inline-block;padding:6px 9px;border-radius:999px;font-size:11px;font-weight:800;background:#e7f6f2;color:#0f665c}.badge.amber{background:#fff3dc;color:#9a5b00}.badge.red{background:#fee4e2;color:#b42318}.badge.blue{background:#e7f0ff;color:#175cd3}
-.btn{border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}.primary{background:var(--teal);color:#fff}.soft{background:var(--teal2);color:#0f5c54}.danger{background:#fee4e2;color:#912018}.btn:disabled{opacity:.45;cursor:not-allowed}
-.login-wrap{max-width:920px;margin:42px auto;padding:18px}.login-card{background:#fff;border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);padding:28px}.login-card h1{font-size:34px;margin:8px 0}.login-card p{color:var(--muted);line-height:1.55}.login-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}.safe{background:#ecfdf3;border:1px solid #abefc6;color:#067647;border-radius:16px;padding:14px}.setup{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:16px;padding:14px}
-.app{max-width:1240px;margin:auto;padding:16px;display:grid;grid-template-columns:245px 1fr;gap:16px}nav{background:#0d3e38;color:#fff;border-radius:20px;padding:13px;min-height:calc(100vh - 92px);position:sticky;top:76px;align-self:start}nav button{width:100%;border:0;background:transparent;color:#cce4df;padding:10px 11px;margin:2px 0;border-radius:11px;text-align:left;cursor:pointer}nav button.active,nav button:hover{background:#145c53;color:#fff}nav small{display:block;color:#8ab7af;margin:14px 8px 5px}
-main{min-width:0}.hero{background:linear-gradient(135deg,#0f766e,#164e63);color:#fff;border-radius:24px;padding:24px;box-shadow:var(--shadow)}.hero h1{margin:4px 0 7px;font-size:32px}.hero p{margin:0;color:#d9efeb}.eyebrow{font-size:12px;font-weight:850;letter-spacing:.08em;color:#a7f3d0}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:13px 0}.stat,.card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.stat{padding:16px}.stat b{display:block;font-size:26px}.stat span,.muted{color:var(--muted);font-size:13px}.card{padding:18px}.card h2{margin:0 0 12px;font-size:18px}.notice{padding:13px 14px;border-radius:14px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;margin:12px 0}.notice.ok{background:#ecfdf3;border-color:#abefc6;color:#067647}.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:13px}.modules{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.module{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px;cursor:pointer}.module:hover{box-shadow:var(--shadow)}.module b{display:block;margin-bottom:4px}.module small{color:var(--muted)}
-.table{background:#fff;border:1px solid var(--line);border-radius:17px;overflow:auto;box-shadow:var(--shadow)}table{border-collapse:collapse;width:100%;min-width:760px}th,td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:top}th{background:#f8fbfa;color:#4b625e;position:sticky;top:0}tr:last-child td{border-bottom:0}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.toolbar input{border:1px solid #cfdcd8;border-radius:11px;padding:10px 11px;min-width:270px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.field label{display:block;font-size:12px;font-weight:800;color:#4b625e;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;border:1px solid #cfdcd8;border-radius:11px;padding:10px 11px;background:#fff}.field textarea{min-height:78px;resize:vertical}.wide{grid-column:1/-1}.actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px}.mini{font-size:12px;padding:7px 9px}.statusline{font-size:12px;color:var(--muted);margin-top:8px}.ocr-box{border:1px dashed #9fc8c1;background:#f7fffd;border-radius:14px;padding:12px;margin-bottom:14px}.ocr-box b{display:block;margin-bottom:5px}.ocr-preview{white-space:pre-wrap;max-height:180px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px;font-size:12px;margin-top:8px}.ocr-candidates{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.ocr-chip{font-size:11px;padding:5px 8px;border-radius:999px;background:#e7f6f2;color:#0f665c}
-.row{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.row:last-child{border:0}.grow{flex:1}.empty{padding:26px;text-align:center;color:var(--muted)}
-.modal-backdrop{position:fixed;inset:0;background:rgba(5,26,23,.58);z-index:100;display:none;align-items:center;justify-content:center;padding:18px}.modal-backdrop.open{display:flex}.modal{width:min(760px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.25);padding:22px}.modal-head{display:flex;gap:12px}.modal-head h2{margin:0}.modal-close{margin-left:auto;border:0;border-radius:10px;width:38px;height:38px;background:#eef5f3;cursor:pointer}.setup-step{padding:13px 0;border-bottom:1px solid var(--line)}.setup-step:last-child{border:0}.setup-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.setup-links a{display:inline-block;text-decoration:none;background:#eaf5f2;color:#0f5c54;padding:9px 11px;border-radius:10px;font-size:13px;font-weight:800}.modal input{width:100%;border:1px solid #cfdcd8;border-radius:11px;padding:10px 11px;margin-top:7px}.modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;flex-wrap:wrap}
-footer{max-width:1240px;margin:0 auto;padding:0 18px 26px;color:#71837f;font-size:12px}footer a{color:#0f766e}
-@media(max-width:900px){.app{grid-template-columns:1fr}nav{position:static;min-height:auto;display:grid;grid-template-columns:repeat(2,1fr)}nav small{grid-column:1/-1}.stats{grid-template-columns:repeat(2,1fr)}.grid,.login-grid{grid-template-columns:1fr}.modules{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.stats,.modules,.form-grid{grid-template-columns:1fr}.login-card h1{font-size:28px}.head .badge{display:none}.app{padding:9px}.login-wrap{padding:9px;margin-top:18px}}
-</style>
-</head>
+button{cursor:pointer}.hide{display:none!important}header{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.head{max-width:1280px;margin:auto;padding:10px 16px;display:flex;align-items:center;gap:12px}.brand{display:flex;align-items:center;gap:10px;font-weight:900}.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--brand),#14532d);display:grid;place-items:center;color:#fff;font-size:22px}.headright{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border-radius:999px;font-size:11px;font-weight:850;background:#e8f6f2;color:#075e55}.badge.warn{background:#fff3dc;color:#965a00}.badge.red{background:#fee4e2;color:var(--danger)}.badge.blue{background:#e8f0ff;color:#175cd3}
+.btn{border:0;border-radius:12px;padding:10px 13px;font-weight:850}.primary{background:var(--brand);color:#fff}.soft{background:var(--soft);color:#0b5f57}.danger{background:#fee4e2;color:#912018}.mini{padding:7px 9px;font-size:12px}.btn:disabled{opacity:.5;cursor:not-allowed}
+.login{max-width:950px;margin:42px auto;padding:16px}.loginbox{background:#fff;border:1px solid var(--line);border-radius:28px;padding:28px;box-shadow:var(--shadow);display:grid;grid-template-columns:1.15fr .85fr;gap:18px}.login h1{font-size:36px;margin:8px 0}.muted{color:var(--muted);font-size:13px}.safe,.notice{border-radius:15px;padding:13px 14px;margin:10px 0}.safe,.notice.ok{background:#ecfdf3;border:1px solid #abefc6;color:#067647}.notice{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412}.notice.red{background:#fef3f2;border-color:#fecdca;color:#b42318}
+.shell{max-width:1280px;margin:auto;padding:15px;display:grid;grid-template-columns:230px 1fr;gap:15px}.side{position:sticky;top:76px;align-self:start;background:#0d3e38;color:#fff;border-radius:20px;padding:12px;min-height:calc(100vh - 92px)}.side small{display:block;color:#8bb8b0;margin:12px 8px 5px}.side button{width:100%;border:0;background:transparent;color:#cce3de;padding:11px;border-radius:11px;text-align:left;font-weight:700;margin:2px 0}.side button.active,.side button:hover{background:#145c53;color:#fff}
+main{min-width:0}.hero{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-radius:24px;padding:22px;box-shadow:var(--shadow)}.hero h1{font-size:31px;margin:3px 0 7px}.hero p{margin:0;color:#d8eeea}.eyebrow{font-size:11px;font-weight:900;letter-spacing:.08em;color:#b5f3dc}
+.assistant{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:13px;display:flex;gap:8px;align-items:center;box-shadow:var(--shadow)}.assistant input{flex:1;border:0;outline:0;background:#f7fbfa;border-radius:12px;padding:12px}.iconbtn{width:42px;height:42px;border:0;border-radius:12px;background:var(--soft);font-size:18px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}.stat,.card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.stat{padding:15px}.stat b{display:block;font-size:25px}.stat span{font-size:12px;color:var(--muted)}.card{padding:17px;margin-bottom:12px}.card h2{margin:0 0 11px;font-size:18px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.row{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid var(--line)}.row:last-child{border:0}.grow{flex:1}.taskdot{width:10px;height:10px;border-radius:50%;background:#f59e0b;flex:none}.taskdot.red{background:#ef4444}.taskdot.ok{background:#22c55e}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}.toolbar input,.toolbar select,.field input,.field select,.field textarea{border:1px solid #cfded9;border-radius:11px;padding:10px;background:#fff}.toolbar input{min-width:250px}.field label{display:block;font-size:12px;font-weight:850;color:#4c625e;margin-bottom:5px}.field input,.field select,.field textarea{width:100%}.field textarea{min-height:76px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.wide{grid-column:1/-1}
+.table{overflow:auto;border:1px solid var(--line);border-radius:15px}table{width:100%;border-collapse:collapse;min-width:720px}th,td{padding:10px 11px;border-bottom:1px solid var(--line);text-align:left;font-size:12px;vertical-align:top}th{background:#f8fbfa;color:#536862;position:sticky;top:0}tr:last-child td{border:0}.link{color:#0f766e;text-decoration:none;font-weight:800}.empty{text-align:center;color:var(--muted);padding:25px}
+.profilehead{display:flex;gap:13px;align-items:center}.avatar{width:54px;height:54px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-size:24px}.timeline{border-left:2px solid #cfe5df;margin-left:10px;padding-left:18px}.event{position:relative;padding:0 0 14px}.event:before{content:"";position:absolute;left:-24px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--brand);border:3px solid #fff;box-shadow:0 0 0 1px #cfe5df}.event b{font-size:13px}.event div{font-size:12px;color:var(--muted);margin-top:2px}
+.tabs{display:flex;gap:7px;overflow:auto;margin-bottom:10px}.tabs button{border:0;background:#eef5f3;border-radius:999px;padding:8px 11px;white-space:nowrap;font-weight:800;color:#526a65}.tabs button.on{background:var(--brand);color:#fff}
+.stepper{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.step{border:1px solid var(--line);border-radius:15px;padding:13px;background:#fff}.step.done{background:#ecfdf3;border-color:#abefc6}.step .n{width:28px;height:28px;border-radius:50%;background:#eef5f3;display:grid;place-items:center;font-weight:900;margin-bottom:7px}.step.done .n{background:#b7f0cf;color:#087443}
+.modalbg{position:fixed;inset:0;background:rgba(4,29,25,.6);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}.modalbg.open{display:flex}.modal{width:min(820px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:22px;padding:20px;box-shadow:0 30px 80px rgba(0,0,0,.25)}.modalhead{display:flex;gap:10px;align-items:flex-start}.modalhead h2{margin:0}.close{margin-left:auto;width:38px;height:38px;border:0;border-radius:10px;background:#eef5f3;font-size:20px}.actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:13px}
+@media(max-width:900px){.shell{grid-template-columns:1fr}.side{position:static;min-height:auto;display:grid;grid-template-columns:repeat(3,1fr)}.side small{grid-column:1/-1}.stats{grid-template-columns:repeat(2,1fr)}.grid2,.loginbox{grid-template-columns:1fr}.stepper{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.stats,.grid3,.formgrid,.stepper{grid-template-columns:1fr}.side{grid-template-columns:repeat(2,1fr)}.login{margin-top:15px;padding:9px}.loginbox{padding:20px}.headright .badge{display:none}.assistant{flex-wrap:wrap}.assistant input{flex-basis:100%}}
+</style></head>
 <body>
-<header><div class="head"><div class="brand"><div class="logo">✚</div><div>App Y tế VK<div class="muted">Trợ lý y tế học đường</div></div></div><div class="head-actions"><span id="envBadge" class="badge blue">PRODUCTION</span><span id="accountBadge" class="badge amber">Chưa đăng nhập</span><button id="updateBtn" class="btn soft" onclick="forceUpdate()" title="Tải bản mới nhất">↻ Cập nhật</button><button class="btn soft" onclick="openSetup()">⚙ Google</button><button id="logoutBtn" class="btn danger" style="display:none" onclick="logout()">Đăng xuất</button></div></div></header>
+<header><div class="head"><div class="brand"><div class="logo">✚</div><div>App Y tế VK<div class="muted">Trợ lý y tế học đường · V2</div></div></div><div class="headright"><span class="badge blue">PRODUCTION V2</span><span id="acct" class="badge warn">Chưa đăng nhập</span><button class="btn soft mini" onclick="openSetup()">⚙ Google</button><button id="logoutBtn" class="btn danger mini hide" onclick="logout()">Đăng xuất</button></div></div></header>
 <div id="root"></div>
-<footer>App Y tế VK · GitHub Pages chỉ chạy giao diện; dữ liệu nằm trong Google Drive/Sheets riêng tư. <a href="privacy.html">Chính sách quyền riêng tư</a> · <a href="terms.html">Điều khoản sử dụng</a></footer>
+<footer style="max-width:1280px;margin:auto;padding:0 18px 28px;color:#71837f;font-size:12px">App Y tế VK V2 · Google Drive/Sheets riêng tư · <a class="link" href="privacy.html">Quyền riêng tư</a> · <a class="link" href="terms.html">Điều khoản</a></footer>
 
-<div id="setupModal" class="modal-backdrop" onclick="if(event.target===this)closeSetup()"><div class="modal">
-<div class="modal-head"><div><h2>Cấu hình Google Production</h2><div class="muted">Production dùng quyền tối thiểu <code>drive.file</code> và Google Picker.</div></div><button class="modal-close" onclick="closeSetup()">×</button></div>
-<div class="safe" style="margin-top:14px"><b>Đã hoàn tất:</b> OAuth Client ID, Google Sheets API, Google Drive API, thư mục App Y tế VK và Master Sheet production.</div>
-<div class="setup-step"><b>1. Bật Google Picker API</b><div class="setup-links"><a target="_blank" href="https://console.cloud.google.com/apis/library/picker.googleapis.com?project=1074784573482">Bật Google Picker API</a></div></div>
-<div class="setup-step"><b>2. Tạo API key cho Picker</b><div class="muted">Tạo API key rồi giới hạn theo website <code>https://drngovothiennhan.github.io/*</code> và <code>https://docs.google.com/*</code>; giới hạn API: Google Picker API + Google Drive API.</div><div class="setup-links"><a target="_blank" href="https://console.cloud.google.com/apis/credentials?project=1074784573482">Mở Credentials / API key</a></div><input id="pickerKeyInput" placeholder="AIza..."></div>
-<div class="setup-step"><b>3. Master Sheet production</b><div class="muted">Sau khi lưu API key, đăng nhập Google rồi chọn đúng file <b>App Y tế VK - MASTER PRODUCTION</b>.</div><div class="setup-links"><a target="_blank" href="https://docs.google.com/spreadsheets/d/169Iu_tlE8LkbSLsNiEsnTdkjyLSsVzDM7_fQl_HTXUI/edit">Mở Master Sheet</a><a target="_blank" href="https://drive.google.com/drive/folders/1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ">Mở App Y tế VK</a></div></div>
-<div id="setupMsg" class="notice" style="display:none"></div>
-<div class="modal-foot"><button class="btn soft" onclick="saveSetup()">Lưu API key</button><button class="btn primary" onclick="saveSetup();closeSetup();startLogin()">Đăng nhập & chọn Master Sheet</button></div>
-</div></div>
+<div id="setupModal" class="modalbg" onclick="if(event.target===this)closeSetup()"><div class="modal"><div class="modalhead"><div><h2>Cấu hình Google</h2><div class="muted">V2 ưu tiên API Bridge. Khi Bridge chưa bật, app dùng quyền trực tiếp với Master Sheet như hiện tại.</div></div><button class="close" onclick="closeSetup()">×</button></div>
+<div class="formgrid" style="margin-top:14px"><div class="field wide"><label>Google Picker API key</label><input id="pickerKey" placeholder="AIza..."></div><div class="field wide"><label>Bridge Web App URL (tùy chọn)</label><input id="bridgeUrl" placeholder="https://script.google.com/macros/s/.../exec"></div></div>
+<div class="notice ok"><b>Master:</b> App Y tế VK - MASTER PRODUCTION. V2 không xóa dữ liệu cũ; Enrollment tách khỏi Student.</div>
+<div class="toolbar"><a class="btn soft" target="_blank" href="https://console.cloud.google.com/apis/library/picker.googleapis.com?project=1074784573482" style="text-decoration:none">Bật Picker API</a><a class="btn soft" target="_blank" href="https://drive.google.com/drive/folders/1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ" style="text-decoration:none">Mở Drive</a></div>
+<div id="setupMsg"></div><div class="actions"><button class="btn soft" onclick="saveSetup()">Lưu</button><button class="btn primary" onclick="saveSetup();closeSetup();startLogin()">Đăng nhập</button></div></div></div>
 
-<div id="recordModal" class="modal-backdrop" onclick="if(event.target===this)closeRecordModal()"><div class="modal">
-<div class="modal-head"><div><h2 id="recordTitle">Thêm dữ liệu</h2><div id="recordSub" class="muted"></div></div><button class="modal-close" onclick="closeRecordModal()">×</button></div>
-<div id="recordBody" style="margin-top:14px"></div>
-</div></div>
+<div id="profileModal" class="modalbg" onclick="if(event.target===this)closeProfile()"><div class="modal"><div class="modalhead"><div><h2 id="profileTitle">Hồ sơ học sinh</h2><div id="profileSub" class="muted"></div></div><button class="close" onclick="closeProfile()">×</button></div><div id="profileBody"></div></div></div>
+<div id="recordModal" class="modalbg" onclick="if(event.target===this)closeRecord()"><div class="modal"><div class="modalhead"><div><h2 id="recordTitle">Thêm bản ghi</h2><div id="recordSub" class="muted"></div></div><button class="close" onclick="closeRecord()">×</button></div><div id="recordBody"></div></div></div>
+<div id="importModal" class="modalbg" onclick="if(event.target===this)closeImport()"><div class="modal"><div class="modalhead"><div><h2>Nhập danh sách học sinh</h2><div class="muted">Preview → Mapping → kiểm tra trùng → Student + Enrollment.</div></div><button class="close" onclick="closeImport()">×</button></div><div id="importBody"></div></div></div>
 
-<div id="importModal" class="modal-backdrop" onclick="if(event.target===this)closeImportModal()"><div class="modal">
-<div class="modal-head"><div><h2>Nhập danh sách học sinh</h2><div class="muted">File được đọc cục bộ trên thiết bị → Preview → Mapping → kiểm tra trùng → xác nhận ghi Master.</div></div><button class="modal-close" onclick="closeImportModal()">×</button></div>
-<div id="importBody" style="margin-top:14px"></div>
-</div></div>
+<input id="quickPhoto" type="file" accept="image/*,.pdf" capture="environment" class="hide" onchange="quickUpload(this.files[0])">
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="google-sheets-connector.js"></script>
 <script>
-const APP_BUILD='2026.10.03.OPT1';
-let appState={authorized:false,user:null,role:null,data:{},page:'home',loadingData:false};
-
-function forceUpdate(){
- const u=new URL(location.href);
- u.searchParams.set('v',Date.now());
- location.replace(u.toString());
-}
-async function checkForUpdate(){
- try{
-   const r=await fetch('version.json?ts='+Date.now(),{cache:'no-store'});
-   const v=await r.json();
-   if(v?.version && v.version!==APP_BUILD){
-     const u=new URL(location.href);
-     u.searchParams.set('v',v.version);
-     location.replace(u.toString());
-   }
- }catch(_){}
-}
-
+const APP_BUILD='2026.10.03.V2.0';
+let state={authorized:false,user:null,role:null,page:'today',data:{},loaded:new Set(),loading:new Set(),healthTab:'meds',studentQuery:'',kitchenSession:''};
+let importState={headers:[],rows:[],map:{},fileName:''};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const badge=(t,c='')=>'<span class="badge '+c+'">'+esc(t)+'</span>';
-const toObjects=values=>{if(!values||values.length<2)return[];const h=values[0];return values.slice(1).filter(r=>r.some(x=>String(x??'').trim()!=='')).map(r=>Object.fromEntries(h.map((k,i)=>[k,r[i]??''])))};
-const countRows=k=>Math.max(0,(appState.data[k]||[]).length-1);
-function activeStudentCount(){const v=appState.data.Students||[];if(v.length<2)return 0;const i=(v[0]||[]).indexOf('Status');return i<0?Math.max(0,v.length-1):v.slice(1).filter(r=>String(r[i]||'').toUpperCase()==='ACTIVE').length}
+const objRows=v=>{if(!v||v.length<2)return[];const h=v[0];return v.slice(1).filter(r=>r.some(x=>String(x??'').trim())).map(r=>Object.fromEntries(h.map((k,i)=>[k,r[i]??''])))};
+const objs=k=>objRows(state.data[k]||[]);
+const today=()=>new Date().toISOString().slice(0,10);
+const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase().replace(/[^a-z0-9]/g,'');
+const colLetter=n=>{let s='';while(n>0){n--;s=String.fromCharCode(65+n%26)+s;n=Math.floor(n/26)}return s};
 
-function setAccount(text,cls='amber'){const e=document.getElementById('accountBadge');e.textContent=text;e.className='badge '+cls}
-function openSetup(){const c=GoogleSheetsConnector.getConfig();document.getElementById('pickerKeyInput').value=c.pickerApiKey||'';document.getElementById('setupModal').classList.add('open')}
+function setAcct(t,c=''){const e=document.getElementById('acct');if(e){e.textContent=t;e.className='badge '+c}}
+function openSetup(){const c=GoogleSheetsConnector.getConfig();document.getElementById('pickerKey').value=c.pickerApiKey||'';document.getElementById('bridgeUrl').value=c.bridgeUrl||'';document.getElementById('setupModal').classList.add('open')}
 function closeSetup(){document.getElementById('setupModal').classList.remove('open')}
-function setupMsg(m,ok=false){const e=document.getElementById('setupMsg');e.style.display='block';e.className='notice'+(ok?' ok':'');e.textContent=m}
-function saveSetup(){const key=(document.getElementById('pickerKeyInput').value||'').trim();GoogleSheetsConnector.saveConfig({pickerApiKey:key,sheetId:GoogleSheetsConnector.PRODUCTION_MASTER_ID});setupMsg(key?'Đã lưu API key trên trình duyệt này.':'Chưa nhập API key.',Boolean(key))}
-function ensurePickerLoaded(){return new Promise((resolve,reject)=>{let n=0;const t=setInterval(()=>{n++;if(window.gapi){clearInterval(t);gapi.load('picker',()=>resolve())}else if(n>30){clearInterval(t);reject(new Error('Không tải được Google Picker.'))}},150)})}
+function saveSetup(){GoogleSheetsConnector.saveConfig({pickerApiKey:document.getElementById('pickerKey').value,bridgeUrl:document.getElementById('bridgeUrl').value});document.getElementById('setupMsg').innerHTML='<div class="notice ok">Đã lưu cấu hình trên trình duyệt này.</div>'}
+function ensurePicker(){return new Promise((resolve,reject)=>{let n=0;const t=setInterval(()=>{n++;if(window.gapi){clearInterval(t);gapi.load('picker',resolve)}else if(n>40){clearInterval(t);reject(new Error('Không tải được Google Picker.'))}},125)})}
 
 function renderLogin(msg=''){
- const cfg=GoogleSheetsConnector.getConfig();
- const ready=Boolean(cfg.pickerApiKey&&GoogleSheetsConnector.hasPickerGrant());
- document.getElementById('root').innerHTML='<div class="login-wrap"><div class="login-card"><div class="login-grid"><div><div class="eyebrow" style="color:#0f766e">APP Y TẾ VK · PRODUCTION</div><h1>Đăng nhập</h1><p>Dùng tài khoản Google đã được quản trị viên cấp quyền. Trên thiết bị đã cấu hình, chỉ cần một nút để vào hệ thống.</p>'+
- (msg?'<div class="notice">'+esc(msg)+'</div>':'')+
- '<div class="toolbar"><button class="btn primary" onclick="startLogin()">'+(ready?'Đăng nhập & vào hệ thống':'Thiết lập / đăng nhập lần đầu')+'</button>'+(ready?'':'<button class="btn soft" onclick="openSetup()">Cấu hình Google</button>')+'</div><div class="muted">Master Sheet: App Y tế VK - MASTER PRODUCTION</div></div>'+
- '<div><div class="safe"><b>'+(ready?'Thiết bị đã sẵn sàng':'Production đã sẵn sàng')+'</b><br>'+(ready?'Master Sheet đã được ghi nhớ trên trình duyệt này. Không cần chọn lại mỗi lần đăng nhập.':'Lần đầu cần cấu hình Picker và chọn Master Sheet; các lần sau hệ thống ghi nhớ trên thiết bị.')+'</div>'+
- '<div class="setup" style="margin-top:12px"><b>Tài khoản người dùng</b><br>Admin có thể tạo tài khoản Google mới trong mục Quản trị → Người dùng. Tài khoản ACTIVE có thể đăng nhập ngay sau khi được cấp.</div></div></div></div></div>';
+ const c=GoogleSheetsConnector.getConfig();
+ document.getElementById('root').innerHTML='<div class="login"><div class="loginbox"><div><div class="eyebrow" style="color:#0f766e">APP Y TẾ VK · V2</div><h1>Y tế học đường theo công việc</h1><p>Dashboard không còn tải toàn bộ bảng. Dữ liệu chỉ được gọi khi cần; hồ sơ học sinh dùng StudentID cố định và Enrollment theo năm học.</p>'+ (msg?'<div class="notice red">'+esc(msg)+'</div>':'') +'<div class="toolbar"><button class="btn primary" onclick="startLogin()">Đăng nhập Google</button><button class="btn soft" onclick="openSetup()">Cấu hình</button></div></div><div><div class="safe"><b>V2 đã tái cơ cấu</b><br>Hôm nay · Học sinh · Y tế · Bếp & kho · Hồ sơ. Timeline, thuốc hôm nay và kiểm thực theo quy trình.</div><div class="notice"><b>Chế độ dữ liệu:</b> '+(c.bridgeUrl?'API Bridge':'Google Sheet trực tiếp (chuyển tiếp an toàn khi Bridge được triển khai)')+'</div></div></div></div>';
 }
 
 async function startLogin(){
  try{
-   setAccount('Đang đăng nhập…','amber');
-   const c=GoogleSheetsConnector.getConfig();
-   if(!c.pickerApiKey){openSetup();setAccount('Cần Picker API key','amber');return}
-   await GoogleSheetsConnector.connect();
-   await ensurePickerLoaded();
-   const session=GoogleSheetsConnector.getSession();
-   setAccount(session.user?.email||'Đã đăng nhập','blue');
-   if(!GoogleSheetsConnector.hasPickerGrant()){
-     GoogleSheetsConnector.openSpreadsheetPicker(async(doc)=>{
-       if(doc.id!==GoogleSheetsConnector.PRODUCTION_MASTER_ID){
-         renderLogin('Bạn đã chọn nhầm file. Hãy chọn đúng “App Y tế VK - MASTER PRODUCTION”.');
-         return;
-       }
-       await authorizeAndLoad();
-     });
-   }else await authorizeAndLoad();
- }catch(e){setAccount('Lỗi đăng nhập','red');renderLogin(String(e.message||e))}
+  setAcct('Đang đăng nhập…','warn');
+  const c=GoogleSheetsConnector.getConfig();
+  await GoogleSheetsConnector.connect();
+  if(!c.bridgeUrl){
+    if(!c.pickerApiKey){openSetup();throw new Error('Cần Google Picker API key hoặc Bridge URL.')}
+    await ensurePicker();
+    if(!GoogleSheetsConnector.hasPickerGrant()){
+      GoogleSheetsConnector.openSpreadsheetPicker(async doc=>{if(doc.id!==GoogleSheetsConnector.PRODUCTION_MASTER_ID)return renderLogin('Hãy chọn đúng Master Production.');await authorize()});return;
+    }
+  }
+  await authorize();
+ }catch(e){setAcct('Chưa đăng nhập','warn');renderLogin(e.message||String(e))}
 }
+async function authorize(){
+ const a=await GoogleSheetsConnector.verifyUserAccess();
+ state.authorized=true;state.user=a;state.role=a.role;setAcct(a.email+' · '+a.role,'');document.getElementById('logoutBtn').classList.remove('hide');
+ renderShell('today');GoogleSheetsConnector.appendAudit('LOGIN_V2','Session','','Đăng nhập App Y tế VK V2').catch(()=>{});
+ loadDashboard();
+}
+function logout(){GoogleSheetsConnector.disconnect();state={authorized:false,user:null,role:null,page:'today',data:{},loaded:new Set(),loading:new Set(),healthTab:'meds',studentQuery:'',kitchenSession:''};document.getElementById('logoutBtn').classList.add('hide');setAcct('Chưa đăng nhập','warn');renderLogin()}
 
-async function authorizeAndLoad(){
- try{
-   const access=await GoogleSheetsConnector.verifyUserAccess();
-   appState.user=access;appState.role=access.role;appState.authorized=true;appState.loadingData=true;
-   setAccount(access.email+' · '+access.role,'');
-   document.getElementById('logoutBtn').style.display='inline-block';
-   renderShell('home');
-   GoogleSheetsConnector.appendAudit('LOGIN','Session','','Đăng nhập production').catch(()=>{});
-   GoogleSheetsConnector.loadProductionData().then(data=>{
-     appState.data=data||{};appState.loadingData=false;
-     if(appState.authorized)renderShell(appState.page||'home');
-   }).catch(e=>{
-     appState.loadingData=false;
-     if(appState.authorized){
-       const main=document.getElementById('main');
-       if(main)main.insertAdjacentHTML('afterbegin','<div class="notice">'+esc(e.message||e)+'</div>');
-     }
-   });
- }catch(e){appState.authorized=false;appState.loadingData=false;renderLogin(String(e.message||e))}
+async function ensure(keys,rerender=true){
+ const need=keys.filter(k=>!state.loaded.has(k)&&!state.loading.has(k));
+ if(!need.length)return;
+ need.forEach(k=>state.loading.add(k));
+ try{const d=await GoogleSheetsConnector.loadKeys(need);Object.assign(state.data,d);need.forEach(k=>state.loaded.add(k))}
+ finally{need.forEach(k=>state.loading.delete(k))}
+ if(rerender&&state.authorized)renderPage();
 }
+async function refresh(keys){keys.forEach(k=>state.loaded.delete(k));await ensure(keys,true)}
+function loadDashboard(){ensure(['Students','Enrollments','Tasks','MedicationOrders','MedicationAdministrations','Inventory','FoodSamples','MealSessions','Attendance','DiseaseSurveillance'],true)}
 
-function logout(){try{GoogleSheetsConnector.disconnect()}catch(_){}appState={authorized:false,user:null,role:null,data:{},page:'home',loadingData:false};document.getElementById('logoutBtn').style.display='none';setAccount('Chưa đăng nhập','amber');renderLogin()}
+function canWrite(area){
+ if(state.role==='ADMIN')return true;if(state.role==='VIEWER')return false;
+ const health=['Students','Enrollments','HealthScreenings','Immunizations','MedicationOrders','MedicationAdministrations','Incidents','DiseaseSurveillance','Attendance','Tasks','Documents'];
+ const food=['FoodB1','FoodB2','FoodB3','FoodSamples','MealSessions','Inventory','Tasks','Documents'];
+ return state.role==='NVYT'?health.includes(area):state.role==='ATTP'?food.includes(area):false;
+}
+function renderShell(page){
+ if(!state.authorized)return renderLogin();
+ state.page=page;
+ document.getElementById('root').innerHTML='<div class="shell"><aside class="side"><small>CÔNG VIỆC</small>'+nav('today','⌂ Hôm nay')+nav('students','👧 Học sinh')+nav('health','🩺 Y tế')+nav('kitchen','🍲 Bếp & kho')+nav('records','📁 Hồ sơ')+(state.role==='ADMIN'?'<small>QUẢN TRỊ</small>'+nav('admin','⚙ Quản trị'):'')+'</aside><main id="main"></main></div>';
+ renderPage();
+}
+function nav(p,l){return'<button class="'+(state.page===p?'active':'')+'" onclick="go(\''+p+'\')">'+l+'</button>'}
+function go(p){state.page=p;document.querySelectorAll('.side button').forEach(b=>b.classList.remove('active'));renderShell(p);if(p==='students')ensure(['Students','Enrollments']);if(p==='health')ensure(['HealthScreenings','Immunizations','MedicationOrders','MedicationAdministrations','Incidents','DiseaseSurveillance','Attendance']);if(p==='kitchen')ensure(['MealSessions','FoodB1','FoodB2','FoodB3','FoodSamples','Inventory']);if(p==='records')ensure(['Documents','SourceRegistry','Communication']);if(p==='admin')ensure(['Users','IdentityReview','AuditLog','Config','Classes','SchoolYears'])}
+function renderPage(){const m=document.getElementById('main');if(!m)return;m.innerHTML=(pages[state.page]||pages.today)()}
 
-function navButton(p,label){return '<button data-page="'+p+'" onclick="renderShell(\''+p+'\')">'+label+'</button>'}
-function canWrite(sheet){
- if(appState.role==='ADMIN')return true;
- if(appState.role==='VIEWER')return false;
- const health=['Students','HealthScreenings','Immunizations','MedicationOrders','MedicationAdministrations','Incidents','DiseaseSurveillance','Documents','Tasks'];
- const food=['FoodB1','FoodB2','FoodB3','FoodSamples','Inventory','Documents','Tasks'];
- return appState.role==='NVYT'?health.includes(sheet):appState.role==='ATTP'?food.includes(sheet):false;
+function assistantBar(){return'<div class="assistant"><input id="assistantQ" placeholder="Gõ việc cần làm: thuốc hôm nay, kiểm tra sữa, lưu mẫu bữa trưa, tìm bé..." onkeydown="if(event.key===\'Enter\')runAssistant()"><button class="iconbtn" onclick="voiceInput()" title="Nói">🎤</button><button class="iconbtn" onclick="document.getElementById(\'quickPhoto\').click()" title="Chụp hồ sơ">📷</button><button class="btn primary" onclick="runAssistant()">Thực hiện</button></div>'}
+function runAssistant(){
+ const q=norm(document.getElementById('assistantQ')?.value||'');
+ if(q.includes('thuoc')){state.healthTab='meds';go('health');return}
+ if(q.includes('sua')||q.includes('kho')){go('kitchen');setTimeout(()=>document.getElementById('inventoryCard')?.scrollIntoView({behavior:'smooth'}),50);return}
+ if(q.includes('luumau')||q.includes('kiemthuc')||q.includes('buatrua')||q.includes('buaan')){go('kitchen');return}
+ if(q.includes('tiem')){state.healthTab='vaccines';go('health');return}
+ if(q.includes('tainan')||q.includes('socuu')){state.healthTab='incidents';go('health');return}
+ if(q.includes('tim')||q.length>2){state.studentQuery=document.getElementById('assistantQ').value.replace(/^(tìm|tim)\s+/i,'');go('students');return}
 }
-function navButton(p,label){return '<button data-page="'+p+'" onclick="renderShell(\''+p+'\')">'+label+'</button>'}
-function renderShell(page='home'){
- if(!appState.authorized)return renderLogin();
- appState.page=page;
- document.getElementById('root').innerHTML='<div class="app"><nav><small>TỔNG QUAN</small>'+navButton('home','⌂ Hôm nay')+
- '<small>Y TẾ HỌC ĐƯỜNG</small>'+navButton('students','👧 Hồ sơ học sinh')+navButton('health','🩺 Khám sức khỏe')+navButton('vaccines','💉 Tiêm chủng')+navButton('meds','💊 Thuốc học sinh')+navButton('medgiven','⏱ Cho uống thuốc')+navButton('incidents','🩹 Tai nạn & sơ cứu')+navButton('disease','🦠 Theo dõi bệnh')+
- '<small>ATTP & VẬN HÀNH</small>'+navButton('food','🍲 Kiểm thực 3 bước')+navButton('inventory','📦 Kho thực phẩm & sữa')+navButton('docs','📄 Tài liệu & chứng từ')+navButton('tasks','✅ Công việc')+navButton('data','🔌 Dữ liệu & kết nối')+
- (appState.role==='ADMIN'?'<small>QUẢN TRỊ</small>'+navButton('admin','⚙ Quản trị'):'')+
- '</nav><main id="main"></main></div>';
- document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
- document.getElementById('main').innerHTML=(pages[page]||pages.home)();
+function voiceInput(){const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R)return alert('Trình duyệt này chưa hỗ trợ nhập giọng nói.');const r=new R();r.lang='vi-VN';r.onresult=e=>{document.getElementById('assistantQ').value=e.results[0][0].transcript;runAssistant()};r.start()}
+async function quickUpload(file){if(!file)return;await ensure(['Documents'],false);openDocumentUpload(file)}
+
+function currentEnrollments(){return objs('Enrollments').filter(e=>String(e.Status||'').toUpperCase()==='ACTIVE')}
+function activeStudentCount(){return currentEnrollments().length||objs('Students').filter(s=>String(s.Status||'').toUpperCase()==='ACTIVE').length}
+function pendingMeds(){
+ const d=today(),orders=objs('MedicationOrders').filter(o=>String(o.Status||'ACTIVE').toUpperCase()==='ACTIVE'&&(!o.StartDate||o.StartDate<=d)&&(!o.EndDate||o.EndDate>=d));
+ const admins=objs('MedicationAdministrations').filter(a=>String(a.GivenAt||a.ScheduledAt||'').slice(0,10)===d&&String(a.Status||'').toUpperCase()==='DONE');
+ const done=new Set(admins.map(a=>a.OrderID));return orders.filter(o=>!done.has(o.OrderID))
 }
-function modulePage(title,key,cols){
- if(appState.loadingData && !appState.data[key])return '<div class="card"><h2>'+esc(title)+'</h2><div class="empty">Đang đồng bộ dữ liệu…</div></div>';
- const objs=toObjects(appState.data[key]||[]);
- const add=canWrite(key)?'<button class="btn primary" onclick="openRecordModal(\''+key+'\')">+ Thêm mới</button>':'';
- const head='<div class="card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;flex:1">'+esc(title)+'</h2>'+add+'</div>';
- if(!objs.length)return head+'<div class="empty">Chưa có dữ liệu production.</div></div>';
- return head+'<div class="table" style="margin-top:12px"><table><thead><tr>'+cols.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'+objs.slice().reverse().map(o=>'<tr>'+cols.map(c=>'<td>'+esc(o[c]||'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></div>';
-}
-function foodPage(){
- const w=canWrite('FoodB1');
- return '<div class="card"><h2>ATTP & kiểm thực 3 bước</h2><div class="stats"><div class="stat"><b>'+countRows('FoodB1')+'</b><span>Bước 1</span></div><div class="stat"><b>'+countRows('FoodB2')+'</b><span>Bước 2</span></div><div class="stat"><b>'+countRows('FoodB3')+'</b><span>Bước 3</span></div><div class="stat"><b>'+countRows('FoodSamples')+'</b><span>Lưu mẫu</span></div></div>'+
- (w?'<div class="toolbar"><button class="btn primary" onclick="openRecordModal(\'FoodB1\')">+ Bước 1</button><button class="btn primary" onclick="openRecordModal(\'FoodB2\')">+ Bước 2</button><button class="btn primary" onclick="openRecordModal(\'FoodB3\')">+ Bước 3</button><button class="btn primary" onclick="openRecordModal(\'FoodSamples\')">+ Lưu mẫu</button></div>':'')+
- '<div class="notice ok">Mọi bản ghi được lưu trực tiếp vào Master Production và ghi AuditLog.</div></div>';
-}
+function expiringLots(){return objs('Inventory').filter(x=>{const d=Number(x.DaysRemaining);return Number.isFinite(d)&&d>=0&&d<=7&&Number(x.CurrentQty||0)>0})}
+function dueSamples(){const now=Date.now();return objs('FoodSamples').filter(x=>x.DestroyAt&&new Date(x.DestroyAt).getTime()<=now&&!/destroy|huy|đã hủy/i.test(x.Condition||''))}
+function openTasks(){return objs('Tasks').filter(t=>!['DONE','CLOSED','COMPLETED'].includes(String(t.Status||'').toUpperCase()))}
+function sickAbsence(){return objs('Attendance').filter(a=>String(a.Date||'')===today()&&String(a.Status||'').toUpperCase()!=='PRESENT'&&String(a.Reason||a.SymptomTags||'').trim())}
+
 const pages={
- home:()=>'<section class="hero"><div class="eyebrow">APP Y TẾ VK · PRODUCTION</div><h1>Hôm nay</h1><p>Dữ liệu được đọc và ghi trực tiếp vào Master Sheet riêng tư sau xác thực Google.</p></section>'+
- (appState.loadingData?'<div class="notice ok"><b>Đã đăng nhập.</b> Dashboard đã mở; số liệu đang đồng bộ nền trong một lần tải.</div>':'')+
- '<div class="stats"><div class="stat"><b>'+activeStudentCount()+'</b><span>Học sinh đang học</span></div><div class="stat"><b>'+countRows('Tasks')+'</b><span>Công việc</span></div><div class="stat"><b>'+countRows('Inventory')+'</b><span>Lô kho</span></div><div class="stat"><b>'+countRows('Incidents')+'</b><span>Sự cố</span></div></div>'+
- '<div class="grid"><div class="card"><h2>Nhập dữ liệu</h2><div class="notice ok">Preview → Mapping → kiểm tra trùng → Xác nhận → Master Production.</div><div class="toolbar">'+(canWrite('Students')?'<button class="btn primary" onclick="openStudentImport()">Nhập danh sách học sinh</button><button class="btn soft" onclick="openRecordModal(\'Students\')">+ Thêm 1 học sinh</button>':'')+'</div></div><div class="card"><h2>Phiên hiện tại</h2><div class="row"><div class="grow"><b>'+esc(appState.user?.name||'')+'</b><div class="muted">'+esc(appState.user?.email||'')+'</div></div>'+badge(appState.role)+'</div><div class="muted">Quyền Google: drive.file · dữ liệu riêng tư.</div></div></div>',
- students:()=>modulePage('Hồ sơ học sinh','Students',['StudentID','FullName','DOB','Gender','Class','GuardianPhone','HealthNotes','Status']),
- health:()=>modulePage('Khám sức khỏe','HealthScreenings',['ScreeningID','StudentID','ExamDate','ExamUnit','ExamType','HeightCm','WeightKg','GeneralResult','Recommendation','ReviewStatus']),
- vaccines:()=>modulePage('Tiêm chủng','Immunizations',['ImmunizationID','StudentID','VaccineName','DoseNumber','DateGiven','Status']),
- meds:()=>modulePage('Thuốc học sinh','MedicationOrders',['OrderID','StudentID','DrugName','Strength','Dose','Route','Schedule','StartDate','EndDate','Status']),
- medgiven:()=>modulePage('Theo dõi cho uống thuốc','MedicationAdministrations',['AdministrationID','OrderID','StudentID','ScheduledAt','GivenAt','DoseGiven','PerformedBy','Status','Note']),
- incidents:()=>modulePage('Tai nạn & sơ cứu','Incidents',['IncidentID','StudentID','OccurredAt','Location','IncidentType','Description','FirstAid','TransferRequired','Status']),
- disease:()=>modulePage('Theo dõi bệnh truyền nhiễm','DiseaseSurveillance',['CaseID','StudentID','Class','ReportedDate','Symptoms','SuspectedCondition','Absent','ClusterFlag','Action','Status']),
- food:()=>foodPage(),
- inventory:()=>modulePage('Kho thực phẩm & sữa','Inventory',['LotID','ItemName','Group','ReceivedDate','ExpiryDate','BatchNo','CurrentQty','Unit','StorageLocation','ExpiryStatus']),
- docs:()=>'<div class="card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;flex:1">Tài liệu & chứng từ</h2>'+(canWrite('Documents')?'<button class="btn primary" onclick="openDocumentUpload()">+ Tải tài liệu</button>':'')+'</div><div style="margin-top:12px">'+modulePage('Danh sách tài liệu','Documents',['DocumentID','DocumentType','RelatedEntityType','RelatedEntityID','FileName','CapturedAt','OCRStatus','VerificationStatus'])+'</div></div>',
- tasks:()=>modulePage('Công việc','Tasks',['TaskID','TaskType','Title','DueAt','Priority','Status','AssignedTo','CompletedAt','Note']),
- data:()=>'<div class="card"><h2>Dữ liệu & kết nối</h2><div class="row"><div class="grow"><b>Master production</b><div class="muted">App Y tế VK - MASTER PRODUCTION</div></div>'+badge('CONNECTED')+'</div><div class="row"><div class="grow"><b>Google OAuth</b><div class="muted">drive.file + openid/email/profile</div></div>'+badge('MINIMUM SCOPE')+'</div><div class="row"><div class="grow"><b>App Y tế VK trên Drive</b><div class="muted">Dữ liệu · chứng từ · nhập liệu · backup · cấu hình</div></div><button class="btn soft" onclick="window.open(\'https://drive.google.com/drive/folders/1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ\',\'_blank\')">Mở Drive</button></div><div class="toolbar"><button class="btn soft" onclick="refreshData()">↻ Làm mới dữ liệu</button><button class="btn soft" onclick="openSetup()">Cấu hình Google</button></div></div>',
- admin:()=>'<div class="card"><h2>Quản trị</h2><div class="notice ok">Role hiện tại: ADMIN. Tạo user, cấp quyền dữ liệu và AuditLog.</div><div class="modules"><div class="module" onclick="showUserManager()"><b>Người dùng</b><small>Tạo nhanh · cấp quyền Master</small></div><div class="module" onclick="showAudit()"><b>Audit Log</b><small>Đăng nhập và thao tác ghi</small></div><div class="module" onclick="window.open(\'https://drive.google.com/drive/folders/1EOCDplX_QWHpxTqB-M6JL6lsAl3XCX7q\',\'_blank\')"><b>Backup</b><small>Mở thư mục sao lưu</small></div></div><div id="adminDetail" style="margin-top:12px"></div></div>'
+ today:()=>{const loaded=state.loaded.has('Students');const meds=pendingMeds(),exp=expiringLots(),samples=dueSamples(),tasks=openTasks(),sick=sickAbsence();return'<section class="hero"><div class="eyebrow">APP Y TẾ VK V2 · HÔM NAY</div><h1>Việc cần xử lý trước</h1><p>'+esc(new Date().toLocaleDateString('vi-VN',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'}))+' · '+(loaded?'Đã đồng bộ dữ liệu chính':'Đang đồng bộ nền…')+'</p></section>'+assistantBar()+
+ '<div class="stats"><div class="stat"><b>'+activeStudentCount()+'</b><span>Học sinh đang học</span></div><div class="stat"><b>'+meds.length+'</b><span>Thuốc chưa ghi nhận hôm nay</span></div><div class="stat"><b>'+exp.length+'</b><span>Lô ≤ 7 ngày HSD</span></div><div class="stat"><b>'+tasks.length+'</b><span>Việc đang mở</span></div></div>'+
+ '<div class="grid2"><div class="card"><h2>Ưu tiên hôm nay</h2>'+priorityRows(meds,exp,samples,sick)+'</div><div class="card"><h2>Thao tác nhanh</h2><div class="grid2"><button class="btn soft" onclick="state.healthTab=\'meds\';go(\'health\')">💊 Thuốc hôm nay</button><button class="btn soft" onclick="go(\'kitchen\')">🍲 Kiểm thực / lưu mẫu</button><button class="btn soft" onclick="go(\'students\')">👧 Tìm học sinh</button><button class="btn soft" onclick="quickNewIncident()">🩹 Ghi sơ cứu</button></div><div class="notice ok"><b>Nguyên tắc V2:</b> chỉ tải module khi mở; Student không bị xóa khi nghỉ học, Enrollment mới là trạng thái theo năm học.</div></div></div>'},
+ students:()=>studentsPage(),
+ health:()=>healthPage(),
+ kitchen:()=>kitchenPage(),
+ records:()=>recordsPage(),
+ admin:()=>adminPage()
 };
+function priorityRows(meds,exp,samples,sick){
+ const arr=[];
+ meds.slice(0,4).forEach(x=>arr.push(['red','Thuốc',studentName(x.StudentID)+' · '+(x.Schedule||x.Dose||x.DrugName),'state.healthTab="meds";go("health")']));
+ exp.slice(0,4).forEach(x=>arr.push(['','Kho',x.ItemName+' · còn '+x.DaysRemaining+' ngày','go("kitchen")']));
+ samples.slice(0,3).forEach(x=>arr.push(['','Lưu mẫu',x.SampleName+' · đến giờ xử lý','go("kitchen")']));
+ sick.slice(0,3).forEach(x=>arr.push(['','Nghỉ bệnh',studentName(x.StudentID)+' · '+(x.Reason||x.SymptomTags),'state.healthTab="disease";go("health")']));
+ if(!arr.length)return'<div class="empty">Chưa có cảnh báo ưu tiên.</div>';
+ return arr.map(x=>'<div class="row" onclick="'+x[3]+'" style="cursor:pointer"><i class="taskdot '+x[0]+'"></i><div class="grow"><b>'+esc(x[1])+'</b><div class="muted">'+esc(x[2])+'</div></div>›</div>').join('')
+}
+function studentName(id){return objs('Students').find(s=>s.StudentID===id)?.FullName||id||''}
 
-function idPrefix(sheet){
- return {Students:'STU',HealthScreenings:'SCR',Immunizations:'IMM',MedicationOrders:'MED',MedicationAdministrations:'ADM',Incidents:'INC',DiseaseSurveillance:'DIS',FoodB1:'B1',FoodB2:'B2',FoodB3:'B3',FoodSamples:'SMP',Inventory:'LOT',Documents:'DOC',Tasks:'TSK'}[sheet]||'REC';
+function studentsPage(){
+ ensure(['Students','Enrollments'],false);
+ const q=norm(state.studentQuery),students=objs('Students'),enr=objs('Enrollments');
+ const current=new Map(enr.filter(e=>String(e.Status||'').toUpperCase()==='ACTIVE').map(e=>[e.StudentID,e]));
+ let list=students.filter(s=>!q||norm([s.FullName,s.NationalID,s.GuardianPhone,current.get(s.StudentID)?.ClassNameSnapshot].join(' ')).includes(q));
+ return'<div class="card"><div class="row"><div class="grow"><h2 style="margin:0">Học sinh</h2><div class="muted">Một StudentID xuyên suốt; lớp/năm học nằm ở Enrollment.</div></div>'+(canWrite('Students')?'<button class="btn soft" onclick="openImport()">Nhập danh sách</button><button class="btn primary" onclick="openGeneric(\'Students\')">+ Học sinh</button>':'')+'</div><div class="toolbar"><input placeholder="Tìm tên, mã định danh, lớp, SĐT..." value="'+esc(state.studentQuery)+'" oninput="state.studentQuery=this.value;renderPage()"><span class="badge">'+list.length+' hồ sơ</span></div>'+
+ '<div class="table"><table><thead><tr><th>Học sinh</th><th>Lớp hiện tại</th><th>Ngày sinh</th><th>Trạng thái</th><th></th></tr></thead><tbody>'+list.slice(0,500).map(s=>{const e=current.get(s.StudentID);return'<tr><td><b>'+esc(s.FullName)+'</b><div class="muted">'+esc(s.StudentID)+'</div></td><td>'+esc(e?.ClassNameSnapshot||s.Class||'')+'</td><td>'+esc(s.DOB)+'</td><td>'+badge(e?.Status||s.Status||'')+'</td><td><button class="btn soft mini" onclick="openProfile(\''+esc(s.StudentID)+'\')">Mở hồ sơ</button></td></tr>'}).join('')+'</tbody></table></div></div>'
 }
-function isAutoField(h,i){return (i===0&&/ID$/.test(h))||h==='UpdatedAt'||h==='CapturedAt'||h==='CheckedBy'||h==='PerformedBy'||h==='StoredBy';}
-function defaultValue(h,i,sheet){
- if(i===0&&/ID$/.test(h))return idPrefix(sheet)+'-'+Date.now();
- if(['UpdatedAt','CapturedAt'].includes(h))return new Date().toISOString();
- if(['CheckedBy','PerformedBy','StoredBy'].includes(h))return appState.user?.email||'';
- if(h==='Source')return 'APP_WEB';
- if(h==='Status')return 'ACTIVE';
- if(['ReviewStatus','VerificationStatus','OCRStatus'].includes(h))return 'PENDING';
- return '';
+async function openProfile(id){
+ document.getElementById('profileModal').classList.add('open');document.getElementById('profileTitle').textContent='Đang tải hồ sơ…';document.getElementById('profileBody').innerHTML='<div class="empty">Đang tải timeline…</div>';
+ await ensure(['HealthScreenings','Immunizations','MedicationOrders','MedicationAdministrations','Incidents','Attendance','DiseaseSurveillance','Enrollments','Students'],false);
+ const s=objs('Students').find(x=>x.StudentID===id);if(!s)return;
+ const e=objs('Enrollments').filter(x=>x.StudentID===id).sort((a,b)=>String(b.StartDate).localeCompare(String(a.StartDate)))[0];
+ document.getElementById('profileTitle').textContent=s.FullName;document.getElementById('profileSub').textContent=(e?.ClassNameSnapshot||s.Class||'')+' · '+(s.DOB||'')+' · '+(s.Gender||'');
+ const ev=[];
+ const add=(date,title,detail)=>{if(date)ev.push({date:String(date),title,detail})};
+ objs('HealthScreenings').filter(x=>x.StudentID===id).forEach(x=>add(x.ExamDate,'Khám sức khỏe',x.GeneralResult||x.Recommendation||x.ExamUnit||''));
+ objs('Immunizations').filter(x=>x.StudentID===id).forEach(x=>add(x.DateGiven,'Tiêm chủng',x.VaccineName+' · mũi '+(x.DoseNumber||'')));
+ objs('MedicationAdministrations').filter(x=>x.StudentID===id).forEach(x=>add(x.GivenAt||x.ScheduledAt,'Cho dùng thuốc',(x.DoseGiven||'')+' · '+(x.Status||'')));
+ objs('Incidents').filter(x=>x.StudentID===id).forEach(x=>add(x.OccurredAt,'Tai nạn / sơ cứu',(x.IncidentType||'')+' · '+(x.FirstAid||'')));
+ objs('Attendance').filter(x=>x.StudentID===id&&String(x.Status||'').toUpperCase()!=='PRESENT').forEach(x=>add(x.Date,'Nghỉ / vắng',(x.Reason||'')+' '+(x.SymptomTags||'')));
+ ev.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ document.getElementById('profileBody').innerHTML='<div class="profilehead" style="margin-top:14px"><div class="avatar">👧</div><div><b>'+esc(s.FullName)+'</b><div class="muted">StudentID: '+esc(s.StudentID)+'</div><div class="muted">Mã định danh: '+esc(s.NationalID||'Chưa có')+'</div></div></div>'+
+ '<div class="stats"><div class="stat"><b>'+esc(e?.ClassNameSnapshot||'—')+'</b><span>Lớp hiện tại</span></div><div class="stat"><b>'+esc(e?.Status||s.Status||'—')+'</b><span>Enrollment</span></div><div class="stat"><b>'+objs('HealthScreenings').filter(x=>x.StudentID===id).length+'</b><span>Lần KSK</span></div><div class="stat"><b>'+objs('Immunizations').filter(x=>x.StudentID===id).length+'</b><span>Bản ghi tiêm</span></div></div>'+
+ '<div class="grid2"><div class="card" style="box-shadow:none"><h2>Thông tin sức khỏe</h2><div class="row"><div class="grow"><b>Lưu ý</b><div class="muted">'+esc(s.HealthNotes||'Chưa ghi nhận')+'</div></div></div><div class="row"><div class="grow"><b>Phụ huynh</b><div class="muted">'+esc(s.GuardianName||'')+' · '+esc(s.GuardianPhone||'')+'</div></div></div></div><div class="card" style="box-shadow:none"><h2>Dòng thời gian</h2><div class="timeline">'+(ev.length?ev.slice(0,30).map(x=>'<div class="event"><b>'+esc(x.title)+'</b><div>'+esc(String(x.date).slice(0,16))+' · '+esc(x.detail)+'</div></div>').join(''):'<div class="empty">Chưa có sự kiện y tế.</div>')+'</div></div></div>';
 }
-function fieldHtml(h,i,sheet){
- const val=defaultValue(h,i,sheet), ro=isAutoField(h,i)?' readonly':'';
- const lower=h.toLowerCase();
- if(lower.includes('note')||lower.includes('description')||lower.includes('recommendation')||lower.includes('symptoms')||lower.includes('action'))return '<div class="field wide"><label>'+esc(h)+'</label><textarea data-field="'+i+'"'+ro+'>'+esc(val)+'</textarea></div>';
- const type=(lower.includes('date')||lower.endsWith('at'))?'text':(/qty|amount|height|weight|bmi|servings|temp|daysremaining|dose(number)?$/.test(lower)?'number':'text');
- return '<div class="field"><label>'+esc(h)+'</label><input data-field="'+i+'" type="'+type+'" value="'+esc(val)+'"'+ro+'></div>';
-}
-let activeRecordSheet=null;
-function openRecordModal(sheet){
- if(!canWrite(sheet))return;
- const values=appState.data[sheet]||[], headers=values[0]||[];
- if(!headers.length){alert('Không đọc được cấu trúc bảng '+sheet);return}
- activeRecordSheet=sheet;
- document.getElementById('recordTitle').textContent='Thêm dữ liệu · '+sheet;
- document.getElementById('recordSub').textContent='Lưu trực tiếp vào Master Production.';
- const ocr='<div class="ocr-box"><b>📷 Nhận diện tự động thông tin hành chính & số liệu</b><div class="muted">Chụp hoặc chọn ảnh phiếu. OCR chạy trên trình duyệt; hệ thống chỉ điền gợi ý vào ô trống và bạn kiểm tra trước khi lưu.</div><div class="toolbar"><input id="ocrFile" type="file" accept="image/*" capture="environment"><button class="btn soft" onclick="runRecordOCR()">Nhận diện</button></div><div id="ocrStatus" class="statusline"></div><div id="ocrResult"></div></div>';
- document.getElementById('recordBody').innerHTML=ocr+'<div class="form-grid">'+headers.map((h,i)=>fieldHtml(h,i,sheet)).join('')+'</div><div id="recordMsg"></div><div class="actions"><button class="btn soft" onclick="closeRecordModal()">Hủy</button><button class="btn primary" onclick="saveRecord()">Lưu</button></div>';
- document.getElementById('recordModal').classList.add('open');
-}
-function closeRecordModal(){document.getElementById('recordModal').classList.remove('open');activeRecordSheet=null}
+function closeProfile(){document.getElementById('profileModal').classList.remove('open')}
 
-function ocrCleanText(t){return String(t||'').replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim()}
-function ocrNormLabel(t){return norm(String(t||'').replace(/đ/g,'d').replace(/Đ/g,'D'))}
-function ocrFindLine(text,labels){
- const lines=ocrCleanText(text).split('\n').map(x=>x.trim()).filter(Boolean);
- const aliases=labels.map(ocrNormLabel);
- for(const line of lines){
-   const n=ocrNormLabel(line);
-   if(aliases.some(a=>n.startsWith(a)||n.includes(a+':')||n.includes(a+'-'))){
-     const parts=line.split(/[:：-]/);
-     if(parts.length>1)return parts.slice(1).join('-').trim();
-   }
- }
- return '';
+function healthPage(){
+ ensure(['HealthScreenings','Immunizations','MedicationOrders','MedicationAdministrations','Incidents','DiseaseSurveillance','Attendance'],false);
+ const tabs=[['meds','💊 Thuốc hôm nay'],['screen','🩺 Khám sức khỏe'],['vaccines','💉 Tiêm chủng'],['incidents','🩹 Sơ cứu'],['disease','🦠 Nghỉ bệnh / dịch']];
+ return'<div class="card"><h2>Y tế học đường</h2><div class="tabs">'+tabs.map(t=>'<button class="'+(state.healthTab===t[0]?'on':'')+'" onclick="state.healthTab=\''+t[0]+'\';renderPage()">'+t[1]+'</button>').join('')+'</div>'+healthTabContent()+'</div>'
 }
-function ocrFirstDate(text){
- const m=String(text||'').match(/\b([0-3]?\d)[\/\-.]([01]?\d)[\/\-.]((?:19|20)?\d{2})\b/);
- if(!m)return '';
- let y=m[3]; if(y.length===2)y=(Number(y)>40?'19':'20')+y;
- return [String(m[1]).padStart(2,'0'),String(m[2]).padStart(2,'0'),y].join('/');
+function healthTabContent(){
+ const t=state.healthTab;
+ if(t==='meds'){const p=pendingMeds();return'<div class="row"><div class="grow"><b>'+p.length+' lịch thuốc chưa ghi nhận hôm nay</b><div class="muted">Mọi liều phải dựa trên toa đã xác nhận.</div></div>'+(canWrite('MedicationOrders')?'<button class="btn primary" onclick="openGeneric(\'MedicationOrders\')">+ Nhận toa</button>':'')+'</div>'+ (p.length?p.map(o=>'<div class="row"><div class="grow"><b>'+esc(studentName(o.StudentID))+'</b><div class="muted">'+esc(o.DrugName)+' · '+esc(o.Dose)+' · '+esc(o.Schedule)+'</div></div>'+badge(o.Status||'ACTIVE')+(canWrite('MedicationAdministrations')?'<button class="btn primary mini" onclick="giveMedication(\''+esc(o.OrderID)+'\',\''+esc(o.StudentID)+'\',\''+esc(o.Dose)+'\')">Đã cho uống</button>':'')+'</div>').join(''):'<div class="empty">Không có lịch thuốc đang chờ.</div>')}
+ if(t==='screen')return moduleTable('HealthScreenings',['ExamDate','StudentID','ExamUnit','HeightCm','WeightKg','GeneralResult'],'Khám sức khỏe');
+ if(t==='vaccines')return moduleTable('Immunizations',['DateGiven','StudentID','VaccineName','DoseNumber','Status'],'Tiêm chủng');
+ if(t==='incidents')return moduleTable('Incidents',['OccurredAt','StudentID','IncidentType','Location','FirstAid','Status'],'Tai nạn & sơ cứu');
+ return moduleTable('DiseaseSurveillance',['ReportedDate','StudentID','Class','Symptoms','SuspectedCondition','Absent','Status'],'Theo dõi bệnh');
 }
-function ocrFirstPhone(text){
- const ms=String(text||'').match(/(?:\+?84|0)[\s.\-]?(?:3|5|7|8|9)(?:[\s.\-]?\d){8}/g)||[];
- return ms.length?ms[0].replace(/[^\d+]/g,''):'';
+async function giveMedication(orderId,studentId,dose){
+ if(!confirm('Xác nhận đã cho học sinh dùng thuốc theo toa đã xác nhận?'))return;
+ const row=['ADM-'+Date.now(),orderId,studentId,new Date().toISOString(),new Date().toISOString(),dose,state.user?.email||'', 'DONE','',new Date().toISOString()];
+ await GoogleSheetsConnector.appendRows('MedicationAdministrations!A:J',[row]);GoogleSheetsConnector.appendAudit('MEDICATION_GIVEN','MedicationAdministration',row[0],orderId).catch(()=>{});await refresh(['MedicationAdministrations'])
 }
-function ocrFirstCCCD(text){const ms=String(text||'').match(/\b\d{12}\b/g)||[];return ms[0]||''}
-function ocrNumAfter(text,labels,unitPattern=''){
- const special='.*+?^$()[]{}|\\';
- const escaped=labels.map(x=>String(x).split('').map(ch=>special.includes(ch)?'\\'+ch:ch).join('')).join('|');
- const re=new RegExp('(?:'+escaped+')[^\\d]{0,20}(\\d+(?:[.,]\\d+)?)\\s*'+unitPattern,'i');
- const m=String(text||'').match(re); return m?m[1].replace(',','.'):'';
-}
-function ocrTextAfter(text,labels){return ocrFindLine(text,labels).trim()}
-function extractOCRFields(text,sheet){
- const out={};
- const name=ocrTextAfter(text,['Họ và tên','Họ tên','Tên học sinh','Tên trẻ','Bệnh nhân']);
- const dob=ocrTextAfter(text,['Ngày sinh','Sinh ngày'])||ocrFirstDate(text);
- const gender=ocrTextAfter(text,['Giới tính']);
- const address=ocrTextAfter(text,['Địa chỉ','Nơi ở','Thường trú']);
- const phone=ocrTextAfter(text,['Số điện thoại','Điện thoại','SĐT'])||ocrFirstPhone(text);
- const cccd=ocrTextAfter(text,['CCCD','Căn cước công dân','Số định danh'])||ocrFirstCCCD(text);
- const bhyt=ocrTextAfter(text,['BHYT','Mã thẻ BHYT','Số thẻ BHYT']);
- const cls=ocrTextAfter(text,['Lớp','Nhóm lớp']);
- if(name)out.FullName=name;if(dob)out.DOB=dob;if(gender)out.Gender=/nu|nữ/i.test(gender)?'Nữ':(/nam/i.test(gender)?'Nam':gender);
- if(address)out.Address=address;if(phone)out.GuardianPhone=phone;if(cccd)out.NationalID=cccd;if(bhyt)out.BHYT=bhyt;if(cls)out.Class=cls;
- if(sheet==='HealthScreenings'){
-   out.StudentID=ocrTextAfter(text,['Mã học sinh','StudentID']);
-   out.ExamDate=ocrTextAfter(text,['Ngày khám','Ngày kiểm tra'])||ocrFirstDate(text);
-   out.ExamUnit=ocrTextAfter(text,['Đơn vị khám','Cơ sở khám']);
-   out.HeightCm=ocrNumAfter(text,['chiều cao','chieu cao'],'(?:cm)?');
-   out.WeightKg=ocrNumAfter(text,['cân nặng','can nang','trọng lượng','trong luong'],'(?:kg)?');
-   out.BMI=ocrNumAfter(text,['BMI'],'');
-   out.Vision=ocrTextAfter(text,['Thị lực','Thị giác']);
-   out.Dental=ocrTextAfter(text,['Răng hàm mặt','Răng miệng']);
- }
- if(sheet==='MedicationOrders'){
-   out.StudentID=ocrTextAfter(text,['Mã học sinh','StudentID']);
-   out.DrugName=ocrTextAfter(text,['Tên thuốc','Thuốc']);
-   out.Strength=ocrTextAfter(text,['Hàm lượng','Nồng độ']);
-   out.Dose=ocrTextAfter(text,['Liều dùng','Liều']);
-   out.Route=ocrTextAfter(text,['Đường dùng']);
-   out.Schedule=ocrTextAfter(text,['Cách dùng','Lịch dùng','Số lần']);
-   out.StartDate=ocrTextAfter(text,['Từ ngày','Ngày bắt đầu']);
-   out.EndDate=ocrTextAfter(text,['Đến ngày','Ngày kết thúc']);
- }
- if(sheet==='Inventory'||sheet==='FoodB1'){
-   const item=ocrTextAfter(text,['Tên hàng','Tên thực phẩm','Hàng hóa','Sản phẩm']);
-   if(item){out.ItemName=item;out.FoodName=item;}
-   out.Supplier=ocrTextAfter(text,['Nhà cung cấp','Đơn vị giao','Công ty']);
-   out.InvoiceNo=ocrTextAfter(text,['Số hóa đơn','Hóa đơn số','Phiếu giao hàng số']);
-   out.BatchNo=ocrTextAfter(text,['Số lô','Lô']);
-   out.ExpiryDate=ocrTextAfter(text,['Hạn sử dụng','HSD','Ngày hết hạn']);
-   const qty=ocrNumAfter(text,['số lượng','so luong','khối lượng','khoi luong'],'');
-   if(qty){out.Quantity=qty;out.QtyIn=qty;out.OpeningQty=qty;}
-   const unit=ocrTextAfter(text,['Đơn vị tính','ĐVT','Đơn vị']);if(unit)out.Unit=unit;
- }
- if(sheet==='Incidents'){
-   out.StudentID=ocrTextAfter(text,['Mã học sinh','StudentID']);
-   out.Location=ocrTextAfter(text,['Địa điểm','Nơi xảy ra']);
-   out.IncidentType=ocrTextAfter(text,['Loại tai nạn','Sự cố']);
-   out.Description=ocrTextAfter(text,['Mô tả','Diễn biến']);
- }
- if(sheet==='FoodSamples'){
-   out.SampleName=ocrTextAfter(text,['Tên mẫu','Mẫu thức ăn','Tên món']);
-   out.Meal=ocrTextAfter(text,['Bữa ăn','Bữa']);
-   out.SampleAmount=ocrNumAfter(text,['khối lượng mẫu','lượng mẫu','mẫu'],'');
-   out.StorageTempC=ocrNumAfter(text,['nhiệt độ','nhiet do'],'(?:°?C)?');
- }
- return Object.fromEntries(Object.entries(out).filter(([_,v])=>String(v||'').trim()!==''));
-}
-function applyOCRFields(fields){
- const headers=(appState.data[activeRecordSheet]||[])[0]||[];let applied=0;
- Object.entries(fields).forEach(([h,v])=>{const i=headers.indexOf(h);if(i<0)return;const el=document.querySelector('#recordBody [data-field="'+i+'"]');if(el&&!String(el.value||'').trim()){el.value=v;applied++}});
- return applied;
-}
-async function runRecordOCR(){
- const file=document.getElementById('ocrFile')?.files?.[0];
- const st=document.getElementById('ocrStatus'),res=document.getElementById('ocrResult');
- if(!file){st.textContent='Hãy chụp hoặc chọn ảnh trước.';return}
- if(!window.Tesseract){st.textContent='Thư viện OCR chưa tải được. Hãy bấm ↻ Cập nhật và thử lại.';return}
- let worker=null;
- try{
-   st.textContent='Đang nhận diện ảnh… lần đầu có thể mất thêm thời gian tải ngôn ngữ tiếng Việt.';
-   worker=await Tesseract.createWorker('vie+eng',1,{logger:m=>{if(m?.status)st.textContent='OCR: '+m.status+(m.progress!=null?' '+Math.round(m.progress*100)+'%':'')}});
-   const result=await worker.recognize(file);
-   const text=ocrCleanText(result?.data?.text||'');
-   const conf=Math.round(result?.data?.confidence||0);
-   const fields=extractOCRFields(text,activeRecordSheet);
-   const applied=applyOCRFields(fields);
-   const nums=(text.match(/\b\d+(?:[.,]\d+)?\b/g)||[]).slice(0,20);
-   if(activeRecordSheet==='FoodB1'){const headers=(appState.data.FoodB1||[])[0]||[],i=headers.indexOf('OCRConfidence');const el=document.querySelector('#recordBody [data-field="'+i+'"]');if(el&&!el.value)el.value=String(conf)}
-   res.innerHTML='<div class="notice ok"><b>Đã nhận diện.</b> Độ tin cậy OCR khoảng '+conf+'%. Đã điền '+applied+' trường còn trống; hãy kiểm tra lại trước khi lưu.</div>'+
-     '<div class="ocr-candidates">'+Object.entries(fields).map(([k,v])=>'<span class="ocr-chip">'+esc(k)+': '+esc(v)+'</span>').join('')+'</div>'+
-     (nums.length?'<div class="ocr-candidates"><span class="ocr-chip">Số liệu phát hiện: '+esc(nums.join(' · '))+'</span></div>':'')+
-     '<details style="margin-top:8px"><summary class="muted">Xem văn bản OCR</summary><div class="ocr-preview">'+esc(text||'Không đọc được văn bản')+'</div></details>';
-   st.textContent='Hoàn tất nhận diện. Không tự lưu dữ liệu.';
- }catch(e){st.textContent='Nhận diện thất bại: '+String(e.message||e)}
- finally{try{if(worker)await worker.terminate()}catch(_){}}
+function moduleTable(key,cols,title){
+ const list=objs(key);return'<div class="row"><div class="grow"><b>'+esc(title)+'</b><div class="muted">'+list.length+' bản ghi</div></div>'+(canWrite(key)?'<button class="btn primary" onclick="openGeneric(\''+key+'\')">+ Thêm</button>':'')+'</div><div class="table"><table><thead><tr>'+cols.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'+list.slice().reverse().slice(0,300).map(o=>'<tr>'+cols.map(c=>'<td>'+esc(o[c]||'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'
 }
 
-async function saveRecord(){
- const sheet=activeRecordSheet;if(!sheet)return;
- const headers=(appState.data[sheet]||[])[0]||[];
- const vals=headers.map((_,i)=>document.querySelector('#recordBody [data-field="'+i+'"]')?.value||'');
- const msg=document.getElementById('recordMsg');
- try{
-   msg.innerHTML='<div class="notice">Đang lưu…</div>';
-   await GoogleSheetsConnector.appendRows(sheet+'!A:'+colLetter(headers.length),[vals]);
-   try{await GoogleSheetsConnector.appendAudit('CREATE_RECORD',sheet,vals[0]||'', 'Tạo bản ghi từ ứng dụng')}catch(_){}
-   await refreshData(false); closeRecordModal(); renderShell(appState.page);
- }catch(e){msg.innerHTML='<div class="notice">'+esc(e.message||e)+'</div>'}
+function kitchenPage(){
+ ensure(['MealSessions','FoodB1','FoodB2','FoodB3','FoodSamples','Inventory'],false);
+ const sessions=objs('MealSessions').slice().sort((a,b)=>String(b.Date).localeCompare(String(a.Date)));if(!state.kitchenSession&&sessions[0])state.kitchenSession=sessions[0].MealSessionID;
+ const s=sessions.find(x=>x.MealSessionID===state.kitchenSession);const steps=s?mealStepState(s.MealSessionID):{};
+ return'<div class="card"><div class="row"><div class="grow"><h2 style="margin:0">Bếp & kho</h2><div class="muted">Một bữa ăn → B1 → B2 → B3 → lưu mẫu.</div></div>'+(canWrite('MealSessions')?'<button class="btn primary" onclick="newMealSession()">+ Bữa ăn</button>':'')+'</div>'+
+ '<div class="toolbar"><select onchange="state.kitchenSession=this.value;renderPage()"><option value="">Chọn bữa ăn</option>'+sessions.slice(0,50).map(x=>'<option value="'+esc(x.MealSessionID)+'" '+(x.MealSessionID===state.kitchenSession?'selected':'')+'>'+esc(x.Date+' · '+x.Meal)+'</option>').join('')+'</select></div>'+
+ (s?'<div class="stepper">'+mealStep('1','Nhận thực phẩm',steps.b1,'FoodB1',s.MealSessionID)+mealStep('2','Chế biến',steps.b2,'FoodB2',s.MealSessionID)+mealStep('3','Trước khi ăn',steps.b3,'FoodB3',s.MealSessionID)+mealStep('4','Lưu mẫu',steps.sample,'FoodSamples',s.MealSessionID)+'</div>':'<div class="empty">Chưa có bữa ăn. Tạo bữa mới để bắt đầu kiểm thực.</div>')+'</div>'+
+ '<div id="inventoryCard" class="card"><div class="row"><div class="grow"><h2 style="margin:0">Kho thực phẩm & sữa</h2><div class="muted">Ưu tiên FEFO · cảnh báo HSD.</div></div>'+(canWrite('Inventory')?'<button class="btn primary" onclick="openGeneric(\'Inventory\')">+ Nhập kho</button>':'')+'</div>'+
+ '<div class="table"><table><thead><tr><th>Mặt hàng</th><th>Lô</th><th>Tồn</th><th>HSD</th><th>Cảnh báo</th></tr></thead><tbody>'+objs('Inventory').slice().sort((a,b)=>Number(a.DaysRemaining||9999)-Number(b.DaysRemaining||9999)).slice(0,300).map(x=>'<tr><td><b>'+esc(x.ItemName)+'</b></td><td>'+esc(x.BatchNo)+'</td><td>'+esc(x.CurrentQty)+' '+esc(x.Unit)+'</td><td>'+esc(x.ExpiryDate)+'</td><td>'+(Number(x.DaysRemaining)<=7?badge('Còn '+x.DaysRemaining+' ngày','warn'):badge(x.ExpiryStatus||'Ổn'))+'</td></tr>').join('')+'</tbody></table></div></div>'
 }
-function colLetter(n){let s='';while(n>0){n--;s=String.fromCharCode(65+n%26)+s;n=Math.floor(n/26)}return s}
-async function refreshData(render=true){
- appState.loadingData=true;
- if(render)renderShell(appState.page);
- try{appState.data=await GoogleSheetsConnector.loadProductionData()}
- finally{appState.loadingData=false}
- if(render)renderShell(appState.page);
-}
-function openDocumentUpload(){
- if(!canWrite('Documents'))return;
- activeRecordSheet='Documents';
- document.getElementById('recordTitle').textContent='Tải tài liệu / chứng từ';
- document.getElementById('recordSub').textContent='File được lưu trong 02_Tài liệu & chứng từ; metadata ghi vào Master.';
- document.getElementById('recordBody').innerHTML='<div class="field"><label>Loại tài liệu</label><input id="docType" placeholder="Toa thuốc / hóa đơn / phiếu giao hàng..."></div><div class="field" style="margin-top:10px"><label>Liên kết đối tượng</label><input id="docEntity" placeholder="StudentID / OrderID / RecordID..."></div><div class="field" style="margin-top:10px"><label>Chọn file</label><input id="docFile" type="file"></div><div class="field wide" style="margin-top:10px"><label>Ghi chú</label><textarea id="docNote"></textarea></div><div id="recordMsg"></div><div class="actions"><button class="btn soft" onclick="closeRecordModal()">Hủy</button><button class="btn primary" onclick="saveDocumentUpload()">Tải lên & lưu</button></div>';
- document.getElementById('recordModal').classList.add('open');
-}
-async function saveDocumentUpload(){
- const file=document.getElementById('docFile')?.files?.[0],msg=document.getElementById('recordMsg');
- if(!file){msg.innerHTML='<div class="notice">Hãy chọn file.</div>';return}
- try{
-   msg.innerHTML='<div class="notice">Đang tải file lên Google Drive…</div>';
-   const up=await GoogleSheetsConnector.uploadDriveFile(file);
-   const row=['DOC-'+Date.now(),document.getElementById('docType').value||'Khác','',document.getElementById('docEntity').value||'',up.id||'',up.name||file.name,up.mimeType||file.type,new Date().toISOString(),'PENDING','PENDING',document.getElementById('docNote').value||''];
-   await GoogleSheetsConnector.appendRows('Documents!A:K',[row]);
-   try{await GoogleSheetsConnector.appendAudit('UPLOAD_DOCUMENT','Documents',row[0],up.name||file.name)}catch(_){}
-   await refreshData(false);closeRecordModal();renderShell('docs');
- }catch(e){msg.innerHTML='<div class="notice">'+esc(e.message||e)+'</div>'}
+function mealStepState(id){return{b1:objs('FoodB1').some(x=>x.MealSessionID===id),b2:objs('FoodB2').some(x=>x.MealSessionID===id),b3:objs('FoodB3').some(x=>x.MealSessionID===id),sample:objs('FoodSamples').some(x=>x.MealSessionID===id)}}
+function mealStep(n,title,done,sheet,id){return'<div class="step '+(done?'done':'')+'"><div class="n">'+(done?'✓':n)+'</div><b>'+title+'</b><div class="muted">'+(done?'Đã có bản ghi':'Chưa hoàn tất')+'</div>'+(canWrite(sheet)?'<button class="btn '+(done?'soft':'primary')+' mini" style="margin-top:8px" onclick="openGeneric(\''+sheet+'\',{MealSessionID:\''+esc(id)+'\'})">'+(done?'Thêm bản ghi':'Tiếp tục')+'</button>':'')+'</div>'}
+async function newMealSession(){
+ const meal=prompt('Tên bữa ăn','Bữa trưa');if(!meal)return;const id='MEAL-'+today().replaceAll('-','')+'-'+Date.now().toString().slice(-5);
+ const row=[id,today(),meal,'','','','','','OPEN',new Date().toISOString()];await GoogleSheetsConnector.appendRows('MealSessions!A:J',[row]);GoogleSheetsConnector.appendAudit('CREATE_MEAL_SESSION','MealSession',id,meal).catch(()=>{});state.kitchenSession=id;await refresh(['MealSessions'])
 }
 
-let studentImport={headers:[],rows:[],map:{},fileName:''};
-function openStudentImport(){
- document.getElementById('importBody').innerHTML='<div class="field"><label>Chọn Excel / CSV</label><input id="studentFile" type="file" accept=".xlsx,.xls,.csv" onchange="readStudentFile(this.files[0])"></div><div id="importWork"></div>';
- document.getElementById('importModal').classList.add('open');
+function recordsPage(){
+ ensure(['Documents','SourceRegistry','Communication'],false);
+ return'<div class="grid2"><div class="card"><div class="row"><div class="grow"><h2 style="margin:0">Hộp tài liệu</h2><div class="muted">Toa thuốc · hóa đơn · phiếu giao hàng · ảnh lưu mẫu.</div></div>'+(canWrite('Documents')?'<button class="btn primary" onclick="openDocumentUpload()">+ Tải file</button>':'')+'</div>'+moduleTable('Documents',['CapturedAt','DocumentType','FileName','VerificationStatus'],'Tài liệu')+'</div><div class="card"><h2>Nguồn dữ liệu</h2>'+objs('SourceRegistry').map(x=>'<div class="row"><div class="grow"><b>'+esc(x.Name)+'</b><div class="muted">'+esc(x.SourceType)+' · '+esc(x.ImportStatus)+' · '+esc(x.RowCount)+' dòng</div></div>'+badge(x.ImportStatus||'')+'</div>').join('')+'</div></div>'+
+ '<div class="card"><div class="row"><div class="grow"><h2 style="margin:0">Truyền thông y tế</h2></div>'+(canWrite('Communication')?'<button class="btn primary" onclick="openGeneric(\'Communication\')">+ Nội dung</button>':'')+'</div>'+moduleTable('Communication',['PublishAt','Type','Title','Audience','Status'],'Nội dung truyền thông')+'</div>'
 }
-function closeImportModal(){document.getElementById('importModal').classList.remove('open');studentImport={headers:[],rows:[],map:{},fileName:''}}
-function norm(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'')}
-function autoMap(headers,target){
- const aliases={FullName:['hoten','hovaten','fullname','tenhocsinh'],DOB:['ngaysinh','dob','birthdate'],Gender:['gioitinh','gender'],Class:['lop','class'],GuardianName:['phuhuynh','hotenphuhuynh','guardianname'],GuardianPhone:['sodienthoai','sdt','dienthoai','guardianphone'],BHYT:['bhyt','sothebhyt'],NationalID:['cccd','cmnd','nationalid','dinhdanhcanhan'],Address:['diachi','address'],HealthNotes:['ghichusuckhoe','healthnotes','ghichu'],Status:['trangthai','status']};
- const hs=headers.map(norm), a=aliases[target]||[norm(target)];
- const i=hs.findIndex(x=>a.includes(x)); return i>=0?String(i):'';
+function adminPage(){
+ ensure(['Users','IdentityReview','AuditLog','Config','Classes','SchoolYears'],false);
+ const cfg=GoogleSheetsConnector.getConfig();
+ return'<div class="grid2"><div class="card"><h2>Kiến trúc V2</h2><div class="row"><div class="grow"><b>Student + Enrollment</b><div class="muted">StudentID không đổi khi đổi lớp/năm học.</div></div>'+badge('ACTIVE')+'</div><div class="row"><div class="grow"><b>API Bridge</b><div class="muted">'+(cfg.bridgeUrl?'Đang dùng Bridge; user không cần sửa Master trực tiếp.':'Đã chuẩn bị mã nguồn; chưa deploy Web App nên đang dùng quyền trực tiếp.')+'</div></div>'+badge(cfg.bridgeUrl?'BRIDGE':'DIRECT',cfg.bridgeUrl?'':'warn')+'</div><div class="row"><div class="grow"><b>Identity Review</b><div class="muted">'+objs('IdentityReview').filter(x=>x.Status==='OPEN').length+' trường hợp cần xem</div></div></div></div>'+
+ '<div class="card"><h2>Người dùng</h2>'+objs('Users').map(u=>'<div class="row"><div class="grow"><b>'+esc(u.DisplayName||u.Email)+'</b><div class="muted">'+esc(u.Email)+'</div></div>'+badge(u.Role||'')+'</div>').join('')+'</div></div>'+
+ '<div class="card"><h2>Enrollment năm học</h2><div class="stats"><div class="stat"><b>'+objs('SchoolYears').length+'</b><span>Năm học</span></div><div class="stat"><b>'+objs('Classes').length+'</b><span>Lớp</span></div><div class="stat"><b>'+objs('Enrollments').length+'</b><span>Enrollment</span></div><div class="stat"><b>'+objs('IdentityReview').filter(x=>x.Status==='OPEN').length+'</b><span>Identity review</span></div></div><div class="toolbar"><button class="btn soft" onclick="openSetup()">Cấu hình Bridge</button><a class="btn soft" target="_blank" href="https://docs.google.com/spreadsheets/d/169Iu_tlE8LkbSLsNiEsnTdkjyLSsVzDM7_fQl_HTXUI/edit" style="text-decoration:none">Mở Master</a></div></div>'
 }
-async function readStudentFile(file){
- const w=document.getElementById('importWork');
- if(!file)return;
- try{
-   if(!window.XLSX)throw new Error('Thư viện đọc Excel chưa tải được. Hãy tải lại trang và thử lại.');
-   const buf=await file.arrayBuffer(), wb=XLSX.read(buf,{type:'array',cellDates:false});
-   const ws=wb.Sheets[wb.SheetNames[0]], data=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});
-   if(data.length<2)throw new Error('File không có dữ liệu.');
-   studentImport={headers:data[0].map(x=>String(x||'').trim()),rows:data.slice(1).filter(r=>r.some(x=>String(x||'').trim())),map:{},fileName:file.name};
-   renderStudentMapping();
- }catch(e){w.innerHTML='<div class="notice">'+esc(e.message||e)+'</div>'}
-}
-function renderStudentMapping(){
- const targets=['FullName','DOB','Gender','Class','GuardianName','GuardianPhone','BHYT','NationalID','Address','HealthNotes','Status'];
- const opts='<option value="">-- Không nhập --</option>'+studentImport.headers.map((h,i)=>'<option value="'+i+'">'+esc(h||('Cột '+(i+1)))+'</option>').join('');
- let html='<div class="notice ok">Đã đọc '+studentImport.rows.length+' dòng. Kiểm tra mapping trước khi xác nhận.</div><div class="form-grid">';
- html+=targets.map(t=>{const v=autoMap(studentImport.headers,t);studentImport.map[t]=v;return '<div class="field"><label>'+t+(t==='FullName'?' *':'')+'</label><select data-map="'+t+'" onchange="studentImport.map[\''+t+'\']=this.value">'+opts.replace('value="'+v+'"','value="'+v+'" selected')+'</select></div>'}).join('');
- html+='</div><div class="table" style="margin-top:12px"><table><thead><tr>'+studentImport.headers.slice(0,8).map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+studentImport.rows.slice(0,10).map(r=>'<tr>'+studentImport.headers.slice(0,8).map((_,i)=>'<td>'+esc(r[i]||'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div><div id="importMsg"></div><div class="actions"><button class="btn soft" onclick="closeImportModal()">Hủy</button><button class="btn primary" onclick="confirmStudentImport()">Xác nhận nhập</button></div>';
- document.getElementById('importWork').innerHTML=html;
-}
-async function confirmStudentImport(){
- const msg=document.getElementById('importMsg'), nameIdx=Number(studentImport.map.FullName);
- if(studentImport.map.FullName===''){msg.innerHTML='<div class="notice">Phải mapping cột FullName / Họ tên.</div>';return}
- try{
-   msg.innerHTML='<div class="notice">Đang kiểm tra trùng và ghi Master…</div>';
-   const headers=(appState.data.Students||[])[0]||[];
-   const current=toObjects(appState.data.Students||[]);
-   const keys=new Set(current.map(o=>norm(o.NationalID)||[norm(o.FullName),norm(o.DOB),norm(o.Class)].join('|')));
-   let skipped=0;const rows=[];
-   for(const src of studentImport.rows){
-     const o={};Object.entries(studentImport.map).forEach(([t,i])=>{if(i!=='')o[t]=src[Number(i)]??''});
-     if(!String(o.FullName||'').trim())continue;
-     const key=norm(o.NationalID)||[norm(o.FullName),norm(o.DOB),norm(o.Class)].join('|');
-     if(keys.has(key)){skipped++;continue} keys.add(key);
-     const id='STU-'+Date.now()+'-'+(rows.length+1);
-     rows.push(headers.map((h,i)=>i===0?id:(h==='Source'?studentImport.fileName:(h==='UpdatedAt'?new Date().toISOString():(o[h]??(h==='Status'?'ACTIVE':''))))));
-   }
-   if(rows.length)await GoogleSheetsConnector.appendRows('Students!A:'+colLetter(headers.length),rows);
-   try{await GoogleSheetsConnector.appendAudit('IMPORT_STUDENTS','Students','', 'File='+studentImport.fileName+'; imported='+rows.length+'; skipped='+skipped)}catch(_){}
-   await refreshData(false);
-   msg.innerHTML='<div class="notice ok"><b>Hoàn tất.</b> Đã nhập '+rows.length+' học sinh; bỏ qua '+skipped+' dòng trùng.</div>';
-   setTimeout(()=>{closeImportModal();renderShell('students')},900);
- }catch(e){msg.innerHTML='<div class="notice">'+esc(e.message||e)+'</div>'}
-}
-async function showUserManager(){
- try{
-   const r=await GoogleSheetsConnector.readRange('Users!A1:G500');
-   const v=r.values||[];
-   const form='<div class="card" style="box-shadow:none;margin-bottom:12px"><h2>Tạo tài khoản sử dụng ngay</h2><div class="muted">Nhập đúng email Google của người dùng. Tài khoản mới được tạo ở trạng thái ACTIVE.</div>'+
-   '<div style="display:grid;grid-template-columns:1.2fr 1fr .8fr;gap:8px;margin-top:12px"><input id="newUserEmail" placeholder="email@gmail.com" style="border:1px solid #cfdcd8;border-radius:11px;padding:10px 11px"><input id="newUserName" placeholder="Họ tên" style="border:1px solid #cfdcd8;border-radius:11px;padding:10px 11px"><select id="newUserRole" style="border:1px solid #cfdcd8;border-radius:11px;padding:10px 11px;background:#fff"><option value="NVYT">NVYT</option><option value="ATTP">ATTP</option><option value="VIEWER">VIEWER</option><option value="ADMIN">ADMIN</option></select></div>'+
-   '<input id="newUserNote" placeholder="Ghi chú (không bắt buộc)" style="width:100%;border:1px solid #cfdcd8;border-radius:11px;padding:10px 11px;margin-top:8px">'+
-   '<div class="toolbar"><button class="btn primary" onclick="createUserAccount()">Tạo tài khoản</button></div><div id="userCreateMsg"></div></div>';
-   document.getElementById('adminDetail').innerHTML=form+rawTable(v);
- }catch(e){document.getElementById('adminDetail').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}
-}
-async function createUserAccount(){
- if(appState.role!=='ADMIN')return;
- const email=String(document.getElementById('newUserEmail')?.value||'').trim().toLowerCase();
- const name=String(document.getElementById('newUserName')?.value||'').trim();
- const role=String(document.getElementById('newUserRole')?.value||'NVYT').toUpperCase();
- const note=String(document.getElementById('newUserNote')?.value||'').trim();
- const msg=document.getElementById('userCreateMsg');
- const allowed=['ADMIN','NVYT','ATTP','VIEWER'];
- if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg.innerHTML='<div class="notice">Email không hợp lệ.</div>';return}
- if(!allowed.includes(role)){msg.innerHTML='<div class="notice">Role không hợp lệ.</div>';return}
- try{
-   const r=await GoogleSheetsConnector.readRange('Users!A1:G500');
-   const v=r.values||[], h=v[0]||[];
-   const iEmail=h.indexOf('Email');
-   const exists=v.slice(1).some(x=>String(x[iEmail]||'').trim().toLowerCase()===email);
-   if(exists){msg.innerHTML='<div class="notice">Email này đã có trong hệ thống. Không tạo bản ghi trùng.</div>';return}
-   msg.innerHTML='<div class="notice">Đang cấp quyền dữ liệu và tạo tài khoản…</div>';
-   await GoogleSheetsConnector.grantMasterAccess(email,role==='VIEWER'?'reader':'writer');
-   await GoogleSheetsConnector.appendRows('Users!A:G',[[email,role,'ACTIVE',name,new Date().toISOString(),appState.user?.email||'ADMIN',note]]);
-   try{await GoogleSheetsConnector.appendAudit('CREATE_USER','User',email,'Role='+role+'; Master access granted')}catch(_){}
-   msg.innerHTML='<div class="notice ok"><b>Đã tạo tài khoản và cấp quyền Master.</b> '+esc(email)+' có thể đăng nhập ngay.</div>';
-   setTimeout(()=>showUserManager(),900);
- }catch(e){msg.innerHTML='<div class="notice">'+esc(e.message||e)+'</div>'}
-}
-async function showAudit(){try{const r=await GoogleSheetsConnector.readRange('AuditLog!A1:K300');document.getElementById('adminDetail').innerHTML=rawTable(r.values||[])}catch(e){document.getElementById('adminDetail').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}}
-function rawTable(v){if(!v.length)return'<div class="empty">Không có dữ liệu.</div>';return'<div class="table"><table><thead><tr>'+v[0].map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+v.slice(1).reverse().map(r=>'<tr>'+v[0].map((_,i)=>'<td>'+esc(r[i]||'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'}
 
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSetup();closeRecordModal();closeImportModal()}});
-checkForUpdate();
+async function openGeneric(sheet,preset={}){
+ await ensure([sheet],false);if(!canWrite(sheet))return alert('Tài khoản không có quyền ghi module này.');
+ const h=(state.data[sheet]||[])[0]||[];if(!h.length)return alert('Chưa tải được cấu trúc bảng.');
+ document.getElementById('recordTitle').textContent='Thêm · '+sheet;document.getElementById('recordSub').textContent='Kiểm tra dữ liệu trước khi lưu.';
+ const autoId=h[0]&&/id$/i.test(h[0])?sheet.replace(/[^A-Z]/gi,'').slice(0,4).toUpperCase()+'-'+Date.now():'';
+ document.getElementById('recordBody').innerHTML='<div class="formgrid">'+h.map((x,i)=>'<div class="field '+(i===h.length-1?'':'')+'"><label>'+esc(x)+'</label><input data-i="'+i+'" value="'+esc(preset[x]??(i===0?autoId:(x==='UpdatedAt'?new Date().toISOString():'')))+'" '+(preset[x]!==undefined?'readonly':'')+'></div>').join('')+'</div><div id="recMsg"></div><div class="actions"><button class="btn soft" onclick="closeRecord()">Hủy</button><button class="btn primary" onclick="saveGeneric(\''+sheet+'\')">Lưu</button></div>';
+ document.getElementById('recordModal').classList.add('open')
+}
+async function saveGeneric(sheet){
+ const h=(state.data[sheet]||[])[0]||[],row=h.map((_,i)=>document.querySelector('#recordBody [data-i="'+i+'"]')?.value||'');
+ const msg=document.getElementById('recMsg');try{msg.innerHTML='<div class="notice">Đang lưu…</div>';await GoogleSheetsConnector.appendRows(sheet+'!A:'+colLetter(h.length),[row]);GoogleSheetsConnector.appendAudit('CREATE_RECORD',sheet,row[0]||'',sheet).catch(()=>{});closeRecord();await refresh([sheet])}catch(e){msg.innerHTML='<div class="notice red">'+esc(e.message)+'</div>'}
+}
+function closeRecord(){document.getElementById('recordModal').classList.remove('open')}
+
+function openDocumentUpload(prefile=null){
+ document.getElementById('recordTitle').textContent='Tải tài liệu / chứng từ';document.getElementById('recordSub').textContent='File lưu trong Google Drive riêng tư; Master chỉ lưu metadata.';
+ document.getElementById('recordBody').innerHTML='<div class="formgrid"><div class="field"><label>Loại tài liệu</label><input id="docType" placeholder="Toa thuốc / hóa đơn / phiếu giao hàng"></div><div class="field"><label>Liên kết ID</label><input id="docEntity" placeholder="StudentID / OrderID..."></div><div class="field wide"><label>File</label><input id="docFile" type="file"></div><div class="field wide"><label>Ghi chú</label><textarea id="docNote"></textarea></div></div><div id="recMsg"></div><div class="actions"><button class="btn soft" onclick="closeRecord()">Hủy</button><button class="btn primary" onclick="saveDoc()">Tải lên</button></div>';
+ document.getElementById('recordModal').classList.add('open');if(prefile){const dt=new DataTransfer();dt.items.add(prefile);document.getElementById('docFile').files=dt.files}
+}
+async function saveDoc(){
+ const file=document.getElementById('docFile').files[0],m=document.getElementById('recMsg');if(!file)return m.innerHTML='<div class="notice red">Chưa chọn file.</div>';
+ try{m.innerHTML='<div class="notice">Đang tải lên Drive…</div>';const up=await GoogleSheetsConnector.uploadDriveFile(file);const row=['DOC-'+Date.now(),document.getElementById('docType').value||'Khác','',document.getElementById('docEntity').value||'',up.id||'',up.name||file.name,up.mimeType||file.type,new Date().toISOString(),'PENDING','PENDING',document.getElementById('docNote').value||''];await GoogleSheetsConnector.appendRows('Documents!A:K',[row]);GoogleSheetsConnector.appendAudit('UPLOAD_DOCUMENT','Documents',row[0],file.name).catch(()=>{});closeRecord();await refresh(['Documents'])}catch(e){m.innerHTML='<div class="notice red">'+esc(e.message)+'</div>'}
+}
+
+function openImport(){importState={headers:[],rows:[],map:{},fileName:''};document.getElementById('importBody').innerHTML='<div class="field"><label>Excel / CSV</label><input type="file" accept=".xlsx,.xls,.csv" onchange="readImport(this.files[0])"></div><div id="importWork"></div>';document.getElementById('importModal').classList.add('open')}
+function closeImport(){document.getElementById('importModal').classList.remove('open')}
+async function readImport(file){
+ const w=document.getElementById('importWork');if(!file)return;try{const wb=XLSX.read(await file.arrayBuffer(),{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],d=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});if(d.length<2)throw new Error('File không có dữ liệu.');importState={headers:d[0].map(x=>String(x).trim()),rows:d.slice(1).filter(r=>r.some(x=>String(x).trim())),map:{},fileName:file.name};renderImport()}catch(e){w.innerHTML='<div class="notice red">'+esc(e.message)+'</div>'}
+}
+function autoMap(t){const a={FullName:['hoten','hovaten','tenhocsinh'],DOB:['ngaysinh','dob'],Gender:['gioitinh'],Class:['lop','nhomlop'],NationalID:['cccd','madinhdanh','dinhdanhcanhan'],GuardianName:['phuhuynh','hotenphuhuynh'],GuardianPhone:['sdt','sodienthoai','dienthoai'],Address:['diachi']};const hs=importState.headers.map(norm);return String(hs.findIndex(x=>(a[t]||[norm(t)]).includes(x)))}
+function renderImport(){const targets=['FullName','DOB','Gender','Class','NationalID','GuardianName','GuardianPhone','Address'];const opts='<option value="">-- Không nhập --</option>'+importState.headers.map((h,i)=>'<option value="'+i+'">'+esc(h||('Cột '+(i+1)))+'</option>').join('');targets.forEach(t=>importState.map[t]=autoMap(t)==='-1'?'':autoMap(t));document.getElementById('importWork').innerHTML='<div class="notice ok">Đã đọc '+importState.rows.length+' dòng. Chưa ghi Master.</div><div class="formgrid">'+targets.map(t=>'<div class="field"><label>'+t+(t==='FullName'?' *':'')+'</label><select onchange="importState.map[\''+t+'\']=this.value">'+opts.replace('value="'+importState.map[t]+'"','value="'+importState.map[t]+'" selected')+'</select></div>').join('')+'</div><div class="table" style="margin-top:12px"><table><tbody>'+importState.rows.slice(0,8).map(r=>'<tr>'+r.slice(0,7).map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div><div id="impMsg"></div><div class="actions"><button class="btn soft" onclick="closeImport()">Hủy</button><button class="btn primary" onclick="commitImport()">Xác nhận nhập</button></div>'}
+async function commitImport(){
+ const m=document.getElementById('impMsg');if(importState.map.FullName==='')return m.innerHTML='<div class="notice red">Phải mapping Họ tên.</div>';
+ await ensure(['Students','Enrollments'],false);const sh=(state.data.Students||[])[0]||[],eh=(state.data.Enrollments||[])[0]||[];const existing=objs('Students');const keys=new Set(existing.map(s=>norm(s.NationalID)||[norm(s.FullName),String(s.DOB),norm(s.Gender)].join('|')));let skip=0;const sr=[],er=[];const now=new Date().toISOString();
+ for(const r of importState.rows){const o={};Object.entries(importState.map).forEach(([k,i])=>{if(i!=='')o[k]=r[Number(i)]||''});if(!String(o.FullName||'').trim())continue;const key=norm(o.NationalID)||[norm(o.FullName),String(o.DOB||''),norm(o.Gender)].join('|');if(keys.has(key)){skip++;continue}keys.add(key);const sid=o.NationalID?'STU-'+String(o.NationalID).replace(/\D/g,''):'STU-'+Date.now()+'-'+sr.length;const sm={StudentID:sid,...o,Status:'ACTIVE',Source:importState.fileName,UpdatedAt:now};sr.push(sh.map(x=>sm[x]||''));const en={EnrollmentID:'ENR-'+sid.replace(/^STU-/,''),StudentID:sid,SchoolYearID:'SY-2026-2027',ClassID:'',ClassNameSnapshot:o.Class||'',Status:'ACTIVE',StartDate:'2026-09-01',EndDate:'',Source:importState.fileName,UpdatedAt:now};er.push(eh.map(x=>en[x]||''))}
+ try{m.innerHTML='<div class="notice">Đang ghi '+sr.length+' học sinh…</div>';if(sr.length)await GoogleSheetsConnector.appendRows('Students!A:'+colLetter(sh.length),sr);if(er.length)await GoogleSheetsConnector.appendRows('Enrollments!A:'+colLetter(eh.length),er);GoogleSheetsConnector.appendAudit('IMPORT_STUDENTS_V2','Students','',importState.fileName+'; imported='+sr.length+'; skipped='+skip).catch(()=>{});closeImport();await refresh(['Students','Enrollments'])}catch(e){m.innerHTML='<div class="notice red">'+esc(e.message)+'</div>'}
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSetup();closeProfile();closeRecord();closeImport()}});
 renderLogin();
-</script>
-</body></html>
+</script></body></html>
