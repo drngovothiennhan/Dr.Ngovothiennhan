@@ -11,7 +11,7 @@ const IMPORT_FOLDER_ID='1tSAAZWbldASeY5zJaJKiEdvxpSxsqQim';
 
 const DRIVE_FILE_SCOPE='https://www.googleapis.com/auth/drive.file';
 const OAUTH_SCOPES='openid email profile '+DRIVE_FILE_SCOPE;
-const AUTO_ADMIN_EMAILS=['dr.ngovothiennhan@gmail.com'];
+const AUTO_ADMIN_EMAILS=['dr.ngovothiennhan@gmail.com','nguyenhao1707@gmail.com'];
 
 const SHEET_RANGES={
   Students:'Students!A1:N5000',
