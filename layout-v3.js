@@ -136,7 +136,7 @@ function rightPanelHtml(){
       quickMetric('📦','Lô ≤ 7 ngày HSD',expiringLots().length,'go("kitchen");setTimeout(()=>selectContext("inventory"),80)')+
       quickMetric('🧪','Mẫu đến hạn',dueSamples().length,'go("kitchen")')+
       quickMetric('🦠','Nghỉ bệnh hôm nay',sickAbsence().length,'state.healthTab="disease";go("health")')+
-      '<div class="quick-block"><b>Thao tác nhanh</b><div class="quick-actions"><button class="btn soft" onclick="state.healthTab=\\'meds\\';go(\\'health\\')">Thuốc</button><button class="btn soft" onclick="quickNewIncident()">Sơ cứu</button><button class="btn soft" onclick="go(\\'students\\')">Tìm trẻ</button><button class="btn soft" onclick="go(\\'records\\')">Tài liệu</button></div></div></aside>';
+      '<div class="quick-block"><b>Thao tác nhanh</b><div class="quick-actions"><button class="btn soft" onclick="state.healthTab=\'meds\';go(\'health\')">Thuốc</button><button class="btn soft" onclick="quickNewIncident()">Sơ cứu</button><button class="btn soft" onclick="go(\'students\')">Tìm trẻ</button><button class="btn soft" onclick="go(\'records\')">Tài liệu</button></div></div></aside>';
   }
   if(state.page==='students'){
     return '<aside class="right-sidebar"><h3>Tổng quan học sinh</h3>'+
@@ -173,7 +173,7 @@ function rightPanelHtml(){
     quickMetric('👤','Người dùng',objs('Users').length,'selectContext("users")')+
     quickMetric('!','Identity review',objs('IdentityReview').filter(x=>String(x.Status).toUpperCase()==='OPEN').length,'selectContext("identity")')+
     '<div class="quick-block"><b>Data access</b><div class="muted">'+(bridge?'Apps Script Bridge đang cấu hình.':'Direct mode đang hoạt động; Bridge source đã sẵn sàng.')+'</div></div>'+
-    '<div class="quick-actions"><button class="btn soft" onclick="openSetup()">Cấu hình</button><button class="btn soft" onclick="window.open(\\'https://docs.google.com/spreadsheets/d/169Iu_tlE8LkbSLsNiEsnTdkjyLSsVzDM7_fQl_HTXUI/edit\\',\\'_blank\\')">Master</button></div></aside>';
+    '<div class="quick-actions"><button class="btn soft" onclick="openSetup()">Cấu hình</button><button class="btn soft" onclick="window.open(\'https://docs.google.com/spreadsheets/d/169Iu_tlE8LkbSLsNiEsnTdkjyLSsVzDM7_fQl_HTXUI/edit\',\'_blank\')">Master</button></div></aside>';
 }
 function quickMetric(icon,label,value,action){
   const safeAction=action?String(action).replace(/&/g,'&amp;').replace(/"/g,'&quot;'):'';
@@ -271,7 +271,7 @@ studentsPage=function(){
     if(!state.selectedClass&&current)state.selectedClass=current;
     const students=objs('Students'),sm=new Map(students.map(s=>[s.StudentID,s]));
     const list=objs('Enrollments').filter(e=>String(e.Status||'').toUpperCase()==='ACTIVE'&&e.ClassNameSnapshot===current);
-    return '<div class="card"><div class="row"><div class="grow"><h2 style="margin:0">Theo lớp</h2><div class="muted">'+list.length+' học sinh</div></div><select onchange="state.selectedClass=this.value;renderPage()">'+classes.map(c=>'<option '+(c===current?'selected':'')+'>'+esc(c)+'</option>').join('')+'</select></div><div class="table"><table><thead><tr><th>Học sinh</th><th>Ngày sinh</th><th>Giới tính</th><th></th></tr></thead><tbody>'+list.map(e=>{const s=sm.get(e.StudentID)||{};return'<tr><td><b>'+esc(s.FullName||e.StudentID)+'</b></td><td>'+esc(s.DOB||'')+'</td><td>'+esc(s.Gender||'')+'</td><td><button class="btn soft mini" onclick="openProfile(\\''+esc(e.StudentID)+'\\')">Hồ sơ</button></td></tr>'}).join('')+'</tbody></table></div></div>';
+    return '<div class="card"><div class="row"><div class="grow"><h2 style="margin:0">Theo lớp</h2><div class="muted">'+list.length+' học sinh</div></div><select onchange="state.selectedClass=this.value;renderPage()">'+classes.map(c=>'<option '+(c===current?'selected':'')+'>'+esc(c)+'</option>').join('')+'</select></div><div class="table"><table><thead><tr><th>Học sinh</th><th>Ngày sinh</th><th>Giới tính</th><th></th></tr></thead><tbody>'+list.map(e=>{const s=sm.get(e.StudentID)||{};return'<tr><td><b>'+esc(s.FullName||e.StudentID)+'</b></td><td>'+esc(s.DOB||'')+'</td><td>'+esc(s.Gender||'')+'</td><td><button class="btn soft mini" onclick="openProfile(\''+esc(e.StudentID)+'\')">Hồ sơ</button></td></tr>'}).join('')+'</tbody></table></div></div>';
   }
   return __studentsPageLayout();
 };
