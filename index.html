@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>App Y tế VK</title>
 <style>
 :root{--bg:#f3f7f6;--card:#fff;--ink:#12312d;--muted:#6b807c;--teal:#0f766e;--teal2:#e2f3ef;--line:#dfe9e6;--red:#b42318;--amber:#b54708;--green:#137333;--shadow:0 12px 34px rgba(21,61,54,.09)}
@@ -24,7 +27,7 @@ footer{max-width:1240px;margin:0 auto;padding:0 18px 26px;color:#71837f;font-siz
 </style>
 </head>
 <body>
-<header><div class="head"><div class="brand"><div class="logo">✚</div><div>App Y tế VK<div class="muted">Trợ lý y tế học đường</div></div></div><div class="head-actions"><span id="envBadge" class="badge blue">PRODUCTION</span><span id="accountBadge" class="badge amber">Chưa đăng nhập</span><button class="btn soft" onclick="openSetup()">⚙ Google</button><button id="logoutBtn" class="btn danger" style="display:none" onclick="logout()">Đăng xuất</button></div></div></header>
+<header><div class="head"><div class="brand"><div class="logo">✚</div><div>App Y tế VK<div class="muted">Trợ lý y tế học đường</div></div></div><div class="head-actions"><span id="envBadge" class="badge blue">PRODUCTION</span><span id="accountBadge" class="badge amber">Chưa đăng nhập</span><button id="updateBtn" class="btn soft" onclick="forceUpdate()" title="Tải bản mới nhất">↻ Cập nhật</button><button class="btn soft" onclick="openSetup()">⚙ Google</button><button id="logoutBtn" class="btn danger" style="display:none" onclick="logout()">Đăng xuất</button></div></div></header>
 <div id="root"></div>
 <footer>App Y tế VK · GitHub Pages chỉ chạy giao diện; dữ liệu nằm trong Google Drive/Sheets riêng tư. <a href="privacy.html">Chính sách quyền riêng tư</a> · <a href="terms.html">Điều khoản sử dụng</a></footer>
 
@@ -53,7 +56,25 @@ footer{max-width:1240px;margin:0 auto;padding:0 18px 26px;color:#71837f;font-siz
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="google-sheets-connector.js"></script>
 <script>
+const APP_BUILD='2026.10.03.1025';
 let appState={authorized:false,user:null,role:null,data:{},page:'home'};
+
+function forceUpdate(){
+ const u=new URL(location.href);
+ u.searchParams.set('v',Date.now());
+ location.replace(u.toString());
+}
+async function checkForUpdate(){
+ try{
+   const r=await fetch('version.json?ts='+Date.now(),{cache:'no-store'});
+   const v=await r.json();
+   if(v?.version && v.version!==APP_BUILD){
+     const u=new URL(location.href);
+     u.searchParams.set('v',v.version);
+     location.replace(u.toString());
+   }
+ }catch(_){}
+}
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const badge=(t,c='')=>'<span class="badge '+c+'">'+esc(t)+'</span>';
@@ -328,7 +349,8 @@ async function createUserAccount(){
 async function showAudit(){try{const r=await GoogleSheetsConnector.readRange('AuditLog!A1:K300');document.getElementById('adminDetail').innerHTML=rawTable(r.values||[])}catch(e){document.getElementById('adminDetail').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}}
 function rawTable(v){if(!v.length)return'<div class="empty">Không có dữ liệu.</div>';return'<div class="table"><table><thead><tr>'+v[0].map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+v.slice(1).reverse().map(r=>'<tr>'+v[0].map((_,i)=>'<td>'+esc(r[i]||'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'}
 
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSetup()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSetup();closeRecordModal();closeImportModal()}});
+checkForUpdate();
 renderLogin();
 </script>
 </body></html>
