@@ -11,11 +11,12 @@ const LAYOUT_META={
   health:{icon:'✚',title:'Y tế',desc:'Thuốc, khám sức khỏe, tiêm chủng và sơ cứu'},
   kitchen:{icon:'♨',title:'Bếp & kho',desc:'Kiểm thực, lưu mẫu và tồn kho'},
   records:{icon:'▤',title:'Hồ sơ',desc:'Tài liệu, nguồn dữ liệu và truyền thông'},
+  portal:{icon:'↗',title:'Vành Khuyên',desc:'Cổng trường học và cầu nối dữ liệu'},
   admin:{icon:'⚙',title:'Quản trị',desc:'Người dùng, phân quyền và cấu hình'}
 };
 
 function railHtml(){
-  const entries=['today','students','health','kitchen','records'].concat(state.role==='ADMIN'?['admin']:[]);
+  const entries=['today','students','health','kitchen','records','portal'].concat(state.role==='ADMIN'?['admin']:[]);
   return '<nav class="left-rail">'+entries.map(p=>
     '<button class="rail-btn '+(state.page===p?'active':'')+'" onclick="go(\''+p+'\')" aria-label="'+esc(LAYOUT_META[p].title)+'">'+
     '<span>'+LAYOUT_META[p].icon+'</span><span class="rail-label">'+esc(LAYOUT_META[p].title)+'</span></button>'
@@ -45,11 +46,17 @@ function contextItems(page){
   ];
   if(page==='kitchen') return [
     ['meal','🍽','Bữa ăn hôm nay',todayMealCount()],
-    ['b1','1','Kiểm thực B1',objs('FoodB1').length],
-    ['b2','2','Kiểm thực B2',objs('FoodB2').length],
-    ['b3','3','Kiểm thực B3',objs('FoodB3').length],
-    ['sample','🧪','Lưu mẫu',objs('FoodSamples').length],
+    ['b1','1','Kiểm thực B1',objs('FoodStep1').length],
+    ['b2','2','Kiểm thực B2',objs('FoodStep2').length],
+    ['b3','3','Kiểm thực B3',objs('FoodStep3').length],
+    ['sample','🧪','Lưu mẫu',objs('FoodSampleLog').length],
     ['inventory','📦','Kho thực phẩm / sữa',expiringLots().length]
+  ];
+  if(page==='portal') return [
+    ['portal','↗','Mở Cổng Vành Khuyên',null],
+    ['projection','⇄','Dữ liệu chia sẻ',objs('PortalProjection').length],
+    ['queue','☷','Hàng đợi đồng bộ',objs('IntegrationQueue').filter(x=>String(x.Status||'').toUpperCase()!=='DONE').length],
+    ['bridge','⚡','Trạng thái cầu nối',null]
   ];
   if(page==='records') return [
     ['docs','▤','Tài liệu & chứng từ',objs('Documents').length],
@@ -86,6 +93,7 @@ function tabItems(page){
   if(page==='health')return [['meds','Thuốc hôm nay'],['screen','Khám sức khỏe'],['vaccines','Tiêm chủng'],['incidents','Sơ cứu'],['disease','Dịch']];
   if(page==='kitchen')return [['meal','Bữa ăn'],['b1','B1'],['b2','B2'],['b3','B3'],['sample','Lưu mẫu'],['inventory','Kho']];
   if(page==='records')return [['docs','Tài liệu'],['sources','Nguồn dữ liệu'],['communication','Truyền thông'],['staging','Staging']];
+  if(page==='portal')return [['portal','Cổng trường'],['projection','Dữ liệu chia sẻ'],['queue','Đồng bộ'],['bridge','Cầu nối']];
   return [['overview','Tổng quan'],['users','Người dùng'],['identity','Xác minh'],['config','Cấu hình']];
 }
 function tabsHtml(){
@@ -106,11 +114,15 @@ function selectContext(key){
     if(key==='tasks'){document.querySelector('#main .assistant')?.scrollIntoView({behavior:'smooth'});return}
   }
   if(state.page==='students'&&key==='review'){ensure(['IdentityReview'],true);return}
+  if(state.page==='portal'){
+    return '<aside class="right-sidebar"><h3>Liên kết Vành Khuyên</h3>'+quickMetric('👧','Projection',objs('PortalProjection').length,'')+quickMetric('☷','Chờ đồng bộ',objs('IntegrationQueue').filter(x=>String(x.Status||'').toUpperCase()!==\'DONE\').length,'')+'<div class="quick-block"><b>Nguyên tắc</b><div class="muted">Chỉ chia sẻ dữ liệu tối thiểu cần cho cổng trường; hồ sơ y tế nhạy cảm vẫn ở App Y tế VK.</div></div></aside>';
+  }
   if(state.page==='records'){
     const map={docs:'documentsPanel',sources:'sourcesPanel',communication:'communicationPanel'};
     setTimeout(()=>document.getElementById(map[key]||'documentsPanel')?.scrollIntoView({behavior:'smooth',block:'start'}),50);
   }
   if(state.page==='admin'&&key==='config'){openSetup();return}
+  if(state.page==='portal'){state.layoutTab.portal=key;renderPage();return}
   renderPage();
 }
 function scrollKitchenFocus(key){
@@ -217,8 +229,9 @@ go=function(p){
   const need={
     students:['Students','Enrollments','Classes','IdentityReview'],
     health:['HealthScreenings','Immunizations','MedicationOrders','MedicationAdministrations','Incidents','DiseaseSurveillance','Attendance'],
-    kitchen:['MealSessions','FoodB1','FoodB2','FoodB3','FoodSamples','Inventory'],
+    kitchen:['MealSessions','FoodStep1','FoodStep2','FoodStep3','FoodSampleLog','Inventory','OCRInbox'],
     records:['Documents','SourceRegistry','Communication'],
+    portal:['PortalProjection','IntegrationQueue','Students','Enrollments','HealthScreenings','Attendance'],
     admin:['Users','IdentityReview','AuditLog','Config','Classes','SchoolYears','Enrollments']
   }[p]||[];
   if(need.length)ensure(need,true);
