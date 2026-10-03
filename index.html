@@ -57,7 +57,7 @@ footer{max-width:1240px;margin:0 auto;padding:0 18px 26px;color:#71837f;font-siz
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="google-sheets-connector.js"></script>
 <script>
-const APP_BUILD='2026.10.03.1035';
+const APP_BUILD='2026.10.03.1040';
 let appState={authorized:false,user:null,role:null,data:{},page:'home'};
 
 function forceUpdate(){
@@ -81,6 +81,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const badge=(t,c='')=>'<span class="badge '+c+'">'+esc(t)+'</span>';
 const toObjects=values=>{if(!values||values.length<2)return[];const h=values[0];return values.slice(1).filter(r=>r.some(x=>String(x??'').trim()!=='')).map(r=>Object.fromEntries(h.map((k,i)=>[k,r[i]??''])))};
 const countRows=k=>Math.max(0,(appState.data[k]||[]).length-1);
+function activeStudentCount(){const v=appState.data.Students||[];if(v.length<2)return 0;const i=(v[0]||[]).indexOf('Status');return i<0?Math.max(0,v.length-1):v.slice(1).filter(r=>String(r[i]||'').toUpperCase()==='ACTIVE').length}
 
 function setAccount(text,cls='amber'){const e=document.getElementById('accountBadge');e.textContent=text;e.className='badge '+cls}
 function openSetup(){const c=GoogleSheetsConnector.getConfig();document.getElementById('pickerKeyInput').value=c.pickerApiKey||'';document.getElementById('setupModal').classList.add('open')}
@@ -169,7 +170,7 @@ function foodPage(){
 }
 const pages={
  home:()=>'<section class="hero"><div class="eyebrow">APP Y TẾ VK · PRODUCTION</div><h1>Hôm nay</h1><p>Dữ liệu được đọc và ghi trực tiếp vào Master Sheet riêng tư sau xác thực Google.</p></section>'+
- '<div class="stats"><div class="stat"><b>'+countRows('Students')+'</b><span>Học sinh</span></div><div class="stat"><b>'+countRows('Tasks')+'</b><span>Công việc</span></div><div class="stat"><b>'+countRows('Inventory')+'</b><span>Lô kho</span></div><div class="stat"><b>'+countRows('Incidents')+'</b><span>Sự cố</span></div></div>'+
+ '<div class="stats"><div class="stat"><b>'+activeStudentCount()+'</b><span>Học sinh đang học</span></div><div class="stat"><b>'+countRows('Tasks')+'</b><span>Công việc</span></div><div class="stat"><b>'+countRows('Inventory')+'</b><span>Lô kho</span></div><div class="stat"><b>'+countRows('Incidents')+'</b><span>Sự cố</span></div></div>'+
  '<div class="grid"><div class="card"><h2>Nhập dữ liệu</h2><div class="notice ok">Preview → Mapping → kiểm tra trùng → Xác nhận → Master Production.</div><div class="toolbar">'+(canWrite('Students')?'<button class="btn primary" onclick="openStudentImport()">Nhập danh sách học sinh</button><button class="btn soft" onclick="openRecordModal(\'Students\')">+ Thêm 1 học sinh</button>':'')+'</div></div><div class="card"><h2>Phiên hiện tại</h2><div class="row"><div class="grow"><b>'+esc(appState.user?.name||'')+'</b><div class="muted">'+esc(appState.user?.email||'')+'</div></div>'+badge(appState.role)+'</div><div class="muted">Quyền Google: drive.file · dữ liệu riêng tư.</div></div></div>',
  students:()=>modulePage('Hồ sơ học sinh','Students',['StudentID','FullName','DOB','Gender','Class','GuardianPhone','HealthNotes','Status']),
  health:()=>modulePage('Khám sức khỏe','HealthScreenings',['ScreeningID','StudentID','ExamDate','ExamUnit','ExamType','HeightCm','WeightKg','GeneralResult','Recommendation','ReviewStatus']),
