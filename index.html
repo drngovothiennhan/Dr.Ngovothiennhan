@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0f766e">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes">
 <title>App Y tế VK V2</title>
 <style>
 :root{--bg:#f3f7f6;--card:#fff;--ink:#15332e;--muted:#667d78;--brand:#0f766e;--brand2:#164e63;--soft:#e7f5f2;--line:#dce8e5;--warn:#b54708;--danger:#b42318;--ok:#087443;--shadow:0 10px 30px rgba(21,61,54,.08)}
@@ -43,17 +43,16 @@ main{min-width:0}.hero{background:linear-gradient(135deg,var(--brand),var(--bran
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="google-sheets-connector.js"></script>
 <script>
-const APP_BUILD='2026.10.03.V2.3.2-PRELOAD';
+const APP_BUILD='2026.10.03.V2.4.0-ATTP';
 let state={authorized:false,user:null,role:null,page:'today',data:{},loaded:new Set(),loading:new Set(),healthTab:'meds',studentQuery:'',kitchenSession:''};
 let importState={headers:[],rows:[],map:{},fileName:''};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const badge=(t,c='')=>'<span class="badge '+c+'">'+esc(t)+'</span>';
 const objRows=v=>{if(!v||v.length<2)return[];const h=v[0];return v.slice(1).filter(r=>r.some(x=>String(x??'').trim())).map(r=>Object.fromEntries(h.map((k,i)=>[k,r[i]??''])))};
 const objs=k=>objRows(state.data[k]||[]);
-const today=()=>new Date().toISOString().slice(0,10);
+const today=()=>{const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())};
 const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase().replace(/[^a-z0-9]/g,'');
 const colLetter=n=>{let s='';while(n>0){n--;s=String.fromCharCode(65+n%26)+s;n=Math.floor(n/26)}return s};
 
@@ -276,7 +275,7 @@ async function saveDoc(){
 function openImport(){importState={headers:[],rows:[],map:{},fileName:''};document.getElementById('importBody').innerHTML='<div class="field"><label>Excel / CSV</label><input type="file" accept=".xlsx,.xls,.csv" onchange="readImport(this.files[0])"></div><div id="importWork"></div>';document.getElementById('importModal').classList.add('open')}
 function closeImport(){document.getElementById('importModal').classList.remove('open')}
 async function readImport(file){
- const w=document.getElementById('importWork');if(!file)return;try{const wb=XLSX.read(await file.arrayBuffer(),{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],d=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});if(d.length<2)throw new Error('File không có dữ liệu.');importState={headers:d[0].map(x=>String(x).trim()),rows:d.slice(1).filter(r=>r.some(x=>String(x).trim())),map:{},fileName:file.name};renderImport()}catch(e){w.innerHTML='<div class="notice red">'+esc(e.message)+'</div>'}
+ const w=document.getElementById('importWork');if(!file)return;try{await ensureXLSX();const wb=XLSX.read(await file.arrayBuffer(),{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],d=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});if(d.length<2)throw new Error('File không có dữ liệu.');importState={headers:d[0].map(x=>String(x).trim()),rows:d.slice(1).filter(r=>r.some(x=>String(x).trim())),map:{},fileName:file.name};renderImport()}catch(e){w.innerHTML='<div class="notice red">'+esc(e.message)+'</div>'}
 }
 function autoMap(t){const a={FullName:['hoten','hovaten','tenhocsinh'],DOB:['ngaysinh','dob'],Gender:['gioitinh'],Class:['lop','nhomlop'],NationalID:['cccd','madinhdanh','dinhdanhcanhan'],GuardianName:['phuhuynh','hotenphuhuynh'],GuardianPhone:['sdt','sodienthoai','dienthoai'],Address:['diachi']};const hs=importState.headers.map(norm);return String(hs.findIndex(x=>(a[t]||[norm(t)]).includes(x)))}
 function renderImport(){const targets=['FullName','DOB','Gender','Class','NationalID','GuardianName','GuardianPhone','Address'];const opts='<option value="">-- Không nhập --</option>'+importState.headers.map((h,i)=>'<option value="'+i+'">'+esc(h||('Cột '+(i+1)))+'</option>').join('');targets.forEach(t=>importState.map[t]=autoMap(t)==='-1'?'':autoMap(t));document.getElementById('importWork').innerHTML='<div class="notice ok">Đã đọc '+importState.rows.length+' dòng. Chưa ghi Master.</div><div class="formgrid">'+targets.map(t=>'<div class="field"><label>'+t+(t==='FullName'?' *':'')+'</label><select onchange="importState.map[\''+t+'\']=this.value">'+opts.replace('value="'+importState.map[t]+'"','value="'+importState.map[t]+'" selected')+'</select></div>').join('')+'</div><div class="table" style="margin-top:12px"><table><tbody>'+importState.rows.slice(0,8).map(r=>'<tr>'+r.slice(0,7).map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div><div id="impMsg"></div><div class="actions"><button class="btn soft" onclick="closeImport()">Hủy</button><button class="btn primary" onclick="commitImport()">Xác nhận nhập</button></div>'}
@@ -289,4 +288,4 @@ async function commitImport(){
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSetup();closeProfile();closeRecord();closeImport()}});
 renderLogin();
-</script><script src="v2-workflows.js"></script><script src="layout-v3.js"></script><script src="attp-v2.js"></script><script src="kitchen-templates.js"></script><script src="integration-vk.js"></script></body></html>
+</script><script src="v2-workflows.js"></script><script src="layout-v3.js"></script><script src="attp-v2.js"></script><script src="kitchen-templates.js"></script><script src="integration-vk.js"></script><script src="attp-core.js"></script><script src="attp-import.js"></script><script>if("serviceWorker"in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{})</script></body></html>

@@ -206,7 +206,7 @@ function statusBarHtml(){
   const sync=state.lastSync?state.lastSync.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'chưa đồng bộ';
   return '<div class="status-bar"><span class="status-item"><i class="status-dot '+(navigator.onLine?'':'off')+'"></i>'+(navigator.onLine?'Online':'Offline')+'</span>'+
     '<span class="status-item hide-mobile">Đồng bộ: '+esc(sync)+'</span><span class="status-item">Role: '+esc(state.role||'—')+'</span>'+
-    '<span class="status-item hide-mobile">Data: '+mode+'</span><span class="status-spacer"></span><span class="status-item">V2.3.2 Templates</span></div>';
+    '<span class="status-item hide-mobile">Data: '+mode+'</span><span class="status-spacer"></span><span class="status-item">V2.4.0 ATTP</span></div>';
 }
 
 const __ensureLayout=ensure;

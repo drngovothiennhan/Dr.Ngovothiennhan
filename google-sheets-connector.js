@@ -11,6 +11,8 @@ const IMPORT_FOLDER_ID='1tSAAZWbldASeY5zJaJKiEdvxpSxsqQim';
 
 const DRIVE_FILE_SCOPE='https://www.googleapis.com/auth/drive.file';
 const OAUTH_SCOPES='openid email profile '+DRIVE_FILE_SCOPE;
+// Dán URL Web App của Apps Script Bridge vào đây (sau khi deploy) để mọi thiết bị dùng ngay, không cần Picker API key.
+const DEFAULT_BRIDGE_URL='';
 const AUTO_ADMIN_EMAILS=['dr.ngovothiennhan@gmail.com','nguyenhao1707@gmail.com'];
 
 const SHEET_RANGES={
@@ -61,7 +63,7 @@ const GoogleSheetsConnector=(()=>{
       sheetId:localStorage.getItem('sha_sheet_id')||PRODUCTION_MASTER_ID,
       pickerApiKey:localStorage.getItem('sha_picker_api_key')||'',
       pickerGrantedId:localStorage.getItem('sha_picker_granted_id')||'',
-      bridgeUrl:localStorage.getItem('sha_bridge_url')||''
+      bridgeUrl:localStorage.getItem('sha_bridge_url')||DEFAULT_BRIDGE_URL
     };
   }
   function saveConfig(next={}){
@@ -172,15 +174,16 @@ const GoogleSheetsConnector=(()=>{
   async function verifyUserAccess(){
     if(!currentUser)currentUser=await getUserInfo();
     const email=String(currentUser.email||'').toLowerCase();
-    // V2.2: không còn bước duyệt/xác nhận nội bộ sau Google Login.
-    // Email quản trị được nhận diện tự động; mọi tài khoản Google khác vào thẳng vai trò USER.
-    currentRole=AUTO_ADMIN_EMAILS.includes(email)?'ADMIN':'USER';
-    return{
-      email,
-      role:currentRole,
-      name:currentUser.name||email,
-      picture:currentUser.picture||''
-    };
+    if(useBridge()){
+      // Vai trò do máy chủ (Apps Script) quyết định, không tin phía trình duyệt.
+      const w=await bridgePost('whoami',{});
+      currentRole=String(w.role||'NONE').toUpperCase();
+      if(currentRole==='NONE')throw new Error('Tài khoản '+email+' chưa được Admin cấp quyền. Hãy báo Admin thêm email này vào bảng Users.');
+      return{email,role:currentRole,name:w.name||currentUser.name||email,picture:currentUser.picture||''};
+    }
+    // Chế độ Direct (không khuyến nghị): chỉ email Admin có quyền ghi; còn lại chỉ xem.
+    currentRole=AUTO_ADMIN_EMAILS.includes(email)?'ADMIN':'VIEWER';
+    return{email,role:currentRole,name:currentUser.name||email,picture:currentUser.picture||''};
   }
   async function appendAudit(action,entityType,entityId,note=''){
     const u=currentUser||{};return appendRows('AuditLog!A:K',[[
@@ -188,8 +191,24 @@ const GoogleSheetsConnector=(()=>{
       action,entityType||'',entityId||'','','','APP_V2',note
     ]]);
   }
+  function fileToBase64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]||'');r.onerror=()=>rej(new Error('Không đọc được file.'));r.readAsDataURL(file)})}
+  async function compressImage(file,maxSide=1800,q=0.82){
+    if(!/^image\/(jpeg|png|webp)$/.test(file.type))return file;
+    try{
+      const bmp=await createImageBitmap(file),k=Math.min(1,maxSide/Math.max(bmp.width,bmp.height));
+      const c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);
+      c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+      const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',q));
+      return blob&&blob.size<file.size?new File([blob],file.name.replace(/\.\w+$/,'')+'.jpg',{type:'image/jpeg'}):file;
+    }catch(_){return file}
+  }
   async function uploadDriveFile(file,folderId=DOCUMENTS_FOLDER_ID){
     if(!file)throw new Error('Chưa chọn file.');
+    if(useBridge()){
+      const f=await compressImage(file);
+      const d=await bridgePost('uploadFile',{name:f.name,mimeType:f.type||'application/octet-stream',base64:await fileToBase64(f)});
+      return{id:d.id,name:d.name,webViewLink:d.url};
+    }
     if(!accessToken)await connect();
     const meta={name:file.name,mimeType:file.type||'application/octet-stream',parents:[folderId]};
     const init=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,mimeType,webViewLink',{
@@ -201,6 +220,7 @@ const GoogleSheetsConnector=(()=>{
     if(!done.ok)throw new Error('Tải file lên Drive thất bại.');
     return done.json();
   }
+  async function healthCheck(){return useBridge()?bridgePost('health',{}):{ok:true,allOk:null,checks:[],note:'Chế độ Direct: không có health check máy chủ.'}}
   async function grantMasterAccess(email,role='writer'){
     if(!accessToken)await connect();
     const r=await fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(PRODUCTION_MASTER_ID)+'/permissions?sendNotificationEmail=false&fields=id',{
@@ -222,6 +242,6 @@ const GoogleSheetsConnector=(()=>{
       }).build().setVisible(true);
   }
 
-  return{getConfig,saveConfig,setSelectedSheet,hasPickerGrant,connect,disconnect,getSession,getAccessToken,getUserInfo,verifyUserAccess,readRange,loadKeys,appendRows,updateRange,appendAudit,uploadDriveFile,grantMasterAccess,openSpreadsheetPicker,useBridge,
+  return{getConfig,saveConfig,setSelectedSheet,hasPickerGrant,connect,disconnect,getSession,getAccessToken,getUserInfo,verifyUserAccess,readRange,loadKeys,appendRows,updateRange,appendAudit,uploadDriveFile,healthCheck,grantMasterAccess,openSpreadsheetPicker,useBridge,
     DEFAULT_GOOGLE_CLIENT_ID,GOOGLE_PROJECT_NUMBER,PRODUCTION_MASTER_ID,APP_FOLDER_ID,DATA_FOLDER_ID,DOCUMENTS_FOLDER_ID,IMPORT_FOLDER_ID,SHEET_RANGES};
 })();
