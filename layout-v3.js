@@ -176,7 +176,8 @@ function rightPanelHtml(){
     '<div class="quick-actions"><button class="btn soft" onclick="openSetup()">Cấu hình</button><button class="btn soft" onclick="window.open(\\'https://docs.google.com/spreadsheets/d/169Iu_tlE8LkbSLsNiEsnTdkjyLSsVzDM7_fQl_HTXUI/edit\\',\\'_blank\\')">Master</button></div></aside>';
 }
 function quickMetric(icon,label,value,action){
-  const onclick=action?' onclick="'+action+'" style="cursor:pointer"':'';
+  const safeAction=action?String(action).replace(/&/g,'&amp;').replace(/"/g,'&quot;'):'';
+  const onclick=safeAction?' onclick="'+safeAction+'" style="cursor:pointer"':'';
   return '<div class="quick-block"'+onclick+'><div class="row" style="padding:0"><span style="font-size:19px">'+icon+'</span><div class="grow"><b>'+esc(label)+'</b><div class="muted">'+esc(value)+'</div></div></div></div>';
 }
 
