@@ -243,3 +243,29 @@ function renderInventoryOfficial(){
   const list=objs('Inventory').slice().sort((a,b)=>Number(a.DaysRemaining||99999)-Number(b.DaysRemaining||99999));
   return'<div id="inventoryCard" class="card"><div class="row"><div class="grow"><h2 style="margin:0">Kho thực phẩm & sữa</h2><div class="muted">FEFO · ưu tiên xuất lô gần HSD trước.</div></div>'+(canWrite('Inventory')?'<button class="btn primary" onclick="openGeneric(\'Inventory\')">+ Nhập kho</button>':'')+'</div><div class="table"><table><thead><tr><th>Mặt hàng</th><th>Lô</th><th>Tồn</th><th>HSD</th><th>Bảo quản</th><th>Cảnh báo</th></tr></thead><tbody>'+list.slice(0,400).map(x=>'<tr><td><b>'+esc(x.ItemName)+'</b></td><td>'+esc(x.BatchNo)+'</td><td>'+esc(x.CurrentQty)+' '+esc(x.Unit)+'</td><td>'+esc(x.ExpiryDate)+'</td><td>'+esc(x.StorageCondition)+'</td><td>'+(Number(x.DaysRemaining)<=7?badge('Còn '+x.DaysRemaining+' ngày','warn'):badge(x.ExpiryStatus||'Ổn'))+'</td></tr>').join('')+'</tbody></table></div></div>';
 }
+
+
+/* Tie workspace tabs/sidebar to the official ATTP wizard */
+const __selectContextAttp=selectContext;
+selectContext=function(key){
+  if(state.page==='kitchen'&&['meal','b1','b2','b3','sample','inventory'].includes(key)){
+    state.kitchenFocus=key;
+    if(['b1','b2','b3','sample'].includes(key))state.attpFocus=key;
+    renderPage();
+    if(key==='inventory')setTimeout(()=>document.getElementById('inventoryCard')?.scrollIntoView({behavior:'smooth',block:'start'}),60);
+    return;
+  }
+  return __selectContextAttp(key);
+};
+
+/* Dashboard sample alerts now use the compliant sample log */
+dueSamples=function(){
+  const now=Date.now();
+  return objs('FoodSampleLog').filter(x=>{
+    if(String(x.HoldDueToIncident||'').toUpperCase()==='YES')return false;
+    if(!x.DestroyAt)return false;
+    const due=new Date(x.DestroyAt).getTime()<=now;
+    const destroyed=String(x.DestroyedBy||'').trim()||/destroy|huy|đã hủy/i.test(x.SampleQualityNote||'');
+    return due&&!destroyed;
+  });
+};
