@@ -169,7 +169,7 @@ function studentsPage(){
  const q=norm(state.studentQuery),students=objs('Students'),enr=objs('Enrollments');
  const current=new Map(enr.filter(e=>String(e.Status||'').toUpperCase()==='ACTIVE').map(e=>[e.StudentID,e]));
  let list=students.filter(s=>!q||norm([s.FullName,s.NationalID,s.GuardianPhone,current.get(s.StudentID)?.ClassNameSnapshot].join(' ')).includes(q));
- return'<div class="card"><div class="row"><div class="grow"><h2 style="margin:0">Học sinh</h2><div class="muted">Một StudentID xuyên suốt; lớp/năm học nằm ở Enrollment.</div></div>'+(canWrite('Students')?'<button class="btn soft" onclick="openImport()">Nhập danh sách</button><button class="btn primary" onclick="openGeneric(\'Students\')">+ Học sinh</button>':'')+'</div><div class="toolbar"><input placeholder="Tìm tên, mã định danh, lớp, SĐT..." value="'+esc(state.studentQuery)+'" oninput="state.studentQuery=this.value;renderPage()"><span class="badge">'+list.length+' hồ sơ</span></div>'+
+ return'<div class="card"><div class="row"><div class="grow"><h2 style="margin:0">Học sinh</h2><div class="muted">Một StudentID xuyên suốt; lớp/năm học nằm ở Enrollment.</div></div>'+(canWrite('Students')?'<button class="btn soft" onclick="openImport()">Nhập danh sách</button><button class="btn primary" onclick="openNewStudent()">+ Học sinh</button>':'')+'</div><div class="toolbar"><input placeholder="Tìm tên, mã định danh, lớp, SĐT..." value="'+esc(state.studentQuery)+'" oninput="state.studentQuery=this.value;renderPage()"><span class="badge">'+list.length+' hồ sơ</span></div>'+
  '<div class="table"><table><thead><tr><th>Học sinh</th><th>Lớp hiện tại</th><th>Ngày sinh</th><th>Trạng thái</th><th></th></tr></thead><tbody>'+list.slice(0,500).map(s=>{const e=current.get(s.StudentID);return'<tr><td><b>'+esc(s.FullName)+'</b><div class="muted">'+esc(s.StudentID)+'</div></td><td>'+esc(e?.ClassNameSnapshot||s.Class||'')+'</td><td>'+esc(s.DOB)+'</td><td>'+badge(e?.Status||s.Status||'')+'</td><td><button class="btn soft mini" onclick="openProfile(\''+esc(s.StudentID)+'\')">Mở hồ sơ</button></td></tr>'}).join('')+'</tbody></table></div></div>'
 }
 async function openProfile(id){
@@ -284,4 +284,4 @@ async function commitImport(){
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSetup();closeProfile();closeRecord();closeImport()}});
 renderLogin();
-</script></body></html>
+</script><script src="v2-workflows.js"></script></body></html>
