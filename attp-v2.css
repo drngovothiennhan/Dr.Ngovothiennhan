@@ -1,0 +1,20 @@
+
+/* ATTP V2 — QĐ 1246/QĐ-BYT */
+.attp-law{background:#eff8ff;border:1px solid #b2ddff;color:#175cd3;padding:11px 13px;border-radius:13px;margin:10px 0;font-size:12px}
+.attp-progress{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.attp-stage{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;cursor:pointer}
+.attp-stage.done{background:#ecfdf3;border-color:#abefc6}.attp-stage.active{outline:2px solid #0f766e}
+.attp-stage .num{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;background:#eef5f3;font-weight:900;margin-bottom:6px}
+.attp-stage.done .num{background:#b7f0cf;color:#087443}
+.attp-form{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px;margin-top:10px}
+.attp-form h3{margin:0 0 5px;font-size:16px}.attp-help{font-size:11px;color:var(--muted);margin-bottom:12px}
+.attp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.attp-grid .wide{grid-column:1/-1}.attp-grid .span2{grid-column:span 2}
+.attp-choice{display:flex;gap:7px;flex-wrap:wrap}.attp-choice label{display:flex;align-items:center;gap:5px;background:#f6faf9;padding:7px 9px;border-radius:9px;border:1px solid var(--line);font-size:12px}
+.ocr-box{border:1px dashed #86c5ba;background:#f5fffc;border-radius:14px;padding:13px;margin:10px 0}
+.ocr-preview{max-height:170px;overflow:auto;white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px;font:11px/1.45 ui-monospace,monospace}
+.ocr-progress{height:8px;background:#e9f2f0;border-radius:999px;overflow:hidden;margin:7px 0}.ocr-progress i{display:block;height:100%;background:#0f766e;width:0}
+.attp-validation{font-size:12px;padding:9px 10px;border-radius:11px;margin:8px 0;background:#fff7ed;color:#9a3412;border:1px solid #fed7aa}.attp-validation.ok{background:#ecfdf3;color:#067647;border-color:#abefc6}
+.attp-records{margin-top:12px}.attp-records .table{max-height:300px}
+.portal-card{border:1px solid #b2ddff;background:#f5faff;border-radius:14px;padding:12px;margin:10px 0}
+@media(max-width:900px){.attp-grid{grid-template-columns:1fr 1fr}.attp-progress{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.attp-grid{grid-template-columns:1fr}.attp-grid .span2,.attp-grid .wide{grid-column:auto}.attp-progress{grid-template-columns:1fr 1fr}}
