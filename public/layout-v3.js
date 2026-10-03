@@ -10,13 +10,12 @@ const LAYOUT_META={
   students:{icon:'⌕',title:'Học sinh',desc:'Danh sách, hồ sơ và dòng thời gian'},
   health:{icon:'✚',title:'Y tế',desc:'Thuốc, khám sức khỏe, tiêm chủng và sơ cứu'},
   kitchen:{icon:'♨',title:'Bếp & kho',desc:'Kiểm thực, lưu mẫu và tồn kho'},
-  records:{icon:'▤',title:'Hồ sơ',desc:'Tài liệu, nguồn dữ liệu và truyền thông'},
-  portal:{icon:'↗',title:'Vành Khuyên',desc:'Cổng trường học và cầu nối dữ liệu'},
-  admin:{icon:'⚙',title:'Quản trị',desc:'Người dùng, phân quyền và cấu hình'}
+  records:{icon:'▤',title:'Chứng từ',desc:'Toa thuốc, hóa đơn, phiếu giao hàng, ảnh lưu mẫu'},
+  admin:{icon:'⚙',title:'Quản trị',desc:'Tài khoản người dùng và tình trạng hệ thống'}
 };
 
 function railHtml(){
-  const entries=['today','students','health','kitchen','records','portal'].concat(state.role==='ADMIN'?['admin']:[]);
+  const entries=['today','students','health','kitchen','records'].concat(state.role==='ADMIN'?['admin']:[]);
   return '<nav class="left-rail">'+entries.map(p=>
     '<button class="rail-btn '+(state.page===p?'active':'')+'" onclick="go(\''+p+'\')" aria-label="'+esc(LAYOUT_META[p].title)+'">'+
     '<span>'+LAYOUT_META[p].icon+'</span><span class="rail-label">'+esc(LAYOUT_META[p].title)+'</span></button>'
@@ -34,8 +33,7 @@ function contextItems(page){
   if(page==='students') return [
     ['all','👧','Tất cả học sinh',activeStudentCount()],
     ['class','▦','Theo lớp',objs('Classes').length||15],
-    ['inactive','↪','Nghỉ / chuyển trường',inactiveEnrollmentCount()],
-    ['review','!','Chờ xác minh',objs('IdentityReview').filter(x=>String(x.Status).toUpperCase()==='OPEN').length]
+    ['inactive','↪','Nghỉ / chuyển trường',inactiveEnrollmentCount()]
   ];
   if(page==='health') return [
     ['meds','💊','Thuốc hôm nay',pendingMeds().length],
@@ -46,8 +44,6 @@ function contextItems(page){
   ];
   if(page==='kitchen') return [
     ['meal','🍽','Bữa ăn hôm nay',todayMealCount()],
-    ['menu','📋','Thực đơn mẫu',objs('MenuPlan').length],
-    ['issue','↗','Xuất kho mẫu',objs('StockIssuePlan').length],
     ['b1','1','Kiểm thực B1',objs('FoodStep1').length],
     ['b2','2','Kiểm thực B2',objs('FoodStep2').length],
     ['b3','3','Kiểm thực B3',objs('FoodStep3').length],
@@ -55,23 +51,12 @@ function contextItems(page){
     ['ledger','🗂','Thẻ kho lịch sử',objs('WarehouseLedger').length],
     ['inventory','📦','Kho hiện tại',expiringLots().length]
   ];
-  if(page==='portal') return [
-    ['portal','↗','Mở Cổng Vành Khuyên',null],
-    ['projection','⇄','Dữ liệu chia sẻ',objs('PortalProjection').length],
-    ['queue','☷','Hàng đợi đồng bộ',objs('IntegrationQueue').filter(x=>String(x.Status||'').toUpperCase()!=='DONE').length],
-    ['bridge','⚡','Trạng thái cầu nối',null]
-  ];
   if(page==='records') return [
-    ['docs','▤','Tài liệu & chứng từ',objs('Documents').length],
-    ['sources','⇄','Nguồn dữ liệu',objs('SourceRegistry').length],
-    ['communication','📣','Truyền thông',objs('Communication').length],
-    ['staging','◫','Import / staging',objs('SourceRegistry').filter(x=>/STAGING|REVIEW/i.test(x.ImportStatus||'')).length]
+    ['docs','▤','Tài liệu & chứng từ',objs('Documents').length]
   ];
   return [
     ['overview','⚙','Tổng quan hệ thống',null],
-    ['users','👤','Người dùng',objs('Users').length],
-    ['identity','!','Identity review',objs('IdentityReview').filter(x=>String(x.Status).toUpperCase()==='OPEN').length],
-    ['config','⌘','Cấu hình',null]
+    ['users','👤','Người dùng',objs('Users').length]
   ];
 }
 function inactiveEnrollmentCount(){return objs('Enrollments').filter(x=>String(x.Status||'').toUpperCase()!=='ACTIVE').length}
@@ -92,12 +77,11 @@ function sidebarHtml(){
 
 function tabItems(page){
   if(page==='today')return [['overview','Tổng quan'],['meds','Thuốc hôm nay'],['kitchen','Bếp & kho'],['tasks','Công việc']];
-  if(page==='students')return [['all','Danh sách'],['class','Theo lớp'],['inactive','Nghỉ / chuyển'],['review','Chờ xác minh']];
+  if(page==='students')return [['all','Danh sách'],['class','Theo lớp'],['inactive','Nghỉ / chuyển']];
   if(page==='health')return [['meds','Thuốc hôm nay'],['screen','Khám sức khỏe'],['vaccines','Tiêm chủng'],['incidents','Sơ cứu'],['disease','Dịch']];
-  if(page==='kitchen')return [['meal','Bữa ăn'],['menu','Thực đơn'],['issue','Xuất kho'],['b1','B1'],['b2','B2'],['b3','B3'],['sample','Lưu mẫu'],['ledger','Thẻ kho'],['inventory','Kho hiện tại']];
-  if(page==='records')return [['docs','Tài liệu'],['sources','Nguồn dữ liệu'],['communication','Truyền thông'],['staging','Staging']];
-  if(page==='portal')return [['portal','Cổng trường'],['projection','Dữ liệu chia sẻ'],['queue','Đồng bộ'],['bridge','Cầu nối']];
-  return [['overview','Tổng quan'],['users','Người dùng'],['identity','Xác minh'],['config','Cấu hình']];
+  if(page==='kitchen')return [['meal','Bữa ăn'],['b1','B1'],['b2','B2'],['b3','B3'],['sample','Lưu mẫu'],['ledger','Thẻ kho'],['inventory','Kho hiện tại']];
+  if(page==='records')return [['docs','Tài liệu']];
+  return [['overview','Tổng quan'],['users','Người dùng']];
 }
 function tabsHtml(){
   const a=currentContextKey();
@@ -116,13 +100,6 @@ function selectContext(key){
     if(key==='kitchen'){go('kitchen');return}
     if(key==='tasks'){document.querySelector('#main .assistant')?.scrollIntoView({behavior:'smooth'});return}
   }
-  if(state.page==='students'&&key==='review'){ensure(['IdentityReview'],true);return}
-  if(state.page==='records'){
-    const map={docs:'documentsPanel',sources:'sourcesPanel',communication:'communicationPanel'};
-    setTimeout(()=>document.getElementById(map[key]||'documentsPanel')?.scrollIntoView({behavior:'smooth',block:'start'}),50);
-  }
-  if(state.page==='admin'&&key==='config'){openSetup();return}
-  if(state.page==='portal'){state.layoutTab.portal=key;renderPage();return}
   renderPage();
 }
 function scrollKitchenFocus(key){
@@ -154,7 +131,6 @@ function rightPanelHtml(){
     return '<aside class="right-sidebar"><h3>Tổng quan học sinh</h3>'+
       quickMetric('👧','Đang học',activeStudentCount(),'')+
       quickMetric('↪','Nghỉ / chuyển',inactiveEnrollmentCount(),'')+
-      quickMetric('!','Chờ xác minh',objs('IdentityReview').filter(x=>String(x.Status).toUpperCase()==='OPEN').length,'selectContext("review")')+
       '<div class="quick-block"><b>Quy tắc định danh</b><div class="muted">Ưu tiên mã định danh → mã học sinh → họ tên + ngày sinh + giới tính → review thủ công.</div></div></aside>';
   }
   if(state.page==='health'){
@@ -168,32 +144,15 @@ function rightPanelHtml(){
   if(state.page==='kitchen'){
     return '<aside class="right-sidebar"><h3>Bếp & kho</h3>'+
       quickMetric('🍽','Bữa hôm nay',todayMealCount(),'selectContext("meal")')+
-      quickMetric('📋','Thực đơn mẫu',objs('MenuPlan').length,'selectContext("menu")')+
-      quickMetric('↗','Dòng xuất kho mẫu',objs('StockIssuePlan').length,'selectContext("issue")')+
       quickMetric('🧪','Mẫu cần xử lý',dueSamples().length,'selectContext("sample")')+
       '<div class="quick-block"><b>Quy trình chuẩn</b><div class="muted">B1 nhận thực phẩm → B2 chế biến → B3 trước khi ăn → lưu mẫu. Mỗi bước dùng chung MealSessionID.</div></div></aside>';
   }
-  if(state.page==='portal'){
-    const pending=objs('IntegrationQueue').filter(x=>String(x.Status||'').toUpperCase()!=='DONE').length;
-    return '<aside class="right-sidebar"><h3>Liên kết Vành Khuyên</h3>'+
-      quickMetric('👧','Projection',objs('PortalProjection').filter(x=>x.StudentID).length,'')+
-      quickMetric('☷','Chờ đồng bộ',pending,'selectContext("queue")')+
-      '<div class="quick-block"><b>Nguyên tắc</b><div class="muted">Chỉ chia sẻ dữ liệu tối thiểu cần cho cổng trường; hồ sơ y tế nhạy cảm vẫn ở App Y tế VK.</div></div></aside>';
-  }
   if(state.page==='records'){
-    const staging=objs('SourceRegistry').filter(x=>/STAGING|REVIEW/i.test(x.ImportStatus||'')).length;
-    return '<aside class="right-sidebar"><h3>Hồ sơ & nguồn</h3>'+
-      quickMetric('▤','Tài liệu',objs('Documents').length,'selectContext("docs")')+
-      quickMetric('⇄','Nguồn dữ liệu',objs('SourceRegistry').length,'selectContext("sources")')+
-      quickMetric('◫','Nguồn staging',staging,'selectContext("staging")')+
-      '<div class="quick-block"><b>Nguyên tắc</b><div class="muted">File nguồn giữ nguyên. Import qua preview/mapping trước khi ghi Master.</div></div></aside>';
+    return '<aside class="right-sidebar"><h3>Chứng từ</h3>'+quickMetric('▤','Tài liệu',objs('Documents').length,'')+'<div class="quick-block"><b>Lưu ý</b><div class="muted">Ảnh và file được lưu riêng tư trong hệ thống; chỉ người đã đăng nhập mới xem được.</div></div></aside>';
   }
-  const bridge=GoogleSheetsConnector.getConfig().bridgeUrl;
   return '<aside class="right-sidebar"><h3>Trạng thái hệ thống</h3>'+
     quickMetric('👤','Người dùng',objs('Users').length,'selectContext("users")')+
-    quickMetric('!','Identity review',objs('IdentityReview').filter(x=>String(x.Status).toUpperCase()==='OPEN').length,'selectContext("identity")')+
-    '<div class="quick-block"><b>Data access</b><div class="muted">'+(bridge?'Apps Script Bridge đang cấu hình.':'Direct mode đang hoạt động; Bridge source đã sẵn sàng.')+'</div></div>'+
-    '<div class="quick-actions"><button class="btn soft" onclick="openSetup()">Cấu hình</button><button class="btn soft" onclick="window.open(\'https://docs.google.com/spreadsheets/d/169Iu_tlE8LkbSLsNiEsnTdkjyLSsVzDM7_fQl_HTXUI/edit\',\'_blank\')">Master</button></div></aside>';
+    '<div class="quick-block"><b>Giới hạn</b><div class="muted">Hệ thống dành cho khoảng 10 người dùng. Mỗi người một tài khoản riêng.</div></div></aside>';
 }
 function quickMetric(icon,label,value,action){
   const safeAction=action?String(action).replace(/&/g,'&amp;').replace(/"/g,'&quot;'):'';
@@ -202,11 +161,10 @@ function quickMetric(icon,label,value,action){
 }
 
 function statusBarHtml(){
-  const mode=GoogleSheetsConnector.useBridge()?'BRIDGE':'DIRECT';
   const sync=state.lastSync?state.lastSync.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'chưa đồng bộ';
   return '<div class="status-bar"><span class="status-item"><i class="status-dot '+(navigator.onLine?'':'off')+'"></i>'+(navigator.onLine?'Online':'Offline')+'</span>'+
     '<span class="status-item hide-mobile">Đồng bộ: '+esc(sync)+'</span><span class="status-item">Role: '+esc(state.role||'—')+'</span>'+
-    '<span class="status-item hide-mobile">Data: '+mode+'</span><span class="status-spacer"></span><span class="status-item">V2.4.0 ATTP</span></div>';
+    '<span class="status-spacer"></span><span class="status-item">V3.0 Cloudflare</span></div>';
 }
 
 const __ensureLayout=ensure;
@@ -235,12 +193,11 @@ go=function(p){
   state.page=p;
   renderShell(p);
   const need={
-    students:['Students','Enrollments','Classes','IdentityReview'],
+    students:['Students','Enrollments','Classes'],
     health:['HealthScreenings','Immunizations','MedicationOrders','MedicationAdministrations','Incidents','DiseaseSurveillance','Attendance'],
-    kitchen:['MealSessions','FoodStep1','FoodStep2','FoodStep3','FoodSampleLog','Inventory','OCRInbox','MenuPlan','StockIssuePlan','WarehouseCatalog','WarehouseLedger'],
-    records:['Documents','SourceRegistry','Communication'],
-    portal:['PortalProjection','IntegrationQueue','Students','Enrollments','HealthScreenings','Attendance'],
-    admin:['Users','IdentityReview','AuditLog','Config','Classes','SchoolYears','Enrollments']
+    kitchen:['MealSessions','FoodStep1','FoodStep2','FoodStep3','FoodSampleLog','Inventory','OCRInbox','WarehouseCatalog','WarehouseLedger'],
+    records:['Documents'],
+    admin:['Users','AuditLog','Classes','SchoolYears','Enrollments']
   }[p]||[];
   if(need.length)ensure(need,true);
 };
@@ -260,26 +217,10 @@ function quickNewIncident(){
   setTimeout(()=>{if(canWrite('Incidents'))openGeneric('Incidents')},120);
 }
 
-/* Give record/source sections stable anchors for sidebar shortcuts */
-const __recordsPageLayout=recordsPage;
-recordsPage=function(){
-  const html=__recordsPageLayout();
-  return html
-    .replace('<div class="grid2">','<div id="documentsPanel" class="grid2">')
-    .replace('<div class="card"><h2>Nguồn dữ liệu</h2>','<div id="sourcesPanel" class="card"><h2>Nguồn dữ liệu</h2>')
-    .replace('<div class="card"><div class="row"><div class="grow"><h2 style="margin:0">Truyền thông y tế</h2>','<div id="communicationPanel" class="card"><div class="row"><div class="grow"><h2 style="margin:0">Truyền thông y tế</h2>');
-};
-
 /* Student sidebar filters: all / class / inactive / review */
 const __studentsPageLayout=studentsPage;
 studentsPage=function(){
   const mode=state.layoutTab.students||'all';
-  if(mode==='review'){
-    ensure(['IdentityReview'],false);
-    const list=objs('IdentityReview');
-    return '<div class="card"><div class="row"><div class="grow"><h2 style="margin:0">Chờ xác minh định danh</h2><div class="muted">Không tự ghép các trường hợp chưa chắc chắn.</div></div></div>'+
-      (list.length?'<div class="table"><table><thead><tr><th>Loại</th><th>Nguồn</th><th>Khóa nguồn</th><th>StudentID</th><th>Độ tin cậy</th><th>Trạng thái</th></tr></thead><tbody>'+list.map(x=>'<tr><td>'+esc(x.CandidateType)+'</td><td>'+esc(x.Source)+'</td><td>'+esc(x.SourceKey)+'</td><td>'+esc(x.StudentID)+'</td><td>'+esc(x.Confidence)+'</td><td>'+badge(x.Status||'')+'</td></tr>').join('')+'</tbody></table></div>':'<div class="empty">Không có trường hợp chờ xác minh.</div>')+'</div>';
-  }
   if(mode==='inactive'){
     const students=objs('Students'),sm=new Map(students.map(s=>[s.StudentID,s]));
     const list=objs('Enrollments').filter(e=>String(e.Status||'').toUpperCase()!=='ACTIVE');

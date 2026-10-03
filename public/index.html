@@ -25,15 +25,13 @@ main{min-width:0}.hero{background:linear-gradient(135deg,var(--brand),var(--bran
 @media(max-width:900px){.shell{grid-template-columns:1fr}.side{position:static;min-height:auto;display:grid;grid-template-columns:repeat(3,1fr)}.side small{grid-column:1/-1}.stats{grid-template-columns:repeat(2,1fr)}.grid2,.loginbox{grid-template-columns:1fr}.stepper{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.stats,.grid3,.formgrid,.stepper{grid-template-columns:1fr}.side{grid-template-columns:repeat(2,1fr)}.login{margin-top:15px;padding:9px}.loginbox{padding:20px}.headright .badge{display:none}.assistant{flex-wrap:wrap}.assistant input{flex-basis:100%}}
 </style><link rel="stylesheet" href="layout-v3.css"><link rel="stylesheet" href="attp-v2.css"></head>
 <body>
-<header><div class="head"><div class="brand"><div class="logo">✚</div><div>App Y tế VK<div class="muted">Trợ lý y tế học đường · V2</div></div></div><div class="headright"><span class="badge blue">PRODUCTION V2</span><span id="acct" class="badge warn">Chưa đăng nhập</span><button class="btn soft mini" onclick="openSetup()">⚙ Google</button><button id="logoutBtn" class="btn danger mini hide" onclick="logout()">Đăng xuất</button></div></div></header>
+<header><div class="head"><div class="brand"><div class="logo">✚</div><div>App Y tế VK<div class="muted">Trợ lý y tế học đường · V2</div></div></div><div class="headright"><span class="badge blue">V3</span><span id="acct" class="badge warn">Chưa đăng nhập</span><button class="btn soft mini" onclick="openPw()">🔑 Mật khẩu</button><button id="logoutBtn" class="btn danger mini hide" onclick="logout()">Đăng xuất</button></div></div></header>
 <div id="root"></div>
-<footer style="max-width:1280px;margin:auto;padding:0 18px 28px;color:#71837f;font-size:12px">App Y tế VK V2 · Google Drive/Sheets riêng tư · <a class="link" href="privacy.html">Quyền riêng tư</a> · <a class="link" href="terms.html">Điều khoản</a></footer>
+<footer style="max-width:1280px;margin:auto;padding:0 18px 28px;color:#71837f;font-size:12px">App Y tế VK V2 · Dữ liệu riêng tư trên Cloudflare · <a class="link" href="privacy.html">Quyền riêng tư</a> · <a class="link" href="terms.html">Điều khoản</a></footer>
 
-<div id="setupModal" class="modalbg" onclick="if(event.target===this)closeSetup()"><div class="modal"><div class="modalhead"><div><h2>Cấu hình Google</h2><div class="muted">V2 ưu tiên API Bridge. Khi Bridge chưa bật, app dùng quyền trực tiếp với Master Sheet như hiện tại.</div></div><button class="close" onclick="closeSetup()">×</button></div>
-<div class="formgrid" style="margin-top:14px"><div class="field wide"><label>Google Picker API key</label><input id="pickerKey" placeholder="AIza..."></div><div class="field wide"><label>Bridge Web App URL (tùy chọn)</label><input id="bridgeUrl" placeholder="https://script.google.com/macros/s/.../exec"></div></div>
-<div class="notice ok"><b>Master:</b> App Y tế VK - MASTER PRODUCTION. V2 không xóa dữ liệu cũ; Enrollment tách khỏi Student.</div>
-<div class="toolbar"><a class="btn soft" target="_blank" href="https://console.cloud.google.com/apis/library/picker.googleapis.com?project=1074784573482" style="text-decoration:none">Bật Picker API</a><a class="btn soft" target="_blank" href="https://drive.google.com/drive/folders/1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ" style="text-decoration:none">Mở Drive</a></div>
-<div id="setupMsg"></div><div class="actions"><button class="btn soft" onclick="saveSetup()">Lưu</button><button class="btn primary" onclick="saveSetup();closeSetup();startLogin()">Đăng nhập</button></div></div></div>
+<div id="pwModal" class="modalbg"><div class="modal" style="max-width:420px"><div class="modalhead"><div><h2>Đổi mật khẩu</h2><div id="pwSub" class="muted">Mật khẩu mới tối thiểu 8 ký tự, gồm cả chữ và số.</div></div><button id="pwClose" class="close" onclick="closePw()">×</button></div>
+<div class="formgrid" style="margin-top:12px"><div class="field wide"><label>Mật khẩu hiện tại</label><input id="pwOld" type="password" autocomplete="current-password"></div><div class="field wide"><label>Mật khẩu mới</label><input id="pwNew" type="password" autocomplete="new-password"></div><div class="field wide"><label>Nhập lại mật khẩu mới</label><input id="pwNew2" type="password" autocomplete="new-password" onkeydown="if(event.key==='Enter')savePw()"></div></div>
+<div id="pwMsg"></div><div class="actions"><button class="btn primary" onclick="savePw()">Lưu mật khẩu</button></div></div></div>
 
 <div id="profileModal" class="modalbg" onclick="if(event.target===this)closeProfile()"><div class="modal"><div class="modalhead"><div><h2 id="profileTitle">Hồ sơ học sinh</h2><div id="profileSub" class="muted"></div></div><button class="close" onclick="closeProfile()">×</button></div><div id="profileBody"></div></div></div>
 <div id="recordModal" class="modalbg" onclick="if(event.target===this)closeRecord()"><div class="modal"><div class="modalhead"><div><h2 id="recordTitle">Thêm bản ghi</h2><div id="recordSub" class="muted"></div></div><button class="close" onclick="closeRecord()">×</button></div><div id="recordBody"></div></div></div>
@@ -41,9 +39,7 @@ main{min-width:0}.hero{background:linear-gradient(135deg,var(--brand),var(--bran
 
 <input id="quickPhoto" type="file" accept="image/*,.pdf" capture="environment" class="hide" onchange="quickUpload(this.files[0])">
 
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://apis.google.com/js/api.js" async defer></script>
-<script src="google-sheets-connector.js"></script>
+<script src="connector.js"></script>
 <script>
 const APP_BUILD='2026.10.03.V2.4.0-ATTP';
 let state={authorized:false,user:null,role:null,page:'today',data:{},loaded:new Set(),loading:new Set(),healthTab:'meds',studentQuery:'',kitchenSession:''};
@@ -57,38 +53,43 @@ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').repl
 const colLetter=n=>{let s='';while(n>0){n--;s=String.fromCharCode(65+n%26)+s;n=Math.floor(n/26)}return s};
 
 function setAcct(t,c=''){const e=document.getElementById('acct');if(e){e.textContent=t;e.className='badge '+c}}
-function openSetup(){const c=GoogleSheetsConnector.getConfig();document.getElementById('pickerKey').value=c.pickerApiKey||'';document.getElementById('bridgeUrl').value=c.bridgeUrl||'';document.getElementById('setupModal').classList.add('open')}
-function closeSetup(){document.getElementById('setupModal').classList.remove('open')}
-function saveSetup(){GoogleSheetsConnector.saveConfig({pickerApiKey:document.getElementById('pickerKey').value,bridgeUrl:document.getElementById('bridgeUrl').value});document.getElementById('setupMsg').innerHTML='<div class="notice ok">Đã lưu cấu hình trên trình duyệt này.</div>'}
-function ensurePicker(){return new Promise((resolve,reject)=>{let n=0;const t=setInterval(()=>{n++;if(window.gapi){clearInterval(t);gapi.load('picker',resolve)}else if(n>40){clearInterval(t);reject(new Error('Không tải được Google Picker.'))}},125)})}
 
 function renderLogin(msg=''){
- const c=GoogleSheetsConnector.getConfig();
- document.getElementById('root').innerHTML='<div class="login"><div class="loginbox"><div><div class="eyebrow" style="color:#0f766e">APP Y TẾ VK · V2</div><h1>Y tế học đường theo công việc</h1><p>Bấm đăng nhập bằng tài khoản Google đã được Admin thêm. Không cần cài đặt hay cấp thêm quyền nào khác.</p>'+ (msg?'<div class="notice red">'+esc(msg)+'</div>':'') +'<div class="toolbar"><button class="btn primary" onclick="startLogin()">Đăng nhập Google</button><button class="btn soft" onclick="openSetup()">Cấu hình</button></div></div><div><div class="safe"><b>V2.2 đăng nhập trực tiếp</b><br>Đăng nhập Google → vào Dashboard. Admin được nhận diện tự động; tài khoản khác vào vai trò USER.</div><div class="notice"><b>Chế độ dữ liệu:</b> '+(c.bridgeUrl?'API Bridge':'Google Sheet trực tiếp (chuyển tiếp an toàn khi Bridge được triển khai)')+'</div></div></div></div>';
+ document.getElementById('root').innerHTML='<div class="login" style="max-width:420px"><div class="loginbox" style="grid-template-columns:1fr"><div><div class="eyebrow" style="color:#0f766e">APP Y TẾ VK</div><h1 style="font-size:28px">Đăng nhập</h1>'+(msg?'<div class="notice red">'+esc(msg)+'</div>':'')+'<div class="field" style="margin:10px 0"><label>Tên đăng nhập</label><input id="lgUser" autocomplete="username" autocapitalize="none" autofocus></div><div class="field" style="margin:10px 0"><label>Mật khẩu</label><input id="lgPass" type="password" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')startLogin()"></div><button id="lgBtn" class="btn primary" style="width:100%" onclick="startLogin()">Đăng nhập</button><p class="muted">Chưa có tài khoản? Hãy nhờ Admin tạo cho bạn.</p></div></div></div>';
 }
-
 async function startLogin(){
- try{
-  setAcct('Đang đăng nhập…','warn');
-  const c=GoogleSheetsConnector.getConfig();
-  await GoogleSheetsConnector.connect();
-  if(!c.bridgeUrl){
-    if(!c.pickerApiKey){openSetup();throw new Error('Cần Google Picker API key hoặc Bridge URL.')}
-    await ensurePicker();
-    if(!GoogleSheetsConnector.hasPickerGrant()){
-      GoogleSheetsConnector.openSpreadsheetPicker(async doc=>{if(doc.id!==GoogleSheetsConnector.PRODUCTION_MASTER_ID)return renderLogin('Hãy chọn đúng Master Production.');await authorize()});return;
-    }
-  }
-  await authorize();
- }catch(e){setAcct('Chưa đăng nhập','warn');renderLogin(e.message||String(e))}
+ const u=document.getElementById('lgUser')?.value.trim(),p=document.getElementById('lgPass')?.value;
+ if(!u||!p)return renderLogin('Nhập tên đăng nhập và mật khẩu.');
+ const b=document.getElementById('lgBtn');if(b){b.disabled=true;b.textContent='Đang đăng nhập…'}
+ try{await GoogleSheetsConnector.login(u,p);await authorize()}catch(e){renderLogin(e.message||String(e))}
 }
 async function authorize(){
- const a=await GoogleSheetsConnector.verifyUserAccess();
- state.authorized=true;state.user=a;state.role=a.role;setAcct(a.email+' · '+a.role,'');document.getElementById('logoutBtn').classList.remove('hide');
- renderShell('today');GoogleSheetsConnector.appendAudit('LOGIN_V2','Session','','Đăng nhập App Y tế VK V2').catch(()=>{});
+ const a=GoogleSheetsConnector.getUser();
+ state.authorized=true;state.user={...a,email:a.username};state.role=a.role;setAcct((a.name||a.username)+' · '+a.role,'');document.getElementById('logoutBtn').classList.remove('hide');
+ renderShell('today');
+ if(a.mustChange){openPw(true);return}
+ GoogleSheetsConnector.appendAudit('LOGIN','Session','','Đăng nhập').catch(()=>{});
  loadDashboard();
 }
-function logout(){GoogleSheetsConnector.disconnect();state={authorized:false,user:null,role:null,page:'today',data:{},loaded:new Set(),loading:new Set(),healthTab:'meds',studentQuery:'',kitchenSession:''};document.getElementById('logoutBtn').classList.add('hide');setAcct('Chưa đăng nhập','warn');renderLogin()}
+async function boot(){
+ if(!GoogleSheetsConnector.hasToken())return renderLogin();
+ try{await GoogleSheetsConnector.resume();await authorize()}catch(e){renderLogin(e.message&&!/Phiên/.test(e.message)?e.message:'')}
+}
+window.addEventListener('yte-auth-expired',()=>{if(state.authorized)logout('Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại.')});
+async function logout(msg){await GoogleSheetsConnector.logout();state={authorized:false,user:null,role:null,page:'today',data:{},loaded:new Set(),loading:new Set(),healthTab:'meds',studentQuery:'',kitchenSession:''};document.getElementById('logoutBtn').classList.add('hide');setAcct('Chưa đăng nhập','warn');renderLogin(typeof msg==='string'?msg:'')}
+function openPw(force=false){['pwOld','pwNew','pwNew2'].forEach(i=>document.getElementById(i).value='');document.getElementById('pwMsg').innerHTML='';document.getElementById('pwClose').classList.toggle('hide',force);document.getElementById('pwSub').textContent=force?'Đây là lần đầu đăng nhập: hãy đặt mật khẩu của riêng bạn (tối thiểu 8 ký tự, gồm cả chữ và số).':'Mật khẩu mới tối thiểu 8 ký tự, gồm cả chữ và số.';document.getElementById('pwModal').dataset.force=force?'1':'';document.getElementById('pwModal').classList.add('open')}
+function closePw(){document.getElementById('pwModal').classList.remove('open')}
+async function savePw(){
+ const m=document.getElementById('pwMsg'),o=pwOld.value,n=pwNew.value;
+ if(n!==pwNew2.value)return m.innerHTML='<div class="notice red">Hai lần nhập mật khẩu mới chưa giống nhau.</div>';
+ try{await GoogleSheetsConnector.changePassword(o,n);closePw();if(state.authorized){GoogleSheetsConnector.appendAudit('CHANGE_PASSWORD','User',state.user.username,'').catch(()=>{});loadDashboard()}}
+ catch(e){m.innerHTML='<div class="notice red">'+esc(e.message||e)+'</div>'}
+}
+// Mở file chứng từ (cần đăng nhập) bằng blob
+document.addEventListener('click',async e=>{
+ const a=e.target.closest&&e.target.closest('a[href^="/api/file"]');if(!a)return;e.preventDefault();
+ try{const r=await fetch(a.getAttribute('href'),{headers:{Authorization:'Bearer '+localStorage.getItem('yte_token')}});if(!r.ok)throw new Error('Không mở được file.');window.open(URL.createObjectURL(await r.blob()),'_blank')}catch(err){alert(err.message)}
+});
 
 async function ensure(keys,rerender=true){
  const need=keys.filter(k=>!state.loaded.has(k)&&!state.loading.has(k));
@@ -99,13 +100,13 @@ async function ensure(keys,rerender=true){
  if(rerender&&state.authorized)renderPage();
 }
 async function refresh(keys){keys.forEach(k=>state.loaded.delete(k));await ensure(keys,true)}
-function loadDashboard(){ensure(['Students','Enrollments','Tasks','MedicationOrders','MedicationAdministrations','Inventory','FoodSampleLog','MealSessions','Attendance','DiseaseSurveillance','IntegrationQueue'],true)}
+function loadDashboard(){ensure(['Students','Enrollments','Tasks','MedicationOrders','MedicationAdministrations','Inventory','FoodSampleLog','MealSessions','Attendance','DiseaseSurveillance'],true)}
 
 function canWrite(area){
  if(state.role==='ADMIN')return true;
  if(state.role==='USER'){
    // USER đăng nhập xong dùng ngay các nghiệp vụ; cấu hình hệ thống vẫn chỉ dành cho ADMIN.
-   return !['Users','Config','AuditLog','IdentityReview','SchoolYears','Classes'].includes(area);
+   return !['Users','Config','AuditLog','SchoolYears','Classes'].includes(area);
  }
  if(state.role==='VIEWER')return false;
  const health=['Students','Enrollments','HealthScreenings','Immunizations','MedicationOrders','MedicationAdministrations','Incidents','DiseaseSurveillance','Attendance','Tasks','Documents'];
@@ -241,7 +242,7 @@ function recordsPage(){
  '<div class="card"><div class="row"><div class="grow"><h2 style="margin:0">Truyền thông y tế</h2></div>'+(canWrite('Communication')?'<button class="btn primary" onclick="openGeneric(\'Communication\')">+ Nội dung</button>':'')+'</div>'+moduleTable('Communication',['PublishAt','Type','Title','Audience','Status'],'Nội dung truyền thông')+'</div>'
 }
 function adminPage(){
- ensure(['Users','IdentityReview','AuditLog','Config','Classes','SchoolYears'],false);
+ ensure(['Users','AuditLog','Classes','SchoolYears'],false);
  const cfg=GoogleSheetsConnector.getConfig();
  return'<div class="grid2"><div class="card"><h2>Kiến trúc V2</h2><div class="row"><div class="grow"><b>Student + Enrollment</b><div class="muted">StudentID không đổi khi đổi lớp/năm học.</div></div>'+badge('ACTIVE')+'</div><div class="row"><div class="grow"><b>API Bridge</b><div class="muted">'+(cfg.bridgeUrl?'Đang dùng Bridge; user không cần sửa Master trực tiếp.':'Đã chuẩn bị mã nguồn; chưa deploy Web App nên đang dùng quyền trực tiếp.')+'</div></div>'+badge(cfg.bridgeUrl?'BRIDGE':'DIRECT',cfg.bridgeUrl?'':'warn')+'</div><div class="row"><div class="grow"><b>Identity Review</b><div class="muted">'+objs('IdentityReview').filter(x=>x.Status==='OPEN').length+' trường hợp cần xem</div></div></div></div>'+
  '<div class="card"><div class="row"><div class="grow"><h2 style="margin:0">Người dùng</h2></div><button class="btn primary mini" onclick="openNewUser()">+ User</button></div>'+objs('Users').map(u=>'<div class="row"><div class="grow"><b>'+esc(u.DisplayName||u.Email)+'</b><div class="muted">'+esc(u.Email)+'</div></div>'+badge(u.Role||'')+'</div>').join('')+'</div></div>'+
@@ -263,13 +264,13 @@ async function saveGeneric(sheet){
 function closeRecord(){document.getElementById('recordModal').classList.remove('open')}
 
 function openDocumentUpload(prefile=null){
- document.getElementById('recordTitle').textContent='Tải tài liệu / chứng từ';document.getElementById('recordSub').textContent='File lưu trong Google Drive riêng tư; Master chỉ lưu metadata.';
+ document.getElementById('recordTitle').textContent='Tải tài liệu / chứng từ';document.getElementById('recordSub').textContent='File được lưu riêng tư trong hệ thống.';
  document.getElementById('recordBody').innerHTML='<div class="formgrid"><div class="field"><label>Loại tài liệu</label><input id="docType" placeholder="Toa thuốc / hóa đơn / phiếu giao hàng"></div><div class="field"><label>Liên kết ID</label><input id="docEntity" placeholder="StudentID / OrderID..."></div><div class="field wide"><label>File</label><input id="docFile" type="file"></div><div class="field wide"><label>Ghi chú</label><textarea id="docNote"></textarea></div></div><div id="recMsg"></div><div class="actions"><button class="btn soft" onclick="closeRecord()">Hủy</button><button class="btn primary" onclick="saveDoc()">Tải lên</button></div>';
  document.getElementById('recordModal').classList.add('open');if(prefile){const dt=new DataTransfer();dt.items.add(prefile);document.getElementById('docFile').files=dt.files}
 }
 async function saveDoc(){
  const file=document.getElementById('docFile').files[0],m=document.getElementById('recMsg');if(!file)return m.innerHTML='<div class="notice red">Chưa chọn file.</div>';
- try{m.innerHTML='<div class="notice">Đang tải lên Drive…</div>';const up=await GoogleSheetsConnector.uploadDriveFile(file);const row=['DOC-'+Date.now(),document.getElementById('docType').value||'Khác','',document.getElementById('docEntity').value||'',up.id||'',up.name||file.name,up.mimeType||file.type,new Date().toISOString(),'PENDING','PENDING',document.getElementById('docNote').value||''];await GoogleSheetsConnector.appendRows('Documents!A:K',[row]);GoogleSheetsConnector.appendAudit('UPLOAD_DOCUMENT','Documents',row[0],file.name).catch(()=>{});closeRecord();await refresh(['Documents'])}catch(e){m.innerHTML='<div class="notice red">'+esc(e.message)+'</div>'}
+ try{m.innerHTML='<div class="notice">Đang tải lên…</div>';const up=await GoogleSheetsConnector.uploadDriveFile(file);const row=['DOC-'+Date.now(),document.getElementById('docType').value||'Khác','',document.getElementById('docEntity').value||'',up.id||'',up.name||file.name,up.mimeType||file.type,new Date().toISOString(),'PENDING','PENDING',document.getElementById('docNote').value||''];await GoogleSheetsConnector.appendRows('Documents!A:K',[row]);GoogleSheetsConnector.appendAudit('UPLOAD_DOCUMENT','Documents',row[0],file.name).catch(()=>{});closeRecord();await refresh(['Documents'])}catch(e){m.innerHTML='<div class="notice red">'+esc(e.message)+'</div>'}
 }
 
 function openImport(){importState={headers:[],rows:[],map:{},fileName:''};document.getElementById('importBody').innerHTML='<div class="field"><label>Excel / CSV</label><input type="file" accept=".xlsx,.xls,.csv" onchange="readImport(this.files[0])"></div><div id="importWork"></div>';document.getElementById('importModal').classList.add('open')}
@@ -286,6 +287,6 @@ async function commitImport(){
  try{m.innerHTML='<div class="notice">Đang ghi '+sr.length+' học sinh…</div>';if(sr.length)await GoogleSheetsConnector.appendRows('Students!A:'+colLetter(sh.length),sr);if(er.length)await GoogleSheetsConnector.appendRows('Enrollments!A:'+colLetter(eh.length),er);GoogleSheetsConnector.appendAudit('IMPORT_STUDENTS_V2','Students','',importState.fileName+'; imported='+sr.length+'; skipped='+skip).catch(()=>{});closeImport();await refresh(['Students','Enrollments'])}catch(e){m.innerHTML='<div class="notice red">'+esc(e.message)+'</div>'}
 }
 
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSetup();closeProfile();closeRecord();closeImport()}});
-renderLogin();
-</script><script src="v2-workflows.js"></script><script src="layout-v3.js"></script><script src="attp-v2.js"></script><script src="kitchen-templates.js"></script><script src="integration-vk.js"></script><script src="attp-core.js"></script><script src="attp-import.js"></script><script>if("serviceWorker"in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{})</script></body></html>
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeProfile();closeRecord();closeImport()}});
+boot();
+</script><script src="v2-workflows.js"></script><script src="layout-v3.js"></script><script src="attp-v2.js"></script><script src="kitchen-templates.js"></script><script src="attp-core.js"></script><script src="attp-import.js"></script><script>if("serviceWorker"in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{})</script></body></html>

@@ -1,5 +1,5 @@
 const assert=require('assert');
-const C=require('../attp-core.js');
+const C=require('../public/attp-core.js');
 let n=0;const t=(name,fn)=>{try{fn();n++;console.log('ok  ',name)}catch(e){console.log('FAIL',name,'\n    ',e.message);process.exitCode=1}};
 
 t('ngày VN d/m/y',()=>{assert.equal(C.toDate('03/10/2026'),'2026-10-03');assert.equal(C.toDate('3-10-26'),'2026-10-03');assert.equal(C.toDate('2026-10-03'),'2026-10-03')});

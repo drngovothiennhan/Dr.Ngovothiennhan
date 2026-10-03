@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "yte-vk",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"],
+    "not_found_handling": "single-page-application"
+  },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "yte-vk", "database_id": "ced4ff33-6872-428e-af24-a0dadfb44a86" }
+  ],
+  "r2_buckets": [
+    { "binding": "FILES", "bucket_name": "yte-vk-files" }
+  ],
+  "triggers": { "crons": ["0 18 * * *"] },
+  "observability": { "enabled": true }
+}

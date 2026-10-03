@@ -1,5 +1,5 @@
 /* App Y tế VK — ATTP: nhập kiểm thực từ Excel / ảnh, xem trước & kiểm tra từng ô, lưu Drive/Sheets,
-   nhắc việc hằng ngày và kiểm tra vận hành. Phụ thuộc: attp-core.js, attp-v2.js, google-sheets-connector.js */
+   nhắc việc hằng ngày và kiểm tra vận hành. Phụ thuộc: attp-core.js, attp-v2.js, connector.js */
 (function(){
 const C=window.AttpCore;
 const SCHEMAS=C.SCHEMAS;
@@ -67,7 +67,7 @@ function importCard(target){
   if(!canWrite(sheet))return'';
   const imgOk=target==='b1';
   return'<div class="imp-card"><b>📥 Nhập nhanh từ file Excel'+(imgOk?' hoặc chụp ảnh phiếu/hóa đơn':'')+'</b>'+
-    '<span class="muted">Hệ thống tự nhận diện → bạn kiểm tra từng ô → lưu vào Google Sheets.</span>'+
+    '<span class="muted">Hệ thống tự nhận diện → bạn kiểm tra từng ô → lưu vào hệ thống.</span>'+
     '<button class="btn primary" onclick="AttpImp.open(\''+target+'\')">Chọn file'+(imgOk?' / chụp ảnh':'')+'</button>'+
     '<button class="btn soft" onclick="AttpImp.template(\''+target+'\')">Tải mẫu Excel</button></div>';
 }
@@ -230,7 +230,7 @@ function render(){
     '<div class="imp-tablewrap"><table class="imp-table"><thead><tr><th>Lưu</th><th>#</th><th>Trạng thái</th>'+fields.map(f=>'<th>'+esc(f.label)+(f.req?' *':'')+'</th>').join('')+'</tr></thead><tbody id="impBodyRows">'+
     imp.rows.map((r,i)=>'<tr data-r="'+i+'" class="'+(r.inc?'':'off')+'"><td><input type="checkbox" '+(r.inc?'checked':'')+' '+(r.dup?'disabled':'')+' onchange="AttpImp.inc('+i+',this.checked)"></td><td>'+(r.line||i+1)+'</td><td class="imp-st">'+statusHtml(r)+'</td>'+fields.map(f=>cell(r,i,f)).join('')+'</tr>').join('')+'</tbody></table></div>'+
     '<label class="notice" style="display:flex;gap:8px;align-items:flex-start;margin-top:10px"><input type="checkbox" id="impConfirm" '+(imp.confirm?'checked':'')+' onchange="AttpImp.setConfirm(this.checked)"><span>Tôi đã đối chiếu dữ liệu với '+(imp.src==='ocr'?'ảnh gốc':'file gốc / thực tế')+' và chịu trách nhiệm về tính chính xác của các dòng được lưu.</span></label>'+
-    '<div id="impMsg"></div><div class="actions"><button class="btn soft" onclick="AttpImp.close()">Hủy</button><button id="impSave" class="btn primary" '+(canSave()?'':'disabled')+' onclick="AttpImp.save()">Lưu '+stats().inc+' dòng vào Google Sheets</button></div>';
+    '<div id="impMsg"></div><div class="actions"><button class="btn soft" onclick="AttpImp.close()">Hủy</button><button id="impSave" class="btn primary" '+(canSave()?'':'disabled')+' onclick="AttpImp.save()">Lưu '+stats().inc+' dòng vào hệ thống</button></div>';
   $('impBody').innerHTML=h;
 }
 function bulkButtons(){
@@ -254,7 +254,7 @@ function refreshInPlace(){
     });
   });
   $('impSum').innerHTML=summaryHtml();
-  const b=$('impSave');if(b){b.disabled=!canSave();b.textContent='Lưu '+stats().inc+' dòng vào Google Sheets'}
+  const b=$('impSave');if(b){b.disabled=!canSave();b.textContent='Lưu '+stats().inc+' dòng vào hệ thống'}
 }
 function onChange(e){
   const t=e.target;if(!imp||!t.dataset||t.dataset.r===undefined||!t.dataset.k)return;
@@ -300,12 +300,12 @@ const act={
     const {s}=sessionCtx(),u=state.user?.email||'',now=new Date().toISOString();
     const rows=imp.rows.filter(r=>r.inc);
     if(!confirm('Lưu '+rows.length+' dòng vào sổ kiểm thực?'))return;
-    imp.saving=true;refreshInPlace();msg('Đang tải file gốc lên Drive…');
+    imp.saving=true;refreshInPlace();msg('Đang tải file gốc lên…');
     try{
       let evidence='';
       if(imp.file){const up=await GoogleSheetsConnector.uploadDriveFile(imp.file);evidence=up.id||''}
       const base=Date.now(),sch=SCHEMAS[imp.target];
-      msg('Đang ghi '+rows.length+' dòng vào Google Sheets…');
+      msg('Đang ghi '+rows.length+' dòng vào hệ thống…');
       const out=rows.map((r,i)=>C.toSheetRow(imp.target,r.v,{id:sch.prefix+'-'+base+'-'+(i+1),sessionId:s.MealSessionID,meal:s.Meal||'',evidence,
         ocrText:imp.src==='ocr'?imp.ocr.text.slice(0,4000):'',ocrConf:imp.src==='ocr'?String(imp.ocr.conf):'',status:'VERIFIED',user:u,now}));
       await GoogleSheetsConnector.appendRows(sch.range,out);
@@ -315,7 +315,7 @@ const act={
       if(imp.src==='ocr')aux.push(GoogleSheetsConnector.appendRows('OCRInbox!A:O',[['OCR-'+base,now,u,'ATTP_RECEIPT',evidence,imp.file.name,imp.ocr.text.slice(0,4000),String(imp.ocr.conf),JSON.stringify(imp.ocr.ctx),'REVIEWED',u,now,'MealSession',s.MealSessionID,now]]));
       aux.push(GoogleSheetsConnector.appendAudit('ATTP_IMPORT_'+imp.target.toUpperCase(),sch.sheet,out[0][0],'rows='+rows.length+'; source='+imp.src+'; file='+(imp.file?.name||'')));
       await Promise.allSettled(aux);
-      state.attpFlash='Đã lưu '+rows.length+' dòng ('+sch.label+') vào Google Sheets lúc '+new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})+'.';
+      state.attpFlash='Đã lưu '+rows.length+' dòng ('+sch.label+') vào hệ thống lúc '+new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})+'.';
       const t=imp.target;close();
       await refresh([sch.sheet,'Documents','OCRInbox']);
       state.attpFocus=NEXT[t];renderPage();
