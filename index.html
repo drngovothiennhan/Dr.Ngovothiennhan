@@ -46,7 +46,7 @@ main{min-width:0}.hero{background:linear-gradient(135deg,var(--brand),var(--bran
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="google-sheets-connector.js"></script>
 <script>
-const APP_BUILD='2026.10.03.V2.1-LAYOUT';
+const APP_BUILD='2026.10.03.V2.2-AUTOLOGIN';
 let state={authorized:false,user:null,role:null,page:'today',data:{},loaded:new Set(),loading:new Set(),healthTab:'meds',studentQuery:'',kitchenSession:''};
 let importState={headers:[],rows:[],map:{},fileName:''};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -65,7 +65,7 @@ function ensurePicker(){return new Promise((resolve,reject)=>{let n=0;const t=se
 
 function renderLogin(msg=''){
  const c=GoogleSheetsConnector.getConfig();
- document.getElementById('root').innerHTML='<div class="login"><div class="loginbox"><div><div class="eyebrow" style="color:#0f766e">APP Y TẾ VK · V2</div><h1>Y tế học đường theo công việc</h1><p>Dashboard không còn tải toàn bộ bảng. Dữ liệu chỉ được gọi khi cần; hồ sơ học sinh dùng StudentID cố định và Enrollment theo năm học.</p>'+ (msg?'<div class="notice red">'+esc(msg)+'</div>':'') +'<div class="toolbar"><button class="btn primary" onclick="startLogin()">Đăng nhập Google</button><button class="btn soft" onclick="openSetup()">Cấu hình</button></div></div><div><div class="safe"><b>V2 đã tái cơ cấu</b><br>Hôm nay · Học sinh · Y tế · Bếp & kho · Hồ sơ. Timeline, thuốc hôm nay và kiểm thực theo quy trình.</div><div class="notice"><b>Chế độ dữ liệu:</b> '+(c.bridgeUrl?'API Bridge':'Google Sheet trực tiếp (chuyển tiếp an toàn khi Bridge được triển khai)')+'</div></div></div></div>';
+ document.getElementById('root').innerHTML='<div class="login"><div class="loginbox"><div><div class="eyebrow" style="color:#0f766e">APP Y TẾ VK · V2</div><h1>Y tế học đường theo công việc</h1><p>Đăng nhập Google là vào dùng ngay. Không còn bước duyệt Admin/User nội bộ; dữ liệu chỉ được gọi khi cần.</p>'+ (msg?'<div class="notice red">'+esc(msg)+'</div>':'') +'<div class="toolbar"><button class="btn primary" onclick="startLogin()">Đăng nhập Google</button><button class="btn soft" onclick="openSetup()">Cấu hình</button></div></div><div><div class="safe"><b>V2.2 đăng nhập trực tiếp</b><br>Đăng nhập Google → vào Dashboard. Admin được nhận diện tự động; tài khoản khác vào vai trò USER.</div><div class="notice"><b>Chế độ dữ liệu:</b> '+(c.bridgeUrl?'API Bridge':'Google Sheet trực tiếp (chuyển tiếp an toàn khi Bridge được triển khai)')+'</div></div></div></div>';
 }
 
 async function startLogin(){
@@ -103,7 +103,12 @@ async function refresh(keys){keys.forEach(k=>state.loaded.delete(k));await ensur
 function loadDashboard(){ensure(['Students','Enrollments','Tasks','MedicationOrders','MedicationAdministrations','Inventory','FoodSamples','MealSessions','Attendance','DiseaseSurveillance'],true)}
 
 function canWrite(area){
- if(state.role==='ADMIN')return true;if(state.role==='VIEWER')return false;
+ if(state.role==='ADMIN')return true;
+ if(state.role==='USER'){
+   // USER đăng nhập xong dùng ngay các nghiệp vụ; cấu hình hệ thống vẫn chỉ dành cho ADMIN.
+   return !['Users','Config','AuditLog','IdentityReview','SchoolYears','Classes'].includes(area);
+ }
+ if(state.role==='VIEWER')return false;
  const health=['Students','Enrollments','HealthScreenings','Immunizations','MedicationOrders','MedicationAdministrations','Incidents','DiseaseSurveillance','Attendance','Tasks','Documents'];
  const food=['FoodB1','FoodB2','FoodB3','FoodSamples','MealSessions','Inventory','Tasks','Documents'];
  return state.role==='NVYT'?health.includes(area):state.role==='ATTP'?food.includes(area):false;
