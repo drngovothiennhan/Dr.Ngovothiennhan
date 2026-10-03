@@ -114,9 +114,6 @@ function selectContext(key){
     if(key==='tasks'){document.querySelector('#main .assistant')?.scrollIntoView({behavior:'smooth'});return}
   }
   if(state.page==='students'&&key==='review'){ensure(['IdentityReview'],true);return}
-  if(state.page==='portal'){
-    return '<aside class="right-sidebar"><h3>Liên kết Vành Khuyên</h3>'+quickMetric('👧','Projection',objs('PortalProjection').length,'')+quickMetric('☷','Chờ đồng bộ',objs('IntegrationQueue').filter(x=>String(x.Status||'').toUpperCase()!==\'DONE\').length,'')+'<div class="quick-block"><b>Nguyên tắc</b><div class="muted">Chỉ chia sẻ dữ liệu tối thiểu cần cho cổng trường; hồ sơ y tế nhạy cảm vẫn ở App Y tế VK.</div></div></aside>';
-  }
   if(state.page==='records'){
     const map={docs:'documentsPanel',sources:'sourcesPanel',communication:'communicationPanel'};
     setTimeout(()=>document.getElementById(map[key]||'documentsPanel')?.scrollIntoView({behavior:'smooth',block:'start'}),50);
@@ -171,6 +168,13 @@ function rightPanelHtml(){
       quickMetric('📦','Lô gần HSD',expiringLots().length,'selectContext("inventory")')+
       quickMetric('🧪','Mẫu cần xử lý',dueSamples().length,'selectContext("sample")')+
       '<div class="quick-block"><b>Quy trình chuẩn</b><div class="muted">B1 nhận thực phẩm → B2 chế biến → B3 trước khi ăn → lưu mẫu. Mỗi bước dùng chung MealSessionID.</div></div></aside>';
+  }
+  if(state.page==='portal'){
+    const pending=objs('IntegrationQueue').filter(x=>String(x.Status||'').toUpperCase()!=='DONE').length;
+    return '<aside class="right-sidebar"><h3>Liên kết Vành Khuyên</h3>'+
+      quickMetric('👧','Projection',objs('PortalProjection').filter(x=>x.StudentID).length,'')+
+      quickMetric('☷','Chờ đồng bộ',pending,'selectContext("queue")')+
+      '<div class="quick-block"><b>Nguyên tắc</b><div class="muted">Chỉ chia sẻ dữ liệu tối thiểu cần cho cổng trường; hồ sơ y tế nhạy cảm vẫn ở App Y tế VK.</div></div></aside>';
   }
   if(state.page==='records'){
     const staging=objs('SourceRegistry').filter(x=>/STAGING|REVIEW/i.test(x.ImportStatus||'')).length;
