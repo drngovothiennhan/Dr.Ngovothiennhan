@@ -1,0 +1,134 @@
+
+/* App Y tế VK V2.1 — workspace layout inspired by the approved wireframe */
+:root{
+  --rail-w:64px;
+  --side-w:226px;
+  --right-w:278px;
+  --status-h:32px;
+}
+body{padding-bottom:var(--status-h)}
+.workspace{
+  max-width:1500px;
+  margin:0 auto;
+  padding:12px;
+  display:grid;
+  grid-template-columns:var(--rail-w) var(--side-w) minmax(0,1fr) var(--right-w);
+  gap:10px;
+  align-items:start;
+}
+.left-rail{
+  position:sticky;top:76px;height:calc(100vh - 88px - var(--status-h));
+  background:#0c3934;border-radius:18px;padding:8px 6px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  box-shadow:var(--shadow);z-index:12
+}
+.rail-btn{
+  width:48px;height:48px;border:0;border-radius:14px;background:transparent;color:#cbe5df;
+  display:grid;place-items:center;font-size:21px;position:relative
+}
+.rail-btn:hover,.rail-btn.active{background:#17665d;color:#fff}
+.rail-btn .rail-label{
+  position:absolute;left:58px;white-space:nowrap;background:#173c37;color:#fff;padding:6px 8px;border-radius:8px;
+  font-size:11px;font-weight:800;opacity:0;pointer-events:none;transform:translateX(-4px);transition:.15s
+}
+.rail-btn:hover .rail-label{opacity:1;transform:none}
+.rail-spacer{flex:1}.rail-avatar{
+  width:42px;height:42px;border-radius:50%;background:#e7f5f2;color:#0f665c;display:grid;place-items:center;
+  font-weight:900;font-size:13px;border:2px solid rgba(255,255,255,.7)
+}
+.context-sidebar{
+  position:sticky;top:76px;height:calc(100vh - 88px - var(--status-h));
+  background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);
+  padding:12px;overflow:auto
+}
+.context-head{padding:5px 7px 10px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.context-head b{display:block;font-size:14px}.context-head small{color:var(--muted)}
+.context-group-label{font-size:10px;font-weight:900;letter-spacing:.08em;color:#91a39f;margin:13px 8px 5px}
+.context-btn{
+  width:100%;display:flex;align-items:center;gap:9px;border:0;background:transparent;color:#526963;
+  border-radius:11px;padding:9px 10px;text-align:left;font-weight:750;font-size:13px
+}
+.context-btn:hover,.context-btn.on{background:#eaf6f3;color:#0b5e55}
+.context-btn .count{margin-left:auto;min-width:24px;text-align:center;padding:2px 6px;border-radius:999px;background:#eef4f2;font-size:10px}
+.center-stage{min-width:0}
+.workspace-tabs{
+  background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
+  padding:7px;display:flex;gap:6px;overflow:auto;margin-bottom:10px;position:sticky;top:76px;z-index:10
+}
+.workspace-tabs button{
+  flex:1;min-width:120px;border:0;background:#f5f9f8;color:#627772;border-radius:10px;
+  padding:9px 11px;font-weight:850;white-space:nowrap
+}
+.workspace-tabs button.active,.workspace-tabs button:hover{background:#0f766e;color:#fff}
+#main{min-width:0}
+.right-sidebar{
+  position:sticky;top:76px;height:calc(100vh - 88px - var(--status-h));
+  background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);
+  padding:13px;overflow:auto
+}
+.right-sidebar h3{font-size:14px;margin:3px 0 9px}
+.quick-block{padding:11px;border:1px solid var(--line);border-radius:13px;background:#fbfdfc;margin:9px 0}
+.quick-block b{font-size:12px}.quick-block .muted{margin-top:3px}
+.quick-list .row{padding:8px 0}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
+.quick-actions .btn{padding:8px 9px;font-size:11px}
+.status-bar{
+  position:fixed;left:0;right:0;bottom:0;height:var(--status-h);z-index:70;
+  background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:14px;padding:0 max(12px,calc((100vw - 1500px)/2 + 12px));font-size:11px;color:#667d78
+}
+.status-item{display:flex;align-items:center;gap:5px;white-space:nowrap}.status-dot{width:7px;height:7px;border-radius:50%;background:#16a34a}.status-dot.warn{background:#f59e0b}.status-dot.off{background:#ef4444}
+.status-spacer{flex:1}
+.main-section-head{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);
+  border-radius:16px;padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow)
+}
+.main-section-head .grow h1{font-size:20px;margin:0 0 2px}
+.mobile-side-toggle,.mobile-context-toggle{display:none}
+body.layout-compact header .head{max-width:1500px}
+body.layout-compact footer{max-width:1500px}
+
+/* Existing V2 content adapts to the new canvas */
+.center-stage .hero{border-radius:18px}
+.center-stage .card{box-shadow:none}
+.center-stage .assistant{box-shadow:none}
+.center-stage .stats{margin-top:10px}
+.center-stage .tabs{display:none} /* health tabs are promoted to workspace tabs */
+.center-stage .grid2{gap:10px}
+.center-stage .table{max-height:62vh}
+
+/* Tablet */
+@media(max-width:1180px){
+  :root{--right-w:238px;--side-w:205px}
+  .workspace{grid-template-columns:58px var(--side-w) minmax(0,1fr)}
+  .right-sidebar{display:none}
+  .mobile-context-toggle{display:inline-flex}
+}
+/* Mobile: rail becomes bottom nav, contextual sidebar becomes horizontal drawer */
+@media(max-width:780px){
+  body{padding-bottom:72px}
+  header .head{padding:9px 10px}.headright{gap:5px}
+  .workspace{display:block;padding:8px}
+  .left-rail{
+    position:fixed;left:8px;right:8px;bottom:8px;top:auto;height:58px;border-radius:18px;
+    flex-direction:row;justify-content:space-around;padding:5px;z-index:90
+  }
+  .rail-btn{width:44px;height:44px;font-size:19px}.rail-btn .rail-label{display:none}.rail-spacer,.rail-avatar{display:none}
+  .context-sidebar{
+    position:static;height:auto;display:flex;gap:6px;overflow:auto;padding:7px;margin-bottom:8px;border-radius:15px
+  }
+  .context-head,.context-group-label{display:none}
+  .context-btn{width:auto;white-space:nowrap;padding:8px 10px;background:#f4f8f7}
+  .context-btn .count{display:none}
+  .workspace-tabs{position:static;border-radius:14px;margin-bottom:8px}
+  .workspace-tabs button{min-width:105px;padding:8px 9px;font-size:12px}
+  .right-sidebar{display:none}
+  .status-bar{height:26px;bottom:72px;padding:0 10px;gap:8px}.status-bar .hide-mobile{display:none}
+  .main-section-head{padding:10px 11px}.main-section-head .grow h1{font-size:18px}
+  .center-stage .table{max-height:none}
+}
+@media(max-width:520px){
+  .workspace-tabs button{min-width:96px}
+  .headright .btn.soft{display:none}
+  .center-stage .stats{grid-template-columns:repeat(2,1fr)}
+}
