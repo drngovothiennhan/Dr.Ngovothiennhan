@@ -113,38 +113,182 @@ async function authorizeAndLoad(){
 function logout(){try{GoogleSheetsConnector.disconnect()}catch(_){}appState={authorized:false,user:null,role:null,data:{},page:'home'};document.getElementById('logoutBtn').style.display='none';setAccount('Chưa đăng nhập','amber');renderLogin()}
 
 function navButton(p,label){return '<button data-page="'+p+'" onclick="renderShell(\''+p+'\')">'+label+'</button>'}
+function canWrite(sheet){
+ if(appState.role==='ADMIN')return true;
+ if(appState.role==='VIEWER')return false;
+ const health=['Students','HealthScreenings','Immunizations','MedicationOrders','MedicationAdministrations','Incidents','DiseaseSurveillance','Documents','Tasks'];
+ const food=['FoodB1','FoodB2','FoodB3','FoodSamples','Inventory','Documents','Tasks'];
+ return appState.role==='NVYT'?health.includes(sheet):appState.role==='ATTP'?food.includes(sheet):false;
+}
+function navButton(p,label){return '<button data-page="'+p+'" onclick="renderShell(\''+p+'\')">'+label+'</button>'}
 function renderShell(page='home'){
  if(!appState.authorized)return renderLogin();
  appState.page=page;
  document.getElementById('root').innerHTML='<div class="app"><nav><small>TỔNG QUAN</small>'+navButton('home','⌂ Hôm nay')+
- '<small>Y TẾ HỌC ĐƯỜNG</small>'+navButton('students','👧 Hồ sơ học sinh')+navButton('health','🩺 Khám sức khỏe')+navButton('vaccines','💉 Tiêm chủng')+navButton('meds','💊 Thuốc học sinh')+navButton('incidents','🩹 Tai nạn & sơ cứu')+
- '<small>ATTP & VẬN HÀNH</small>'+navButton('food','🍲 Kiểm thực 3 bước')+navButton('inventory','📦 Kho thực phẩm & sữa')+navButton('docs','📄 Tài liệu & chứng từ')+navButton('data','🔌 Dữ liệu & kết nối')+
+ '<small>Y TẾ HỌC ĐƯỜNG</small>'+navButton('students','👧 Hồ sơ học sinh')+navButton('health','🩺 Khám sức khỏe')+navButton('vaccines','💉 Tiêm chủng')+navButton('meds','💊 Thuốc học sinh')+navButton('medgiven','⏱ Cho uống thuốc')+navButton('incidents','🩹 Tai nạn & sơ cứu')+navButton('disease','🦠 Theo dõi bệnh')+
+ '<small>ATTP & VẬN HÀNH</small>'+navButton('food','🍲 Kiểm thực 3 bước')+navButton('inventory','📦 Kho thực phẩm & sữa')+navButton('docs','📄 Tài liệu & chứng từ')+navButton('tasks','✅ Công việc')+navButton('data','🔌 Dữ liệu & kết nối')+
  (appState.role==='ADMIN'?'<small>QUẢN TRỊ</small>'+navButton('admin','⚙ Quản trị'):'')+
  '</nav><main id="main"></main></div>';
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
  document.getElementById('main').innerHTML=(pages[page]||pages.home)();
 }
-
+function modulePage(title,key,cols){
+ const objs=toObjects(appState.data[key]||[]);
+ const add=canWrite(key)?'<button class="btn primary" onclick="openRecordModal(\''+key+'\')">+ Thêm mới</button>':'';
+ const head='<div class="card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;flex:1">'+esc(title)+'</h2>'+add+'</div>';
+ if(!objs.length)return head+'<div class="empty">Chưa có dữ liệu production.</div></div>';
+ return head+'<div class="table" style="margin-top:12px"><table><thead><tr>'+cols.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'+objs.slice().reverse().map(o=>'<tr>'+cols.map(c=>'<td>'+esc(o[c]||'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></div>';
+}
+function foodPage(){
+ const w=canWrite('FoodB1');
+ return '<div class="card"><h2>ATTP & kiểm thực 3 bước</h2><div class="stats"><div class="stat"><b>'+countRows('FoodB1')+'</b><span>Bước 1</span></div><div class="stat"><b>'+countRows('FoodB2')+'</b><span>Bước 2</span></div><div class="stat"><b>'+countRows('FoodB3')+'</b><span>Bước 3</span></div><div class="stat"><b>'+countRows('FoodSamples')+'</b><span>Lưu mẫu</span></div></div>'+
+ (w?'<div class="toolbar"><button class="btn primary" onclick="openRecordModal(\'FoodB1\')">+ Bước 1</button><button class="btn primary" onclick="openRecordModal(\'FoodB2\')">+ Bước 2</button><button class="btn primary" onclick="openRecordModal(\'FoodB3\')">+ Bước 3</button><button class="btn primary" onclick="openRecordModal(\'FoodSamples\')">+ Lưu mẫu</button></div>':'')+
+ '<div class="notice ok">Mọi bản ghi được lưu trực tiếp vào Master Production và ghi AuditLog.</div></div>';
+}
 const pages={
- home:()=>'<section class="hero"><div class="eyebrow">APP Y TẾ VK · PRODUCTION</div><h1>Hôm nay</h1><p>Dữ liệu được đọc trực tiếp từ Master Sheet riêng tư sau khi xác thực Google.</p></section>'+
+ home:()=>'<section class="hero"><div class="eyebrow">APP Y TẾ VK · PRODUCTION</div><h1>Hôm nay</h1><p>Dữ liệu được đọc và ghi trực tiếp vào Master Sheet riêng tư sau xác thực Google.</p></section>'+
  '<div class="stats"><div class="stat"><b>'+countRows('Students')+'</b><span>Học sinh</span></div><div class="stat"><b>'+countRows('Tasks')+'</b><span>Công việc</span></div><div class="stat"><b>'+countRows('Inventory')+'</b><span>Lô kho</span></div><div class="stat"><b>'+countRows('Incidents')+'</b><span>Sự cố</span></div></div>'+
- '<div class="grid"><div class="card"><h2>Sẵn sàng nhập dữ liệu thật</h2><div class="notice ok">Production master đang tách biệt hoàn toàn với bản demo. Bước kế tiếp có thể nhập danh sách học sinh qua Preview → Mapping → Xác nhận.</div><button class="btn primary" onclick="alert(\'Hệ thống đã sẵn sàng. Hãy cung cấp file học sinh ở bước tiếp theo.\')">Nhập danh sách học sinh</button></div><div class="card"><h2>Phiên hiện tại</h2><div class="row"><div class="grow"><b>'+esc(appState.user?.name||'')+'</b><div class="muted">'+esc(appState.user?.email||'')+'</div></div>'+badge(appState.role)+'</div><div class="muted">Quyền Google: drive.file · chỉ file được chọn.</div></div></div>',
- students:()=>tablePage('Hồ sơ học sinh','Students',['StudentID','FullName','DOB','Gender','Class','HealthNotes','Status']),
- health:()=>tablePage('Khám sức khỏe','HealthScreenings',['ScreeningID','StudentID','ExamDate','ExamUnit','ExamType','GeneralResult','Recommendation','ReviewStatus']),
- vaccines:()=>tablePage('Tiêm chủng','Immunizations',['ImmunizationID','StudentID','VaccineName','DoseNumber','DateGiven','Status']),
- meds:()=>tablePage('Thuốc học sinh','MedicationOrders',['OrderID','StudentID','DrugName','Dose','Route','Schedule','StartDate','EndDate','Status']),
- incidents:()=>tablePage('Tai nạn & sơ cứu','Incidents',['IncidentID','StudentID','OccurredAt','Location','IncidentType','FirstAid','Status']),
- inventory:()=>tablePage('Kho thực phẩm & sữa','Inventory',['LotID','ItemName','Group','ReceivedDate','ExpiryDate','CurrentQty','Unit','ExpiryStatus']),
- docs:()=>tablePage('Tài liệu & chứng từ','Documents',['DocumentID','DocumentType','RelatedEntityType','RelatedEntityID','FileName','CapturedAt','VerificationStatus']),
- food:()=>'<div class="card"><h2>ATTP & kiểm thực 3 bước</h2><div class="stats"><div class="stat"><b>'+countRows('FoodB1')+'</b><span>Bước 1</span></div><div class="stat"><b>'+countRows('FoodB2')+'</b><span>Bước 2</span></div><div class="stat"><b>'+countRows('FoodB3')+'</b><span>Bước 3</span></div><div class="stat"><b>'+countRows('FoodSamples')+'</b><span>Lưu mẫu</span></div></div><div class="notice ok">Các bảng production đã sẵn sàng; chưa có dữ liệu mẫu.</div></div>',
- data:()=>'<div class="card"><h2>Dữ liệu & kết nối</h2><div class="row"><div class="grow"><b>Master production</b><div class="muted">169Iu_tlE8LkbSLsNiEsnTdkjyLSsVzDM7_fQl_HTXUI</div></div>'+badge('CONNECTED')+'</div><div class="row"><div class="grow"><b>Google OAuth</b><div class="muted">drive.file + openid/email/profile</div></div>'+badge('MINIMUM SCOPE')+'</div><div class="row"><div class="grow"><b>App Y tế VK trên Drive</b><div class="muted">Dữ liệu · chứng từ · nhập liệu · backup · cấu hình</div></div><button class="btn soft" onclick="window.open(\'https://drive.google.com/drive/folders/1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ\',\'_blank\')">Mở Drive</button></div><div class="toolbar"><button class="btn soft" onclick="openSetup()">Cấu hình Google Picker</button><button class="btn soft" onclick="GoogleSheetsConnector.openSpreadsheetPicker(()=>authorizeAndLoad())">Chọn lại Master Sheet</button></div></div>',
- admin:()=>'<div class="card"><h2>Quản trị</h2><div class="notice ok">Role hiện tại: ADMIN. Có thể tạo tài khoản sử dụng ngay bằng email Google.</div><div class="modules"><div class="module" onclick="showUserManager()"><b>Người dùng</b><small>Tạo nhanh · ADMIN · NVYT · ATTP · VIEWER</small></div><div class="module" onclick="showAudit()"><b>Audit Log</b><small>Đăng nhập và thao tác ghi</small></div><div class="module"><b>Backup</b><small>Thư mục 04_Backup đã sẵn sàng</small></div></div><div id="adminDetail" style="margin-top:12px"></div></div>'
+ '<div class="grid"><div class="card"><h2>Nhập dữ liệu</h2><div class="notice ok">Preview → Mapping → kiểm tra trùng → Xác nhận → Master Production.</div><div class="toolbar">'+(canWrite('Students')?'<button class="btn primary" onclick="openStudentImport()">Nhập danh sách học sinh</button><button class="btn soft" onclick="openRecordModal(\'Students\')">+ Thêm 1 học sinh</button>':'')+'</div></div><div class="card"><h2>Phiên hiện tại</h2><div class="row"><div class="grow"><b>'+esc(appState.user?.name||'')+'</b><div class="muted">'+esc(appState.user?.email||'')+'</div></div>'+badge(appState.role)+'</div><div class="muted">Quyền Google: drive.file · dữ liệu riêng tư.</div></div></div>',
+ students:()=>modulePage('Hồ sơ học sinh','Students',['StudentID','FullName','DOB','Gender','Class','GuardianPhone','HealthNotes','Status']),
+ health:()=>modulePage('Khám sức khỏe','HealthScreenings',['ScreeningID','StudentID','ExamDate','ExamUnit','ExamType','HeightCm','WeightKg','GeneralResult','Recommendation','ReviewStatus']),
+ vaccines:()=>modulePage('Tiêm chủng','Immunizations',['ImmunizationID','StudentID','VaccineName','DoseNumber','DateGiven','Status']),
+ meds:()=>modulePage('Thuốc học sinh','MedicationOrders',['OrderID','StudentID','DrugName','Strength','Dose','Route','Schedule','StartDate','EndDate','Status']),
+ medgiven:()=>modulePage('Theo dõi cho uống thuốc','MedicationAdministrations',['AdministrationID','OrderID','StudentID','ScheduledAt','GivenAt','DoseGiven','PerformedBy','Status','Note']),
+ incidents:()=>modulePage('Tai nạn & sơ cứu','Incidents',['IncidentID','StudentID','OccurredAt','Location','IncidentType','Description','FirstAid','TransferRequired','Status']),
+ disease:()=>modulePage('Theo dõi bệnh truyền nhiễm','DiseaseSurveillance',['CaseID','StudentID','Class','ReportedDate','Symptoms','SuspectedCondition','Absent','ClusterFlag','Action','Status']),
+ food:()=>foodPage(),
+ inventory:()=>modulePage('Kho thực phẩm & sữa','Inventory',['LotID','ItemName','Group','ReceivedDate','ExpiryDate','BatchNo','CurrentQty','Unit','StorageLocation','ExpiryStatus']),
+ docs:()=>'<div class="card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;flex:1">Tài liệu & chứng từ</h2>'+(canWrite('Documents')?'<button class="btn primary" onclick="openDocumentUpload()">+ Tải tài liệu</button>':'')+'</div><div style="margin-top:12px">'+modulePage('Danh sách tài liệu','Documents',['DocumentID','DocumentType','RelatedEntityType','RelatedEntityID','FileName','CapturedAt','OCRStatus','VerificationStatus'])+'</div></div>',
+ tasks:()=>modulePage('Công việc','Tasks',['TaskID','TaskType','Title','DueAt','Priority','Status','AssignedTo','CompletedAt','Note']),
+ data:()=>'<div class="card"><h2>Dữ liệu & kết nối</h2><div class="row"><div class="grow"><b>Master production</b><div class="muted">App Y tế VK - MASTER PRODUCTION</div></div>'+badge('CONNECTED')+'</div><div class="row"><div class="grow"><b>Google OAuth</b><div class="muted">drive.file + openid/email/profile</div></div>'+badge('MINIMUM SCOPE')+'</div><div class="row"><div class="grow"><b>App Y tế VK trên Drive</b><div class="muted">Dữ liệu · chứng từ · nhập liệu · backup · cấu hình</div></div><button class="btn soft" onclick="window.open(\'https://drive.google.com/drive/folders/1xfcLkDysWdNKjQ2USVHrh8MBnYF6M4wQ\',\'_blank\')">Mở Drive</button></div><div class="toolbar"><button class="btn soft" onclick="refreshData()">↻ Làm mới dữ liệu</button><button class="btn soft" onclick="openSetup()">Cấu hình Google</button></div></div>',
+ admin:()=>'<div class="card"><h2>Quản trị</h2><div class="notice ok">Role hiện tại: ADMIN. Tạo user, cấp quyền dữ liệu và AuditLog.</div><div class="modules"><div class="module" onclick="showUserManager()"><b>Người dùng</b><small>Tạo nhanh · cấp quyền Master</small></div><div class="module" onclick="showAudit()"><b>Audit Log</b><small>Đăng nhập và thao tác ghi</small></div><div class="module" onclick="window.open(\'https://drive.google.com/drive/folders/1EOCDplX_QWHpxTqB-M6JL6lsAl3XCX7q\',\'_blank\')"><b>Backup</b><small>Mở thư mục sao lưu</small></div></div><div id="adminDetail" style="margin-top:12px"></div></div>'
 };
 
-function tablePage(title,key,cols){
- const objs=toObjects(appState.data[key]||[]);
- if(!objs.length)return '<div class="card"><h2>'+title+'</h2><div class="empty">Chưa có dữ liệu production.</div></div>';
- return '<div class="card"><h2>'+title+'</h2><div class="table"><table><thead><tr>'+cols.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'+objs.map(o=>'<tr>'+cols.map(c=>'<td>'+esc(o[c]||'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></div>';
+function idPrefix(sheet){
+ return {Students:'STU',HealthScreenings:'SCR',Immunizations:'IMM',MedicationOrders:'MED',MedicationAdministrations:'ADM',Incidents:'INC',DiseaseSurveillance:'DIS',FoodB1:'B1',FoodB2:'B2',FoodB3:'B3',FoodSamples:'SMP',Inventory:'LOT',Documents:'DOC',Tasks:'TSK'}[sheet]||'REC';
+}
+function isAutoField(h,i){return (i===0&&/ID$/.test(h))||h==='UpdatedAt'||h==='CapturedAt'||h==='CheckedBy'||h==='PerformedBy'||h==='StoredBy';}
+function defaultValue(h,i,sheet){
+ if(i===0&&/ID$/.test(h))return idPrefix(sheet)+'-'+Date.now();
+ if(['UpdatedAt','CapturedAt'].includes(h))return new Date().toISOString();
+ if(['CheckedBy','PerformedBy','StoredBy'].includes(h))return appState.user?.email||'';
+ if(h==='Source')return 'APP_WEB';
+ if(h==='Status')return 'ACTIVE';
+ if(['ReviewStatus','VerificationStatus','OCRStatus'].includes(h))return 'PENDING';
+ return '';
+}
+function fieldHtml(h,i,sheet){
+ const val=defaultValue(h,i,sheet), ro=isAutoField(h,i)?' readonly':'';
+ const lower=h.toLowerCase();
+ if(lower.includes('note')||lower.includes('description')||lower.includes('recommendation')||lower.includes('symptoms')||lower.includes('action'))return '<div class="field wide"><label>'+esc(h)+'</label><textarea data-field="'+i+'"'+ro+'>'+esc(val)+'</textarea></div>';
+ const type=(lower.includes('date')||lower.endsWith('at'))?'text':(/qty|amount|height|weight|bmi|servings|temp|daysremaining|dose(number)?$/.test(lower)?'number':'text');
+ return '<div class="field"><label>'+esc(h)+'</label><input data-field="'+i+'" type="'+type+'" value="'+esc(val)+'"'+ro+'></div>';
+}
+let activeRecordSheet=null;
+function openRecordModal(sheet){
+ if(!canWrite(sheet))return;
+ const values=appState.data[sheet]||[], headers=values[0]||[];
+ if(!headers.length){alert('Không đọc được cấu trúc bảng '+sheet);return}
+ activeRecordSheet=sheet;
+ document.getElementById('recordTitle').textContent='Thêm dữ liệu · '+sheet;
+ document.getElementById('recordSub').textContent='Lưu trực tiếp vào Master Production.';
+ document.getElementById('recordBody').innerHTML='<div class="form-grid">'+headers.map((h,i)=>fieldHtml(h,i,sheet)).join('')+'</div><div id="recordMsg"></div><div class="actions"><button class="btn soft" onclick="closeRecordModal()">Hủy</button><button class="btn primary" onclick="saveRecord()">Lưu</button></div>';
+ document.getElementById('recordModal').classList.add('open');
+}
+function closeRecordModal(){document.getElementById('recordModal').classList.remove('open');activeRecordSheet=null}
+async function saveRecord(){
+ const sheet=activeRecordSheet;if(!sheet)return;
+ const headers=(appState.data[sheet]||[])[0]||[];
+ const vals=headers.map((_,i)=>document.querySelector('#recordBody [data-field="'+i+'"]')?.value||'');
+ const msg=document.getElementById('recordMsg');
+ try{
+   msg.innerHTML='<div class="notice">Đang lưu…</div>';
+   await GoogleSheetsConnector.appendRows(sheet+'!A:'+colLetter(headers.length),[vals]);
+   try{await GoogleSheetsConnector.appendAudit('CREATE_RECORD',sheet,vals[0]||'', 'Tạo bản ghi từ ứng dụng')}catch(_){}
+   await refreshData(false); closeRecordModal(); renderShell(appState.page);
+ }catch(e){msg.innerHTML='<div class="notice">'+esc(e.message||e)+'</div>'}
+}
+function colLetter(n){let s='';while(n>0){n--;s=String.fromCharCode(65+n%26)+s;n=Math.floor(n/26)}return s}
+async function refreshData(render=true){
+ appState.data=await GoogleSheetsConnector.loadProductionData();
+ if(render)renderShell(appState.page);
+}
+function openDocumentUpload(){
+ if(!canWrite('Documents'))return;
+ activeRecordSheet='Documents';
+ document.getElementById('recordTitle').textContent='Tải tài liệu / chứng từ';
+ document.getElementById('recordSub').textContent='File được lưu trong 02_Tài liệu & chứng từ; metadata ghi vào Master.';
+ document.getElementById('recordBody').innerHTML='<div class="field"><label>Loại tài liệu</label><input id="docType" placeholder="Toa thuốc / hóa đơn / phiếu giao hàng..."></div><div class="field" style="margin-top:10px"><label>Liên kết đối tượng</label><input id="docEntity" placeholder="StudentID / OrderID / RecordID..."></div><div class="field" style="margin-top:10px"><label>Chọn file</label><input id="docFile" type="file"></div><div class="field wide" style="margin-top:10px"><label>Ghi chú</label><textarea id="docNote"></textarea></div><div id="recordMsg"></div><div class="actions"><button class="btn soft" onclick="closeRecordModal()">Hủy</button><button class="btn primary" onclick="saveDocumentUpload()">Tải lên & lưu</button></div>';
+ document.getElementById('recordModal').classList.add('open');
+}
+async function saveDocumentUpload(){
+ const file=document.getElementById('docFile')?.files?.[0],msg=document.getElementById('recordMsg');
+ if(!file){msg.innerHTML='<div class="notice">Hãy chọn file.</div>';return}
+ try{
+   msg.innerHTML='<div class="notice">Đang tải file lên Google Drive…</div>';
+   const up=await GoogleSheetsConnector.uploadDriveFile(file);
+   const row=['DOC-'+Date.now(),document.getElementById('docType').value||'Khác','',document.getElementById('docEntity').value||'',up.id||'',up.name||file.name,up.mimeType||file.type,new Date().toISOString(),'PENDING','PENDING',document.getElementById('docNote').value||''];
+   await GoogleSheetsConnector.appendRows('Documents!A:K',[row]);
+   try{await GoogleSheetsConnector.appendAudit('UPLOAD_DOCUMENT','Documents',row[0],up.name||file.name)}catch(_){}
+   await refreshData(false);closeRecordModal();renderShell('docs');
+ }catch(e){msg.innerHTML='<div class="notice">'+esc(e.message||e)+'</div>'}
+}
+
+let studentImport={headers:[],rows:[],map:{},fileName:''};
+function openStudentImport(){
+ document.getElementById('importBody').innerHTML='<div class="field"><label>Chọn Excel / CSV</label><input id="studentFile" type="file" accept=".xlsx,.xls,.csv" onchange="readStudentFile(this.files[0])"></div><div id="importWork"></div>';
+ document.getElementById('importModal').classList.add('open');
+}
+function closeImportModal(){document.getElementById('importModal').classList.remove('open');studentImport={headers:[],rows:[],map:{},fileName:''}}
+function norm(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'')}
+function autoMap(headers,target){
+ const aliases={FullName:['hoten','hovaten','fullname','tenhocsinh'],DOB:['ngaysinh','dob','birthdate'],Gender:['gioitinh','gender'],Class:['lop','class'],GuardianName:['phuhuynh','hotenphuhuynh','guardianname'],GuardianPhone:['sodienthoai','sdt','dienthoai','guardianphone'],BHYT:['bhyt','sothebhyt'],NationalID:['cccd','cmnd','nationalid','dinhdanhcanhan'],Address:['diachi','address'],HealthNotes:['ghichusuckhoe','healthnotes','ghichu'],Status:['trangthai','status']};
+ const hs=headers.map(norm), a=aliases[target]||[norm(target)];
+ const i=hs.findIndex(x=>a.includes(x)); return i>=0?String(i):'';
+}
+async function readStudentFile(file){
+ const w=document.getElementById('importWork');
+ if(!file)return;
+ try{
+   if(!window.XLSX)throw new Error('Thư viện đọc Excel chưa tải được. Hãy tải lại trang và thử lại.');
+   const buf=await file.arrayBuffer(), wb=XLSX.read(buf,{type:'array',cellDates:false});
+   const ws=wb.Sheets[wb.SheetNames[0]], data=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});
+   if(data.length<2)throw new Error('File không có dữ liệu.');
+   studentImport={headers:data[0].map(x=>String(x||'').trim()),rows:data.slice(1).filter(r=>r.some(x=>String(x||'').trim())),map:{},fileName:file.name};
+   renderStudentMapping();
+ }catch(e){w.innerHTML='<div class="notice">'+esc(e.message||e)+'</div>'}
+}
+function renderStudentMapping(){
+ const targets=['FullName','DOB','Gender','Class','GuardianName','GuardianPhone','BHYT','NationalID','Address','HealthNotes','Status'];
+ const opts='<option value="">-- Không nhập --</option>'+studentImport.headers.map((h,i)=>'<option value="'+i+'">'+esc(h||('Cột '+(i+1)))+'</option>').join('');
+ let html='<div class="notice ok">Đã đọc '+studentImport.rows.length+' dòng. Kiểm tra mapping trước khi xác nhận.</div><div class="form-grid">';
+ html+=targets.map(t=>{const v=autoMap(studentImport.headers,t);studentImport.map[t]=v;return '<div class="field"><label>'+t+(t==='FullName'?' *':'')+'</label><select data-map="'+t+'" onchange="studentImport.map[\''+t+'\']=this.value">'+opts.replace('value="'+v+'"','value="'+v+'" selected')+'</select></div>'}).join('');
+ html+='</div><div class="table" style="margin-top:12px"><table><thead><tr>'+studentImport.headers.slice(0,8).map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+studentImport.rows.slice(0,10).map(r=>'<tr>'+studentImport.headers.slice(0,8).map((_,i)=>'<td>'+esc(r[i]||'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div><div id="importMsg"></div><div class="actions"><button class="btn soft" onclick="closeImportModal()">Hủy</button><button class="btn primary" onclick="confirmStudentImport()">Xác nhận nhập</button></div>';
+ document.getElementById('importWork').innerHTML=html;
+}
+async function confirmStudentImport(){
+ const msg=document.getElementById('importMsg'), nameIdx=Number(studentImport.map.FullName);
+ if(studentImport.map.FullName===''){msg.innerHTML='<div class="notice">Phải mapping cột FullName / Họ tên.</div>';return}
+ try{
+   msg.innerHTML='<div class="notice">Đang kiểm tra trùng và ghi Master…</div>';
+   const headers=(appState.data.Students||[])[0]||[];
+   const current=toObjects(appState.data.Students||[]);
+   const keys=new Set(current.map(o=>norm(o.NationalID)||[norm(o.FullName),norm(o.DOB),norm(o.Class)].join('|')));
+   let skipped=0;const rows=[];
+   for(const src of studentImport.rows){
+     const o={};Object.entries(studentImport.map).forEach(([t,i])=>{if(i!=='')o[t]=src[Number(i)]??''});
+     if(!String(o.FullName||'').trim())continue;
+     const key=norm(o.NationalID)||[norm(o.FullName),norm(o.DOB),norm(o.Class)].join('|');
+     if(keys.has(key)){skipped++;continue} keys.add(key);
+     const id='STU-'+Date.now()+'-'+(rows.length+1);
+     rows.push(headers.map((h,i)=>i===0?id:(h==='Source'?studentImport.fileName:(h==='UpdatedAt'?new Date().toISOString():(o[h]??(h==='Status'?'ACTIVE':''))))));
+   }
+   if(rows.length)await GoogleSheetsConnector.appendRows('Students!A:'+colLetter(headers.length),rows);
+   try{await GoogleSheetsConnector.appendAudit('IMPORT_STUDENTS','Students','', 'File='+studentImport.fileName+'; imported='+rows.length+'; skipped='+skipped)}catch(_){}
+   await refreshData(false);
+   msg.innerHTML='<div class="notice ok"><b>Hoàn tất.</b> Đã nhập '+rows.length+' học sinh; bỏ qua '+skipped+' dòng trùng.</div>';
+   setTimeout(()=>{closeImportModal();renderShell('students')},900);
+ }catch(e){msg.innerHTML='<div class="notice">'+esc(e.message||e)+'</div>'}
 }
 async function showUserManager(){
  try{
