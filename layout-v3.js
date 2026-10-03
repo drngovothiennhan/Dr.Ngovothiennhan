@@ -46,11 +46,14 @@ function contextItems(page){
   ];
   if(page==='kitchen') return [
     ['meal','🍽','Bữa ăn hôm nay',todayMealCount()],
+    ['menu','📋','Thực đơn mẫu',objs('MenuPlan').length],
+    ['issue','↗','Xuất kho mẫu',objs('StockIssuePlan').length],
     ['b1','1','Kiểm thực B1',objs('FoodStep1').length],
     ['b2','2','Kiểm thực B2',objs('FoodStep2').length],
     ['b3','3','Kiểm thực B3',objs('FoodStep3').length],
     ['sample','🧪','Lưu mẫu',objs('FoodSampleLog').length],
-    ['inventory','📦','Kho thực phẩm / sữa',expiringLots().length]
+    ['ledger','🗂','Thẻ kho lịch sử',objs('WarehouseLedger').length],
+    ['inventory','📦','Kho hiện tại',expiringLots().length]
   ];
   if(page==='portal') return [
     ['portal','↗','Mở Cổng Vành Khuyên',null],
@@ -91,7 +94,7 @@ function tabItems(page){
   if(page==='today')return [['overview','Tổng quan'],['meds','Thuốc hôm nay'],['kitchen','Bếp & kho'],['tasks','Công việc']];
   if(page==='students')return [['all','Danh sách'],['class','Theo lớp'],['inactive','Nghỉ / chuyển'],['review','Chờ xác minh']];
   if(page==='health')return [['meds','Thuốc hôm nay'],['screen','Khám sức khỏe'],['vaccines','Tiêm chủng'],['incidents','Sơ cứu'],['disease','Dịch']];
-  if(page==='kitchen')return [['meal','Bữa ăn'],['b1','B1'],['b2','B2'],['b3','B3'],['sample','Lưu mẫu'],['inventory','Kho']];
+  if(page==='kitchen')return [['meal','Bữa ăn'],['menu','Thực đơn'],['issue','Xuất kho'],['b1','B1'],['b2','B2'],['b3','B3'],['sample','Lưu mẫu'],['ledger','Thẻ kho'],['inventory','Kho hiện tại']];
   if(page==='records')return [['docs','Tài liệu'],['sources','Nguồn dữ liệu'],['communication','Truyền thông'],['staging','Staging']];
   if(page==='portal')return [['portal','Cổng trường'],['projection','Dữ liệu chia sẻ'],['queue','Đồng bộ'],['bridge','Cầu nối']];
   return [['overview','Tổng quan'],['users','Người dùng'],['identity','Xác minh'],['config','Cấu hình']];
@@ -132,7 +135,7 @@ function sectionHeaderHtml(){
   let action='';
   if(state.page==='students'&&canWrite('Students'))action='<button class="btn primary mini" onclick="openNewStudent()">+ Học sinh</button>';
   if(state.page==='health'&&canWrite('Incidents'))action='<button class="btn primary mini" onclick="quickNewIncident()">+ Sơ cứu</button>';
-  if(state.page==='kitchen'&&canWrite('MealSessions'))action='<button class="btn primary mini" onclick="newMealSession()">+ Bữa ăn</button>';
+  if(state.page==='kitchen'&&canWrite('MealSessions'))action='<button class="btn primary mini" onclick="newMealSession1246()">+ Bữa ăn</button>';
   if(state.page==='records'&&canWrite('Documents'))action='<button class="btn primary mini" onclick="openDocumentUpload()">+ Tài liệu</button>';
   if(state.page==='admin'&&state.role==='ADMIN')action='<button class="btn primary mini" onclick="openNewUser()">+ User</button>';
   return '<div class="main-section-head"><div class="grow"><h1>'+esc(m.title)+'</h1><div class="muted">App Y tế VK / '+esc(m.title)+' · '+esc(m.desc)+'</div></div>'+action+'</div>';
@@ -165,7 +168,8 @@ function rightPanelHtml(){
   if(state.page==='kitchen'){
     return '<aside class="right-sidebar"><h3>Bếp & kho</h3>'+
       quickMetric('🍽','Bữa hôm nay',todayMealCount(),'selectContext("meal")')+
-      quickMetric('📦','Lô gần HSD',expiringLots().length,'selectContext("inventory")')+
+      quickMetric('📋','Thực đơn mẫu',objs('MenuPlan').length,'selectContext("menu")')+
+      quickMetric('↗','Dòng xuất kho mẫu',objs('StockIssuePlan').length,'selectContext("issue")')+
       quickMetric('🧪','Mẫu cần xử lý',dueSamples().length,'selectContext("sample")')+
       '<div class="quick-block"><b>Quy trình chuẩn</b><div class="muted">B1 nhận thực phẩm → B2 chế biến → B3 trước khi ăn → lưu mẫu. Mỗi bước dùng chung MealSessionID.</div></div></aside>';
   }
@@ -202,7 +206,7 @@ function statusBarHtml(){
   const sync=state.lastSync?state.lastSync.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'chưa đồng bộ';
   return '<div class="status-bar"><span class="status-item"><i class="status-dot '+(navigator.onLine?'':'off')+'"></i>'+(navigator.onLine?'Online':'Offline')+'</span>'+
     '<span class="status-item hide-mobile">Đồng bộ: '+esc(sync)+'</span><span class="status-item">Role: '+esc(state.role||'—')+'</span>'+
-    '<span class="status-item hide-mobile">Data: '+mode+'</span><span class="status-spacer"></span><span class="status-item">V2.1 Layout</span></div>';
+    '<span class="status-item hide-mobile">Data: '+mode+'</span><span class="status-spacer"></span><span class="status-item">V2.3.2 Templates</span></div>';
 }
 
 const __ensureLayout=ensure;
@@ -233,7 +237,7 @@ go=function(p){
   const need={
     students:['Students','Enrollments','Classes','IdentityReview'],
     health:['HealthScreenings','Immunizations','MedicationOrders','MedicationAdministrations','Incidents','DiseaseSurveillance','Attendance'],
-    kitchen:['MealSessions','FoodStep1','FoodStep2','FoodStep3','FoodSampleLog','Inventory','OCRInbox'],
+    kitchen:['MealSessions','FoodStep1','FoodStep2','FoodStep3','FoodSampleLog','Inventory','OCRInbox','MenuPlan','StockIssuePlan','WarehouseCatalog','WarehouseLedger'],
     records:['Documents','SourceRegistry','Communication'],
     portal:['PortalProjection','IntegrationQueue','Students','Enrollments','HealthScreenings','Attendance'],
     admin:['Users','IdentityReview','AuditLog','Config','Classes','SchoolYears','Enrollments']
