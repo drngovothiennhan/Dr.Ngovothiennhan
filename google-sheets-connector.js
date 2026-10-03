@@ -67,7 +67,7 @@ const GoogleSheetsConnector = (() => {
           } catch(e){ reject(e); }
         }
       });
-      tokenClient.requestAccessToken({prompt:accessToken?'':'consent'});
+      tokenClient.requestAccessToken({prompt:''});
     });
   }
 
