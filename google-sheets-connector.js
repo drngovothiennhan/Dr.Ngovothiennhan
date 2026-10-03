@@ -11,6 +11,7 @@ const IMPORT_FOLDER_ID='1tSAAZWbldASeY5zJaJKiEdvxpSxsqQim';
 
 const DRIVE_FILE_SCOPE='https://www.googleapis.com/auth/drive.file';
 const OAUTH_SCOPES='openid email profile '+DRIVE_FILE_SCOPE;
+const AUTO_ADMIN_EMAILS=['dr.ngovothiennhan@gmail.com'];
 
 const SHEET_RANGES={
   Students:'Students!A1:N5000',
@@ -151,18 +152,16 @@ const GoogleSheetsConnector=(()=>{
 
   async function verifyUserAccess(){
     if(!currentUser)currentUser=await getUserInfo();
-    let values;
-    if(useBridge()){
-      const d=await bridgePost('whoami',{});currentRole=String(d.role||'VIEWER').toUpperCase();
-      return{email:d.email||currentUser.email,role:currentRole,name:d.name||currentUser.name||currentUser.email,picture:currentUser.picture||''};
-    }
-    values=(await readRange('Users!A1:G1000')).values||[];
-    const h=values[0]||[],email=String(currentUser.email||'').toLowerCase();
-    const row=values.slice(1).find(r=>String(r[h.indexOf('Email')]||'').toLowerCase()===email);
-    if(!row)throw new Error('Tài khoản '+email+' chưa được cấp quyền.');
-    if(String(row[h.indexOf('Status')]||'').toUpperCase()!=='ACTIVE')throw new Error('Tài khoản đang bị khóa.');
-    currentRole=String(row[h.indexOf('Role')]||'VIEWER').toUpperCase();
-    return{email,role:currentRole,name:row[h.indexOf('DisplayName')]||currentUser.name||email,picture:currentUser.picture||''};
+    const email=String(currentUser.email||'').toLowerCase();
+    // V2.2: không còn bước duyệt/xác nhận nội bộ sau Google Login.
+    // Email quản trị được nhận diện tự động; mọi tài khoản Google khác vào thẳng vai trò USER.
+    currentRole=AUTO_ADMIN_EMAILS.includes(email)?'ADMIN':'USER';
+    return{
+      email,
+      role:currentRole,
+      name:currentUser.name||email,
+      picture:currentUser.picture||''
+    };
   }
   async function appendAudit(action,entityType,entityId,note=''){
     const u=currentUser||{};return appendRows('AuditLog!A:K',[[
