@@ -127,7 +127,17 @@ function renderSampleStep(s){
     sel('smhold','Giữ mẫu do nghi ngờ sự cố/yêu cầu cơ quan quản lý',['Không','Có'],'Không')+
     ta('smnote','Ghi chú chất lượng mẫu','')+
     '</div><div id="sampleValidation"></div><div id="attpMsg"></div><div class="actions"><button class="btn primary" onclick="saveSample()">Lưu mẫu</button></div></div>'+
-    attpTable(list,['SampleName','Meal','Servings','SampleAmount','Unit','StorageTempC','CollectedAt','DestroyAt','Sealed','Min24hOK','AmountOK']);
+    sampleRecordsTable(list);
+}
+function sampleRecordsTable(list){
+  if(!list.length)return'<div class="attp-records empty">Chưa có mẫu lưu.</div>';
+  return '<div class="attp-records table"><table><thead><tr><th>Mẫu</th><th>Lượng</th><th>Nhiệt độ</th><th>Lấy mẫu</th><th>Dự kiến hủy</th><th>Trạng thái</th><th></th></tr></thead><tbody>'+
+    list.slice().reverse().map(x=>{
+      const destroyed=String(x.DestroyStatus||'').toUpperCase()==='DESTROYED'||String(x.DestroyedBy||'').trim();
+      const due=x.DestroyAt&&new Date(x.DestroyAt).getTime()<=Date.now();
+      const hold=String(x.HoldDueToIncident||'').toUpperCase()==='YES';
+      return '<tr><td><b>'+esc(x.SampleName)+'</b></td><td>'+esc(x.SampleAmount)+' '+esc(x.Unit)+'</td><td>'+esc(x.StorageTempC)+'°C</td><td>'+esc(fmtDT(x.CollectedAt))+'</td><td>'+esc(fmtDT(x.DestroyAt))+'</td><td>'+badge(destroyed?'ĐÃ HỦY':hold?'ĐANG GIỮ':due?'ĐẾN HẠN':'ĐANG LƯU',destroyed?'':hold?'warn':due?'warn':'')+'</td><td>'+(!destroyed&&canWrite('FoodSampleLog')?'<button class="btn soft mini" onclick="destroySample(\''+esc(x.SampleID)+'\')">'+(hold?'Xử lý giữ mẫu':'Hủy mẫu')+'</button>':'')+'</td></tr>';
+    }).join('')+'</tbody></table></div>';
 }
 function fmtForInput(v){if(!v)return'';const d=new Date(v),off=d.getTimezoneOffset()*60000;return new Date(d.getTime()-off).toISOString().slice(0,16)}
 function attpTable(list,cols){
@@ -147,8 +157,11 @@ async function saveStep1(){
   try{
     msgAttp('Đang lưu Bước 1…');
     if(ocr?.file){
-      const up=await GoogleSheetsConnector.uploadDriveFile(ocr.file);
-      evidence=up.id||'';ocrText=ocr.text||'';ocrConf=String(ocr.confidence??'');
+      if(!ocr.uploadedFileId){
+        const up=await GoogleSheetsConnector.uploadDriveFile(ocr.file);
+        ocr.uploadedFileId=up.id||'';
+      }
+      evidence=ocr.uploadedFileId||'';ocrText=ocr.text||'';ocrConf=String(ocr.confidence??'');
       await GoogleSheetsConnector.appendRows('OCRInbox!A:O',[[
         'OCR-'+Date.now(),now,state.user?.email||'', 'ATTP_RECEIPT',evidence,ocr.file.name,ocrText,ocrConf,
         JSON.stringify(ocr.parsed||{}),'REVIEWED',state.user?.email||'',now,'MealSession',s.MealSessionID,now
@@ -162,7 +175,7 @@ async function saveStep1(){
     ];
     await GoogleSheetsConnector.appendRows('FoodStep1!A:Z',[row]);
     GoogleSheetsConnector.appendAudit('ATTP_STEP1_SAVE','FoodStep1',row[0],food).catch(()=>{});
-    state.ocrDraft=null;await refresh(['FoodStep1','OCRInbox']);state.attpFocus='b2';renderPage();
+    await refresh(['FoodStep1','OCRInbox']);state.attpFocus='b2';renderPage();
   }catch(e){msgAttp(e.message||String(e))}
 }
 async function saveStep2(){
@@ -187,8 +200,33 @@ async function saveSample(){
   const messages=[];if(!amountOK)messages.push('Lượng mẫu chưa đạt tối thiểu '+minAmount+' '+(type.startsWith('Thức ăn lỏng')?'ml':'g'));if(!tempOK)messages.push('Nhiệt độ phải trong khoảng 2–8°C');if(!min24)messages.push('Thời gian lưu phải ít nhất 24 giờ');if(!sealed)messages.push('Mẫu phải được niêm phong.');
   const box=document.getElementById('sampleValidation');
   if(messages.length){if(box)box.innerHTML='<div class="attp-validation">'+esc(messages.join(' · '))+'</div>';return}
-  const now=new Date().toISOString(),row=['SMP-'+Date.now(),s.MealSessionID,name,s.Meal||'',getv('smservings'),String(amt),unit,getv('smcontainer'),String(temp),collected,destroy,getv('smnote'),state.user?.email||'','',sealed?'YES':'NO',min24?'YES':'NO',amountOK?'YES':'NO',getv('smhold')==='Có'?'YES':'NO','',now];
-  try{await GoogleSheetsConnector.appendRows('FoodSampleLog!A:T',[row]);GoogleSheetsConnector.appendAudit('ATTP_SAMPLE_SAVE','FoodSampleLog',row[0],name).catch(()=>{});await refresh(['FoodSampleLog']);renderPage()}catch(e){msgAttp(e.message||String(e))}
+  const now=new Date().toISOString(),row=['SMP-'+Date.now(),s.MealSessionID,name,s.Meal||'',getv('smservings'),String(amt),unit,getv('smcontainer'),String(temp),collected,destroy,getv('smnote'),state.user?.email||'','',sealed?'YES':'NO',min24?'YES':'NO',amountOK?'YES':'NO',getv('smhold')==='Có'?'YES':'NO','',now,'','STORED',''];
+  try{await GoogleSheetsConnector.appendRows('FoodSampleLog!A:W',[row]);GoogleSheetsConnector.appendAudit('ATTP_SAMPLE_SAVE','FoodSampleLog',row[0],name).catch(()=>{});await refresh(['FoodSampleLog']);renderPage()}catch(e){msgAttp(e.message||String(e))}
+}
+
+async function destroySample(sampleId){
+  const raw=state.data.FoodSampleLog||[],h=raw[0]||[],idCol=h.indexOf('SampleID');
+  const rowIndex=raw.findIndex((r,i)=>i>0&&r[idCol]===sampleId);
+  if(rowIndex<1)return alert('Không tìm thấy mẫu.');
+  const o=objs('FoodSampleLog').find(x=>x.SampleID===sampleId);if(!o)return;
+  const minTime=new Date(o.CollectedAt).getTime()+24*3600000;
+  const hold=String(o.HoldDueToIncident||'').toUpperCase()==='YES';
+  let release='';
+  if(hold){
+    if(state.role!=='ADMIN')return alert('Mẫu đang được giữ do nghi ngờ sự cố/yêu cầu quản lý. Chỉ ADMIN được xác nhận giải phóng mẫu.');
+    release=prompt('Nhập người/căn cứ cho phép hủy mẫu sau thời gian giữ:','');
+    if(!release)return;
+  }else if(Date.now()<minTime){
+    return alert('Chưa đủ 24 giờ kể từ thời điểm lấy mẫu.');
+  }
+  if(!confirm('Xác nhận đã hủy mẫu "'+o.SampleName+'"?'))return;
+  const sheetRow=rowIndex+1,now=new Date().toISOString(),who=state.user?.email||'';
+  try{
+    await GoogleSheetsConnector.updateRange('FoodSampleLog!N'+sheetRow+':N'+sheetRow,[[who]]);
+    await GoogleSheetsConnector.updateRange('FoodSampleLog!T'+sheetRow+':W'+sheetRow,[[now,now,'DESTROYED',release]]);
+    GoogleSheetsConnector.appendAudit('ATTP_SAMPLE_DESTROY','FoodSampleLog',sampleId,o.SampleName).catch(()=>{});
+    await refresh(['FoodSampleLog']);renderPage();
+  }catch(e){alert(e.message||e)}
 }
 
 async function newMealSession1246(){
@@ -265,7 +303,7 @@ dueSamples=function(){
     if(String(x.HoldDueToIncident||'').toUpperCase()==='YES')return false;
     if(!x.DestroyAt)return false;
     const due=new Date(x.DestroyAt).getTime()<=now;
-    const destroyed=String(x.DestroyedBy||'').trim()||/destroy|huy|đã hủy/i.test(x.SampleQualityNote||'');
+    const destroyed=String(x.DestroyStatus||'').toUpperCase()==='DESTROYED'||String(x.DestroyedBy||'').trim();
     return due&&!destroyed;
   });
 };
