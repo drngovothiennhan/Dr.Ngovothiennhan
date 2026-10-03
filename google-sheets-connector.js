@@ -29,7 +29,7 @@ const SHEET_RANGES={
   FoodStep1:'FoodStep1!A1:Z10000',
   FoodStep2:'FoodStep2!A1:P10000',
   FoodStep3:'FoodStep3!A1:N10000',
-  FoodSampleLog:'FoodSampleLog!A1:T10000',
+  FoodSampleLog:'FoodSampleLog!A1:W10000',
   OCRInbox:'OCRInbox!A1:O5000',
   PortalProjection:'PortalProjection!A1:P5000',
   IntegrationQueue:'IntegrationQueue!A1:L10000',
@@ -157,6 +157,14 @@ const GoogleSheetsConnector=(()=>{
     return sheetsApi(path,{method:'POST',body:JSON.stringify({values:rows})});
   }
 
+  async function updateRange(range,rows){
+    if(useBridge())return bridgePost('updateRange',{range,rows});
+    const {sheetId}=getConfig();
+    if(!hasPickerGrant())throw new Error('Chưa cấp quyền Master Sheet.');
+    const path=encodeURIComponent(sheetId)+'/values/'+encodeURIComponent(range)+'?valueInputOption=USER_ENTERED';
+    return sheetsApi(path,{method:'PUT',body:JSON.stringify({values:rows})});
+  }
+
   async function verifyUserAccess(){
     if(!currentUser)currentUser=await getUserInfo();
     const email=String(currentUser.email||'').toLowerCase();
@@ -210,6 +218,6 @@ const GoogleSheetsConnector=(()=>{
       }).build().setVisible(true);
   }
 
-  return{getConfig,saveConfig,setSelectedSheet,hasPickerGrant,connect,disconnect,getSession,getAccessToken,getUserInfo,verifyUserAccess,readRange,loadKeys,appendRows,appendAudit,uploadDriveFile,grantMasterAccess,openSpreadsheetPicker,useBridge,
+  return{getConfig,saveConfig,setSelectedSheet,hasPickerGrant,connect,disconnect,getSession,getAccessToken,getUserInfo,verifyUserAccess,readRange,loadKeys,appendRows,updateRange,appendAudit,uploadDriveFile,grantMasterAccess,openSpreadsheetPicker,useBridge,
     DEFAULT_GOOGLE_CLIENT_ID,GOOGLE_PROJECT_NUMBER,PRODUCTION_MASTER_ID,APP_FOLDER_ID,DATA_FOLDER_ID,DOCUMENTS_FOLDER_ID,IMPORT_FOLDER_ID,SHEET_RANGES};
 })();
