@@ -58,7 +58,7 @@ footer{max-width:1240px;margin:0 auto;padding:0 18px 26px;color:#71837f;font-siz
 <script src="google-sheets-connector.js"></script>
 <script>
 const APP_BUILD='2026.10.03.1040';
-let appState={authorized:false,user:null,role:null,data:{},page:'home'};
+let appState={authorized:false,user:null,role:null,data:{},page:'home',loadingData:false};
 
 function forceUpdate(){
  const u=new URL(location.href);
@@ -124,16 +124,25 @@ async function startLogin(){
 async function authorizeAndLoad(){
  try{
    const access=await GoogleSheetsConnector.verifyUserAccess();
-   appState.user=access;appState.role=access.role;appState.authorized=true;
+   appState.user=access;appState.role=access.role;appState.authorized=true;appState.loadingData=true;
    setAccount(access.email+' · '+access.role,'');
    document.getElementById('logoutBtn').style.display='inline-block';
-   try{await GoogleSheetsConnector.appendAudit('LOGIN','Session','','Đăng nhập production')}catch(_){}
-   appState.data=await GoogleSheetsConnector.loadProductionData();
    renderShell('home');
- }catch(e){appState.authorized=false;renderLogin(String(e.message||e))}
+   GoogleSheetsConnector.appendAudit('LOGIN','Session','','Đăng nhập production').catch(()=>{});
+   GoogleSheetsConnector.loadProductionData().then(data=>{
+     appState.data=data||{};appState.loadingData=false;
+     if(appState.authorized)renderShell(appState.page||'home');
+   }).catch(e=>{
+     appState.loadingData=false;
+     if(appState.authorized){
+       const main=document.getElementById('main');
+       if(main)main.insertAdjacentHTML('afterbegin','<div class="notice">'+esc(e.message||e)+'</div>');
+     }
+   });
+ }catch(e){appState.authorized=false;appState.loadingData=false;renderLogin(String(e.message||e))}
 }
 
-function logout(){try{GoogleSheetsConnector.disconnect()}catch(_){}appState={authorized:false,user:null,role:null,data:{},page:'home'};document.getElementById('logoutBtn').style.display='none';setAccount('Chưa đăng nhập','amber');renderLogin()}
+function logout(){try{GoogleSheetsConnector.disconnect()}catch(_){}appState={authorized:false,user:null,role:null,data:{},page:'home',loadingData:false};document.getElementById('logoutBtn').style.display='none';setAccount('Chưa đăng nhập','amber');renderLogin()}
 
 function navButton(p,label){return '<button data-page="'+p+'" onclick="renderShell(\''+p+'\')">'+label+'</button>'}
 function canWrite(sheet){
@@ -156,6 +165,7 @@ function renderShell(page='home'){
  document.getElementById('main').innerHTML=(pages[page]||pages.home)();
 }
 function modulePage(title,key,cols){
+ if(appState.loadingData && !appState.data[key])return '<div class="card"><h2>'+esc(title)+'</h2><div class="empty">Đang đồng bộ dữ liệu…</div></div>';
  const objs=toObjects(appState.data[key]||[]);
  const add=canWrite(key)?'<button class="btn primary" onclick="openRecordModal(\''+key+'\')">+ Thêm mới</button>':'';
  const head='<div class="card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;flex:1">'+esc(title)+'</h2>'+add+'</div>';
@@ -170,6 +180,7 @@ function foodPage(){
 }
 const pages={
  home:()=>'<section class="hero"><div class="eyebrow">APP Y TẾ VK · PRODUCTION</div><h1>Hôm nay</h1><p>Dữ liệu được đọc và ghi trực tiếp vào Master Sheet riêng tư sau xác thực Google.</p></section>'+
+ (appState.loadingData?'<div class="notice ok"><b>Đã đăng nhập.</b> Dashboard đã mở; số liệu đang đồng bộ nền trong một lần tải.</div>':'')+
  '<div class="stats"><div class="stat"><b>'+activeStudentCount()+'</b><span>Học sinh đang học</span></div><div class="stat"><b>'+countRows('Tasks')+'</b><span>Công việc</span></div><div class="stat"><b>'+countRows('Inventory')+'</b><span>Lô kho</span></div><div class="stat"><b>'+countRows('Incidents')+'</b><span>Sự cố</span></div></div>'+
  '<div class="grid"><div class="card"><h2>Nhập dữ liệu</h2><div class="notice ok">Preview → Mapping → kiểm tra trùng → Xác nhận → Master Production.</div><div class="toolbar">'+(canWrite('Students')?'<button class="btn primary" onclick="openStudentImport()">Nhập danh sách học sinh</button><button class="btn soft" onclick="openRecordModal(\'Students\')">+ Thêm 1 học sinh</button>':'')+'</div></div><div class="card"><h2>Phiên hiện tại</h2><div class="row"><div class="grow"><b>'+esc(appState.user?.name||'')+'</b><div class="muted">'+esc(appState.user?.email||'')+'</div></div>'+badge(appState.role)+'</div><div class="muted">Quyền Google: drive.file · dữ liệu riêng tư.</div></div></div>',
  students:()=>modulePage('Hồ sơ học sinh','Students',['StudentID','FullName','DOB','Gender','Class','GuardianPhone','HealthNotes','Status']),
@@ -354,7 +365,10 @@ async function saveRecord(){
 }
 function colLetter(n){let s='';while(n>0){n--;s=String.fromCharCode(65+n%26)+s;n=Math.floor(n/26)}return s}
 async function refreshData(render=true){
- appState.data=await GoogleSheetsConnector.loadProductionData();
+ appState.loadingData=true;
+ if(render)renderShell(appState.page);
+ try{appState.data=await GoogleSheetsConnector.loadProductionData()}
+ finally{appState.loadingData=false}
  if(render)renderShell(appState.page);
 }
 function openDocumentUpload(){
