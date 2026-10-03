@@ -187,6 +187,20 @@ const GoogleSheetsConnector = (() => {
     return res.json();
   }
 
+  async function batchReadRanges(entries){
+    const {sheetId}=getConfig();
+    if(!sheetId) throw new Error('Chưa chọn Master Sheet.');
+    if(!hasPickerGrant()) throw new Error('Chưa cấp quyền cho Master Sheet bằng Google Picker.');
+    const params=new URLSearchParams();
+    for(const [,range] of entries) params.append('ranges',range);
+    params.set('majorDimension','ROWS');
+    const result=await sheetsApi(encodeURIComponent(sheetId)+'/values:batchGet?'+params.toString());
+    const valueRanges=result.valueRanges||[];
+    const out={};
+    entries.forEach(([key],i)=>{ out[key]=valueRanges[i]?.values||[]; });
+    return out;
+  }
+
   async function loadProductionData(){
     const ranges=[
       ['Students','Students!A1:N5000'],
@@ -204,12 +218,7 @@ const GoogleSheetsConnector = (() => {
       ['Documents','Documents!A1:K5000'],
       ['Tasks','Tasks!A1:L5000']
     ];
-    const out={};
-    for(const [k,r] of ranges){
-      try{ out[k]=(await readRange(r)).values||[]; }
-      catch(e){ out[k]=[]; }
-    }
-    return out;
+    return batchReadRanges(ranges);
   }
 
   function openSpreadsheetPicker(onPicked){
@@ -240,7 +249,7 @@ const GoogleSheetsConnector = (() => {
 
   return {
     getConfig,saveConfig,setSelectedSheet,hasPickerGrant,connect,disconnect,getUserInfo,getSession,getAccessToken,
-    readRange,appendRows,verifyUserAccess,appendAudit,uploadDriveFile,grantMasterAccess,loadProductionData,openSpreadsheetPicker,
+    readRange,appendRows,verifyUserAccess,appendAudit,uploadDriveFile,grantMasterAccess,batchReadRanges,loadProductionData,openSpreadsheetPicker,
     DEFAULT_GOOGLE_CLIENT_ID,GOOGLE_PROJECT_NUMBER,PRODUCTION_MASTER_ID,APP_FOLDER_ID,DATA_FOLDER_ID,DOCUMENTS_FOLDER_ID,IMPORT_FOLDER_ID,
     SHEETS_ENABLE_URL,DRIVE_ENABLE_URL,PICKER_ENABLE_URL,API_KEYS_URL
   };
