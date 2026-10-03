@@ -180,7 +180,8 @@ const GoogleSheetsConnector = (() => {
     if(!c.pickerApiKey) throw new Error('Chưa cấu hình Google Picker API key.');
     if(!window.gapi||!window.google?.picker) throw new Error('Google Picker chưa tải xong.');
     const view=new google.picker.DocsView(google.picker.ViewId.SPREADSHEETS)
-      .setMode(google.picker.DocsViewMode.LIST);
+      .setMode(google.picker.DocsViewMode.LIST)
+      .setFileIds(PRODUCTION_MASTER_ID);
     const picker=new google.picker.PickerBuilder()
       .addView(view)
       .setOAuthToken(accessToken)
